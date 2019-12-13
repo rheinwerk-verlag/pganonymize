@@ -37,3 +37,4 @@ waffle_switch:
 
 truncate:
     - customer_email
+    - customer_email
