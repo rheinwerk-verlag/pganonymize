@@ -7,11 +7,17 @@ address_useraddress:
         security: fake.company
     phone_number:
         security: fake.phone_number
+    line1:
+        security: fake.street_name
+    line2:
+        security: fake.building_number
+    line4:
+        security: fake.city
+    search_text:
+        security: clear
 auth_user:
     email: 
         security: fake.email
-customer_email:
-    security: truncate
 customer_objectioninfo:
     email:
         security: fake.email
@@ -28,3 +34,6 @@ waffle_switch:
     active:
         security: set
         value: "false"
+
+truncate:
+    - customer_email
