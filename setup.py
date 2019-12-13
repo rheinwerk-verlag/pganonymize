@@ -56,7 +56,8 @@ Topic :: Internet
 """
 
 install_requires = [
-    # 'six',
+    'faker',
+    'six',
 ]
 
 tests_require = [

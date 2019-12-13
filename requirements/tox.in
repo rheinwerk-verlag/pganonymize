@@ -1,5 +1,6 @@
 attrs==19.1.0              # Pin to a version prior to 19.2.0 as it breaks pytest 3.x
 coverage==4.5.1
+faker==3.0.0
 flake8==3.5.0
 isort==4.3.4
 pep8==1.7.1
@@ -11,3 +12,4 @@ pytest==3.6.2
 pytest-pep8==1.0.6
 pytest-cov==2.5.1
 pytest-pythonpath==0.7.2
+six==1.13.0

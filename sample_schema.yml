@@ -1,0 +1,30 @@
+address_useraddress:
+    first_name:
+        security: fake.first_name
+    last_name:
+        security: fake.last_name
+    company:
+        security: fake.company
+    phone_number:
+        security: fake.phone_number
+auth_user:
+    email: 
+        security: fake.email
+customer_email:
+    security: truncate
+customer_objectioninfo:
+    email:
+        security: fake.email
+feedback_feedback:
+    user_email:
+        security: fake.email
+newsletters_subscription:
+    email:
+        security: fake.email
+order_order:
+    guest_email:
+        security: fake.email
+waffle_switch:
+    active:
+        security: set
+        value: "false"
