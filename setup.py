@@ -58,6 +58,8 @@ Topic :: Internet
 install_requires = [
     'faker',
     'six',
+    'psycopg2',
+    'pyyaml'
 ]
 
 tests_require = [
