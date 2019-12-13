@@ -1,7 +1,7 @@
 PostgreSQL Anonymizer
 ================================
 
-A cookiecutter template for Rheinwerk Python packages
+A commandline tool to anonymize PostgreSQL databases.
 
 Quickstart
 ----------
