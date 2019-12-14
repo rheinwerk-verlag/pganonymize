@@ -21,10 +21,10 @@ def main():
     parser.add_argument('--schema',  help='A YAML file that contains the anonymization rules', required=True,
                         default='./schema.yml')
     parser.add_argument('--dbname',  help='Name of the database')
-    parser.add_argument('--user',  help='')
-    parser.add_argument('--password',  default='', help='')
-    parser.add_argument('--host', help='', default='localhost')
-    parser.add_argument('--port', help='', default='5432')
+    parser.add_argument('--user',  help='Name of the database user')
+    parser.add_argument('--password',  default='', help='Password for the database user')
+    parser.add_argument('--host', help='Database hostname', default='localhost')
+    parser.add_argument('--port', help='Port of the database', default='5432')
     args = parser.parse_args()
     print(args)
 
