@@ -3,6 +3,13 @@ PostgreSQL Anonymizer
 
 A commandline tool to anonymize PostgreSQL databases.
 
+Installation
+------------
+
+Usage
+-----
+
+
 Quickstart
 ----------
 

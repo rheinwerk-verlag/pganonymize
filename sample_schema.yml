@@ -1,40 +1,54 @@
-address_useraddress:
-    first_name:
-        provider: fake.first_name
-    last_name:
-        provider: fake.last_name
-    company:
-        provider: fake.company
-    phone_number:
-        provider: fake.phone_number
-    line1:
-        provider: fake.street_name
-    line2:
-        provider: fake.building_number
-    line4:
-        provider: fake.city
-    search_text:
-        provider: clear
-auth_user:
-    email: 
-        provider: fake.email
-customer_objectioninfo:
-    email:
-        provider: fake.email
-feedback_feedback:
-    user_email:
-        provider: fake.email
-newsletters_subscription:
-    email:
-        provider: fake.email
-order_order:
-    guest_email:
-        provider: fake.email
-waffle_switch:
-    active:
-        provider: set
-        value: "false"
+tables:
+    - address_useraddress:
+        fields:
+            - first_name:
+                provider: fake.first_name
+            - last_name:
+                provider: fake.last_name
+            - company:
+                provider: fake.company
+            - phone_number:
+                provider: fake.phone_number
+            - line1:
+                provider: fake.street_name
+            - line2:
+                provider: fake.building_number
+            - line4:
+                provider: fake.city
+            - search_text:
+                provider: set
+                value: ""
+            - notes:
+                provider: clear
+    - auth_user:
+        fields:
+            - first_name:
+                provider: fake.first_name
+            - last_name:
+                provider: fake.last_name
+            - email: 
+                provider: fake.email
+    - customer_objectioninfo:
+        fields:
+            - email:
+                provider: fake.email
+    - feedback_feedback:
+        fields:
+            - user_email:
+                provider: fake.email
+    - newsletters_subscription:
+        fields:
+            - email:
+                provider: fake.email
+    - order_order:
+        fields:
+            - guest_email:
+                provider: fake.email
+    - waffle_switch:
+        fields:
+            - active:
+                provider: set
+                value: "false"
 
 truncate:
-    - customer_email
     - customer_email
