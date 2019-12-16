@@ -34,6 +34,8 @@ tables:
                 provider: fake.email
     - feedback_feedback:
         fields:
+            - username:
+                provider: fake.name
             - user_email:
                 provider: fake.email
     - newsletters_subscription:

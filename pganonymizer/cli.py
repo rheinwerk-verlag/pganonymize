@@ -13,6 +13,7 @@ from progress.bar import IncrementalBar
 from constants import DATABASE_ARGS, DEFAULT_PRIMARY_KEY
 
 
+logging.basicConfig(format='%(levelname)s: %(message)s')
 log = logging.getLogger(__name__)
 
 fake_data = faker.Faker()
@@ -25,6 +26,8 @@ def get_column_values(row, columns):
         column_definition = definition[column_name]
         provider = column_definition.get('provider')
         orig_value = row.get(column_name)
+        if not orig_value:
+            continue
         if provider.startswith('fake'):
             func_name = provider.split('.')[1]
             func = getattr(fake_data, func_name)
@@ -42,13 +45,6 @@ def get_column_values(row, columns):
     return columns, values
 
 
-def setup_logging(verbose):
-    if verbose:
-        logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
-    else:
-        logging.basicConfig(format="%(levelname)s: %(message)s")
-
-
 def main():
     parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
     parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
@@ -62,7 +58,8 @@ def main():
     parser.add_argument('--port', help='Port of the database', default='5432')
     args = parser.parse_args()
 
-    setup_logging(args.verbose)
+    if args.verbose:
+        log.setLevel(logging.DEBUG)
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
 
