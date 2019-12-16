@@ -21,6 +21,7 @@ def main():
     parser.add_argument('--schema',  help='A YAML file that contains the anonymization rules', required=True,
                         default='./schema.yml')
     parser.add_argument('--dbname',  help='Name of the database')
+    parser.add_argunent('--dbschema', default='public', help='Name of the database schema')
     parser.add_argument('--user',  help='Name of the database user')
     parser.add_argument('--password',  default='', help='Password for the database user')
     parser.add_argument('--host', help='Database hostname', default='localhost')
@@ -32,15 +33,16 @@ def main():
     truncate_tables = schema['truncate']
 
     pg_args = ({name: value for name, value in zip(DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
+    pg_schema = args.dbschema
 
     with psycopg2.connect(**pg_args) as connection:
         connection.autocommit = True
         with connection.cursor() as cursor:
-            cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
+            cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}';".format(schema=pg_schema))
             for table in cursor.fetchall():
                 #print(table)
                 #print('*' * 20)
-                cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' and table_name = %s", table)
+                cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_schema = '{schema}' and table_name = {table}".format(schema=pg_schema, table=table))
                 #for column in cursor.fetchall():
                 #    print(column)
 
