@@ -5,6 +5,7 @@ import logging
 import psycopg2
 import psycopg2.extras
 import sys
+import time
 import yaml
 
 import faker
@@ -56,6 +57,7 @@ def main():
     parser.add_argument('--password',  default='', help='Password for the database user')
     parser.add_argument('--host', help='Database hostname', default='localhost')
     parser.add_argument('--port', help='Port of the database', default='5432')
+    parser.add_argument('--dry-run', action='store_true', help='', default=False)
     args = parser.parse_args()
 
     if args.verbose:
@@ -71,8 +73,10 @@ def main():
         args.port))})
     pg_schema = args.dbschema
 
+    start_time = time.time()
+
     with psycopg2.connect(**pg_args) as connection:
-        connection.autocommit = True
+        #connection.autocommit = True
         with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             
             for table_name in schema.get('truncate', []):
@@ -91,7 +95,9 @@ def main():
                 log.info('Found table defintion "%s"', table_name)
                 sql = "SELECT * FROM {table};".format(table=table_name)
                 cursor.execute(sql)
-                bar = IncrementalBar('Anonymizing', max=total_count)
+                
+                if args.verbose:
+                    bar = IncrementalBar('Anonymizing', max=total_count)
 
                 for row in cursor.fetchall():
                     columns_to_update, values = get_column_values(row, columns)
@@ -101,9 +107,18 @@ def main():
                         primary_key=primary_key,
                         id=row['id']
                     )
-                    bar.next()
+                    if args.verbose:
+                        bar.next()
                     cursor.execute(sql, values)
-                bar.finish()
+
+                if args.verbose:
+                    bar.finish()
+
+        if not args.dry_run:
+            connection.commit()
+
+    end_time = time.time()
+    log.info('Anonymization took {:.2f}s.'.format(end_time - start_time))
 
 
 if __name__ == '__main__':
