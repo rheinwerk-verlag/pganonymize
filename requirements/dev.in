@@ -1,6 +1,7 @@
 -r tox.in
 
 ipdb==0.12.3
+ipython==5.8.0
 pip-tools==1.11.0
 Jinja2>=2.10.1
 recommonmark==0.4.0

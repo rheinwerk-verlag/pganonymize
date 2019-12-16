@@ -29,6 +29,32 @@ Schema definition
 Provider
 --------
 
+Provider are the tools, that means functions, used to alter the data within the database.
+The following provider are currently supported:
+
+``clear``
+~~~~~~~~~
+
+**Arguments:** none
+
+The ``clear`` provider will set a database field to ``null``. But remember, that you can set
+fields to ``null`` if the database field is not nullable.
+
+``set``
+~~~~~~~
+
+**Arguments:** 
+
+* ``value``: The value to set
+
+``md5``
+~~~~~~~
+
+**Arguments:** none
+
+This provider will hash the given field value with the MD5 algorithm.
+
+
 
 Quickstart
 ----------
