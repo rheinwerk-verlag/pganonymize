@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 def data2csv(data):
     si = StringIO()
-    cw = csv.writer(si, delimiter='\t', lineterminator='\n')
+    cw = csv.writer(si, delimiter='\t', lineterminator='\n', quotechar='|')
     [cw.writerow([(x is None and '\\N' or x) for x in row]) for row in data]
     si.seek(0)
     return si
