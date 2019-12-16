@@ -69,6 +69,19 @@ def get_column_values(row, columns):
     return column_dict
 
 
+def truncate_tables(connection, tables):
+    """
+    Truncate a list of tables.
+
+    :param connection: A database connection instance
+    :param list[str] tables: A list of table names
+    """
+    cursor = connection.cursor()
+    for table_name in tables:
+        log.info('Truncating table "%s"', table_name)
+        cursor.execute('TRUNCATE TABLE {table}'.format(table=table_name))
+    cursor.close()
+
 
 def main():
     parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
@@ -80,7 +93,8 @@ def main():
     parser.add_argument('--password',  default='', help='Password for the database user')
     parser.add_argument('--host', help='Database hostname', default='localhost')
     parser.add_argument('--port', help='Port of the database', default='5432')
-    parser.add_argument('--dry-run', action='store_true', help='Dont commit changes made on the database', default=False)
+    parser.add_argument('--dry-run', action='store_true', help='Dont commit changes made on the database', 
+                        default=False)
     args = parser.parse_args()
 
     if args.verbose:
@@ -96,14 +110,9 @@ def main():
         args.port))})
 
     start_time = time.time()
-
     connection = psycopg2.connect(**pg_args)    
 
-    cursor = connection.cursor()            
-    for table_name in schema.get('truncate', []):
-        log.info('Truncating table "%s"', table_name)
-        cursor.execute('TRUNCATE TABLE {table}'.format(table=table_name))
-    cursor.close()
+    truncate_tables(connection, schema.get('truncate', []))
 
     for definition in schema.get('tables', []):
         table_name = definition.keys()[0]
@@ -146,10 +155,14 @@ def main():
                     continue
                 data.append(row.values())
             
+        if args.verbose:
+            bar.finish()
         cursor.close()
 
+        log.info('Loading data')
         new_data = data2csv(data)
 
+        log.info('Persisting temporary data')
         cursor = connection.cursor()
         cursor.execute('CREATE TEMP TABLE source(LIKE %s INCLUDING ALL) ON COMMIT DROP;' % table_name)
         cursor.copy_from(new_data, 'source', columns=table_columns)
@@ -162,12 +175,10 @@ def main():
             WHERE t.{primary_key} = s.{primary_key}
         '''.format(table=table_name, primary_key=primary_key, columns=set_columns)
         
+        log.info('Writing data back')
         cursor.execute(sql)
         cursor.execute('DROP TABLE source;')
         cursor.close()
-
-        if args.verbose:
-            bar.finish()
 
     if not args.dry_run:
         connection.commit()
