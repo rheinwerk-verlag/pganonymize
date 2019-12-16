@@ -2,19 +2,26 @@ tables:
     - address_useraddress:
         fields:
             - first_name:
-                provider: fake.first_name
+                provider: set
+                value: "Foo"
             - last_name:
-                provider: fake.last_name
+                provider: set
+                value: "Bar"
             - company:
-                provider: fake.company
+                provider: set
+                value: "Company"
             - phone_number:
-                provider: fake.phone_number
+                provider: set
+                value: "01234/567890"
             - line1:
-                provider: fake.street_name
+                provider: set
+                value: "Street"
             - line2:
-                provider: fake.building_number
+                provider: set
+                value: "111"
             - line4:
-                provider: fake.city
+                provider: set
+                value: "City"
             - search_text:
                 provider: set
                 value: ""
@@ -23,29 +30,36 @@ tables:
     - auth_user:
         fields:
             - first_name:
-                provider: fake.first_name
+                provider: set
+                value: "Foo"
             - last_name:
-                provider: fake.last_name
+                provider: set
+                value: "Bar"
             - email: 
-                provider: fake.email
+                provider: md5
+                append: '@localhost'
     - customer_objectioninfo:
         fields:
             - email:
-                provider: fake.email
+                provider: md5
+                append: '@localhost'
     - feedback_feedback:
         fields:
             - username:
                 provider: fake.name
             - user_email:
-                provider: fake.email
+                provider: md5
+                append: '@localhost'
     - newsletters_subscription:
         fields:
             - email:
-                provider: fake.email
+                provider: md5
+                append: '@localhost'
     - order_order:
         fields:
             - guest_email:
-                provider: fake.email
+                provider: md5
+                append: '@localhost'
     - waffle_switch:
         fields:
             - active:
