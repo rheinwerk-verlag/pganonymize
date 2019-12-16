@@ -21,7 +21,7 @@ def main():
     parser.add_argument('--schema',  help='A YAML file that contains the anonymization rules', required=True,
                         default='./schema.yml')
     parser.add_argument('--dbname',  help='Name of the database')
-    parser.add_argunent('--dbschema', default='public', help='Name of the database schema')
+    parser.add_argument('--dbschema', default='public', help='Name of the database schema')
     parser.add_argument('--user',  help='Name of the database user')
     parser.add_argument('--password',  default='', help='Password for the database user')
     parser.add_argument('--host', help='Database hostname', default='localhost')

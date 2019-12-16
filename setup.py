@@ -46,9 +46,7 @@ Private :: Do Not Upload
 Development Status :: 2 - Pre-Alpha
 Intended Audience :: Developers
 License :: Other/Proprietary License
-#Operating System :: Microsoft :: Windows
 Operating System :: POSIX
-#Operating System :: MacOS :: MacOS X
 Programming Language :: Python
 Programming Language :: Python :: 2.7
 Programming Language :: Python :: 3.5
@@ -92,5 +90,10 @@ setup(
     tests_require=tests_require,
     cmdclass={
         'test': ToxTestCommand,
+    },
+    entry_points={
+        'console_scripts': [
+            'pganonymize=pganonymizer.cli:main'
+        ]
     }
 )
