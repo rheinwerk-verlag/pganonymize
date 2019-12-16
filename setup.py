@@ -56,6 +56,7 @@ Topic :: Internet
 install_requires = [
     'faker',
     'six',
+    'progress',
     'psycopg2',
     'pyyaml'
 ]

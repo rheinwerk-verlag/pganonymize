@@ -2,6 +2,6 @@
 
 ## Development
 
-## 0.1.0 (2019-12-13)
+## 0.1.0 (2019-12-16)
 
-Initial release
+Initial release of the prototype
