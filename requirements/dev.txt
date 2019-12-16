@@ -45,6 +45,7 @@ pexpect==4.7.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pip-tools==1.11.0
 pluggy==0.6.0             # via pytest
+progress==1.5
 prompt-toolkit==3.0.2     # via ipython
 psycopg2==2.8.4
 ptyprocess==0.6.0         # via pexpect

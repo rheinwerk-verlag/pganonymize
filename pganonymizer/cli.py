@@ -49,7 +49,6 @@ def setup_logging(verbose):
         logging.basicConfig(format="%(levelname)s: %(message)s")
 
 
-
 def main():
     parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
     parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')

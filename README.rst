@@ -1,13 +1,33 @@
 PostgreSQL Anonymizer
-================================
+=====================
+
+.. image:: https://travis-ci.org/hkage/postgresql-anonymizer.svg?branch=master
+    :target: https://travis-ci.org/hkage/postgresql-anonymizer
 
 A commandline tool to anonymize PostgreSQL databases.
 
 Installation
 ------------
 
+
 Usage
 -----
+
+Sample usage::
+
+    $ pganonymize \
+        --schema=sample_schema.yml \
+        --host=localhost \
+        --user=user \
+        --password=password \
+        --dbname=mydatabase \
+        -v
+
+Schema definition
+-----------------
+
+Provider
+--------
 
 
 Quickstart
