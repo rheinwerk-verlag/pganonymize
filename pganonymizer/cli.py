@@ -22,10 +22,27 @@ logging.basicConfig(format='%(levelname)s: %(message)s')
 log = logging.getLogger(__name__)
 
 
+def get_table_count(connection, table):
+    """
+    Return the number of table entries.
+
+    :param connection: A database connection instance
+    :param str table: Name of the database table
+    :return: The number of table entries
+    :rtype: int
+    """
+    sql = "SELECT COUNT(*) FROM {table};".format(table=table)
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    total_count = cursor.fetchone()[0]
+    cursor.close()
+    return total_count
+
+
 def data2csv(data):
     si = StringIO()
-    cw = csv.writer(si, delimiter='\t', lineterminator='\n', quotechar='|')
-    [cw.writerow([(x is None and '\\N' or x) for x in row]) for row in data]
+    writer = csv.writer(si, delimiter='\t', lineterminator='\n', quotechar='|')
+    [writer.writerow([(x is None and '\\N' or x) for x in row]) for row in data]
     si.seek(0)
     return si
 
@@ -118,17 +135,11 @@ def main():
         table_name = definition.keys()[0]
         table_defintion = definition[table_name]
         columns = table_defintion.get('fields', [])
-
         column_dict = get_column_dict(columns)
-
         primary_key = table_defintion.get('primary_key', DEFAULT_PRIMARY_KEY)
 
-        sql = "SELECT COUNT(*) FROM {table};".format(table=table_name)
-        cursor = connection.cursor()
-        cursor.execute(sql)
-        total_count = cursor.fetchone()[0]
+        total_count = get_table_count(connection, table_name)
         log.info('Found table defintion "%s"', table_name)
-        cursor.close()
 
         sql = "SELECT * FROM {table};".format(table=table_name)
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')

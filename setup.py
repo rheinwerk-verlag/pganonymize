@@ -60,7 +60,7 @@ tests_require = [
 ]
 
 setup(
-    name='PostgreSQL Anonymizer',
+    name='pganonymize',
     version=__version__,  # noqa
     description='Commandline tool to anonymize PostgreSQL databases',
     long_description=read('README.rst'),
