@@ -98,7 +98,6 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
     :param str primary_key: Name of the tables primary key.
     :param list data: The table data.
     """
-    import ipdb; ipdb.set_trace()
     primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
     cursor = connection.cursor()
     cursor.execute('CREATE TEMP TABLE source(LIKE %s INCLUDING ALL) ON COMMIT DROP;' % source_table)
