@@ -11,9 +11,7 @@ from progress.bar import IncrementalBar
 from pganonymizer.constants import DATABASE_ARGS, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import InvalidFieldProvider
 
-
 fake_data = Faker()
-log = logging.getLogger(__name__)
 
 
 def anonymize_tables(connection, definitions, verbose=False):
@@ -22,7 +20,7 @@ def anonymize_tables(connection, definitions, verbose=False):
     """
     for definition in definitions:
         table_name = definition.keys()[0]
-        log.info('Found table definition "%s"', table_name)
+        logging.info('Found table definition "%s"', table_name)
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
         column_dict = get_column_dict(columns)
@@ -214,6 +212,6 @@ def truncate_tables(connection, tables):
     """
     cursor = connection.cursor()
     for table_name in tables:
-        log.info('Truncating table "%s"', table_name)
+        logging.info('Truncating table "%s"', table_name)
         cursor.execute('TRUNCATE TABLE {table}'.format(table=table_name))
     cursor.close()

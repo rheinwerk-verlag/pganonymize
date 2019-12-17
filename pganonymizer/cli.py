@@ -7,10 +7,6 @@ import yaml
 from pganonymizer.utils import anonymize_tables, get_connection, truncate_tables
 
 
-logging.basicConfig(format='%(levelname)s: %(message)s')
-log = logging.getLogger(__name__)
-
-
 def main():
     parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
     parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
@@ -24,9 +20,10 @@ def main():
     parser.add_argument('--dry-run', action='store_true', help='Dont commit changes made on the database',
                         default=False)
     args = parser.parse_args()
-
+    loglevel = logging.WARNING
     if args.verbose:
-        log.setLevel(logging.DEBUG)
+        loglevel = logging.DEBUG
+    logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
     connection = get_connection(args)
@@ -40,7 +37,7 @@ def main():
     connection.close()
 
     end_time = time.time()
-    log.info('Anonymization took {:.2f}s.'.format(end_time - start_time))
+    logging.info('Anonymization took {:.2f}s.'.format(end_time - start_time))
 
 
 if __name__ == '__main__':
