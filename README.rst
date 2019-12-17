@@ -4,6 +4,9 @@ PostgreSQL Anonymizer
 .. image:: https://travis-ci.org/hkage/postgresql-anonymizer.svg?branch=master
     :target: https://travis-ci.org/hkage/postgresql-anonymizer
 
+.. image:: https://img.shields.io/badge/license-MIT-green.svg
+    :target: https://github.com/hkage/postgresql-anonymizer/blob/master/LICENSE.rst
+
 A commandline tool to anonymize PostgreSQL databases.
 
 Installation
@@ -37,10 +40,10 @@ Usage
 Schema definition
 -----------------
 
-``pganonymize`` uses a YAML based schema definition for the anonymization rules. 
+``pganonymize`` uses a YAML based schema definition for the anonymization rules.
 
 On the top level a list of tables can be defined with the ``tables`` keyword. This will define
-which tables should be anonymized. 
+which tables should be anonymized.
 
 On the table level you can specify the tables primary key with the keyword ``primary_key`` if it
 isn't the default ``id``.
@@ -74,7 +77,7 @@ The following provider are currently supported:
 
 **Arguments:** none
 
-The ``clear`` provider will set a database field to ``null``. 
+The ``clear`` provider will set a database field to ``null``.
 
 .. note::
    But remember, that you can set fields to ``null`` only if the database field is not nullable.
@@ -128,7 +131,7 @@ This provider will hash the given field value with the MD5 algorithm.
 ``set``
 ~~~~~~~
 
-**Arguments:** 
+**Arguments:**
 
 * ``value``: The value to set
 
