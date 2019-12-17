@@ -41,8 +41,6 @@ class ToxTestCommand(distutils.cmd.Command):
 exec(read('pganonymizer', 'version.py'))
 
 classifiers = """
-# The next line is important: it prevents accidental upload to PyPI!
-Private :: Do Not Upload
 Development Status :: 2 - Pre-Alpha
 Intended Audience :: Developers
 License :: Other/Proprietary License
@@ -50,6 +48,9 @@ Operating System :: POSIX
 Programming Language :: Python
 Programming Language :: Python :: 2.7
 Programming Language :: Python :: 3.5
+Programming Language :: Python :: 3.6
+Programming Language :: Python :: 3.7
+Programming Language :: Python :: 3.8
 Topic :: Internet
 """
 
@@ -75,12 +76,12 @@ tests_require = [
 setup(
     name='PostgreSQL Anonymizer',
     version=__version__,  # noqa
-    description='A cookiecutter template for Rheinwerk Python packages',
+    description='Commandline tool to anonymize PostgreSQL databases',
     long_description=read('README.rst'),
     author='Henning Kage',
     author_email='henning.kage@gmail.com',
-    maintainer='Rheinwerk Verlag GmbH Webteam',
-    maintainer_email='webteam@rheinwerk-verlag.de',
+    maintainer='Henning Kage',
+    maintainer_email='henning.kage@gmail.com',
     url='https://github.com/hkage/postgresql-anonymizer',
     license='Proprietary',
     classifiers=[c.strip() for c in classifiers.splitlines()
