@@ -250,7 +250,7 @@ TODOs
 -----
 * Add tests
 * Add option to create a database dump
-* Add ``choice``provider to randomly choice from a list of values
+* Add ``choice`` provider to randomly choice from a list of values
 
 
 .. _Faker: https://faker.readthedocs.io/en/master/providers.html
