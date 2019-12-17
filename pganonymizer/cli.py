@@ -1,116 +1,33 @@
 from __future__ import print_function
 
 import argparse
-import csv
-import hashlib
 import logging
-import sys
 import time
-from cStringIO import StringIO
 
-import faker
 import psycopg2
 import psycopg2.extras
 import yaml
 from progress.bar import IncrementalBar
 
-from constants import DATABASE_ARGS, DEFAULT_PRIMARY_KEY
+from pganonymizer.constants import DEFAULT_PRIMARY_KEY
+from pganonymizer.utils import (
+    data2csv, get_column_dict, get_column_values, get_connection, get_table_count, truncate_tables)
 
-
-fake_data = faker.Faker()
 logging.basicConfig(format='%(levelname)s: %(message)s')
 log = logging.getLogger(__name__)
-
-
-def get_table_count(connection, table):
-    """
-    Return the number of table entries.
-
-    :param connection: A database connection instance
-    :param str table: Name of the database table
-    :return: The number of table entries
-    :rtype: int
-    """
-    sql = "SELECT COUNT(*) FROM {table};".format(table=table)
-    cursor = connection.cursor()
-    cursor.execute(sql)
-    total_count = cursor.fetchone()[0]
-    cursor.close()
-    return total_count
-
-
-def data2csv(data):
-    si = StringIO()
-    writer = csv.writer(si, delimiter='\t', lineterminator='\n', quotechar='|')
-    [writer.writerow([(x is None and '\\N' or x) for x in row]) for row in data]
-    si.seek(0)
-    return si
-
-
-def get_column_dict(columns):
-    column_dict = {}
-    for definition in columns:
-        column_name = definition.keys()[0]
-        column_dict[column_name] = None
-    return column_dict
-
-
-def get_column_values(row, columns):
-    column_dict = {}
-    for definition in columns:
-        column_name = definition.keys()[0]
-        column_definition = definition[column_name]
-        provider = column_definition.get('provider')
-        orig_value = row.get(column_name)
-        if not orig_value:
-            continue
-        if provider.startswith('fake'):
-            func_name = provider.split('.')[1]
-            func = getattr(fake_data, func_name)
-            value = func()
-        elif provider == 'md5':
-            value = hashlib.md5(orig_value).hexdigest()
-        elif provider == 'clear':
-            value = None
-        elif provider == 'set':
-            value = column_definition.get('value')
-        else:
-            log.warn('Unknown provider for field %s: %s', column_name, provider)
-            continue
-
-        append = column_definition.get('append')
-        if append:
-            value = value + append
-
-        column_dict[column_name] = value
-    return column_dict
-
-
-def truncate_tables(connection, tables):
-    """
-    Truncate a list of tables.
-
-    :param connection: A database connection instance
-    :param list[str] tables: A list of table names
-    """
-    cursor = connection.cursor()
-    for table_name in tables:
-        log.info('Truncating table "%s"', table_name)
-        cursor.execute('TRUNCATE TABLE {table}'.format(table=table_name))
-    cursor.close()
 
 
 def main():
     parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
     parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
-    parser.add_argument('--schema',  help='A YAML file that contains the anonymization rules', required=True,
+    parser.add_argument('--schema', help='A YAML file that contains the anonymization rules', required=True,
                         default='./schema.yml')
-    parser.add_argument('--dbname',  help='Name of the database')
-    parser.add_argument('--user',  help='Name of the database user')
-    parser.add_argument('--password',  default='', help='Password for the database user')
+    parser.add_argument('--dbname', help='Name of the database')
+    parser.add_argument('--user', help='Name of the database user')
+    parser.add_argument('--password', default='', help='Password for the database user')
     parser.add_argument('--host', help='Database hostname', default='localhost')
     parser.add_argument('--port', help='Port of the database', default='5432')
-    parser.add_argument('--dry-run', action='store_true', help='Dont commit changes made on the database', 
+    parser.add_argument('--dry-run', action='store_true', help='Dont commit changes made on the database',
                         default=False)
     args = parser.parse_args()
 
@@ -118,17 +35,9 @@ def main():
         log.setLevel(logging.DEBUG)
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
-
-    pg_args = ({name: value for name, value in zip(DATABASE_ARGS, (
-        args.dbname, 
-        args.user, 
-        args.password, 
-        args.host, 
-        args.port))})
+    connection = get_connection(args)
 
     start_time = time.time()
-    connection = psycopg2.connect(**pg_args)    
-
     truncate_tables(connection, schema.get('truncate', []))
 
     for definition in schema.get('tables', []):
@@ -144,7 +53,7 @@ def main():
         sql = "SELECT * FROM {table};".format(table=table_name)
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
         cursor.execute(sql)
-        
+
         if args.verbose:
             bar = IncrementalBar('Anonymizing', max=total_count)
 
@@ -165,7 +74,7 @@ def main():
                 if not row_column_dict:
                     continue
                 data.append(row.values())
-            
+
         if args.verbose:
             bar.finish()
         cursor.close()
@@ -180,12 +89,12 @@ def main():
 
         set_columns = ', '.join(['{column} = s.{column}'.format(column=key) for key in column_dict.keys()])
         sql = '''
-            UPDATE {table} t 
-                SET {columns} 
-            FROM source s 
+            UPDATE {table} t
+                SET {columns}
+            FROM source s
             WHERE t.{primary_key} = s.{primary_key}
         '''.format(table=table_name, primary_key=primary_key, columns=set_columns)
-        
+
         log.info('Writing data back')
         cursor.execute(sql)
         cursor.execute('DROP TABLE source;')
