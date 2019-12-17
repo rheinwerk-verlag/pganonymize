@@ -222,4 +222,10 @@ the ``BROWSER`` make variable, e.g.::
     $ make BROWSER=chromium-browser docs
 
 
+TODOs
+-----
+* Add tests
+* Add option to create a database dump
+
+
 .. _Faker: https://faker.readthedocs.io/en/master/providers.html
