@@ -1,13 +1,13 @@
 tables:
-    - auth_user:
-        primary_key: id
-        fields:
-            - first_name:
-                provider: set
-                value: "Foo"
-            - last_name:
-                provider: set
-                value: "Bar"
-            - email: 
-                provider: md5
-                append: '@localhost'
+ - auth_user:
+    primary_key: id
+    fields:
+     - first_name:
+        provider: set
+        value: "Foo"
+     - last_name:
+        provider: set
+        value: "Bar"
+     - email:
+        provider: md5
+        append: "@localhost"

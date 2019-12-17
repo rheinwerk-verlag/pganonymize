@@ -7,9 +7,9 @@ import psycopg2
 import psycopg2.extras
 from faker import Faker
 from progress.bar import IncrementalBar
-from psycopg2.errors import BadCopyFileFormat
+from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 
-from pganonymizer.constants import DATABASE_ARGS, DEFAULT_PRIMARY_KEY
+from pganonymizer.constants import COPY_DB_DELIMITER, DATABASE_ARGS, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import BadDataFormat, InvalidFieldProvider
 
 fake_data = Faker()
@@ -81,12 +81,13 @@ def copy_from(connection, data, table, columns):
     :param list data: The data of a table.
     :param str table: Name of the temporary table used for copying the data.
     :param list columns: All columns of the current table.
+    :raises BadDataFormat: If the data cannot be imported due to a invalid format.
     """
     new_data = data2csv(data)
     cursor = connection.cursor()
     try:
-        cursor.copy_from(new_data, table, columns=columns)
-    except BadCopyFileFormat as e:
+        cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N', columns=columns)
+    except (BadCopyFileFormat, InvalidTextRepresentation) as e:
         raise BadDataFormat(e)
     cursor.close()
 
@@ -156,11 +157,11 @@ def data2csv(data):
     :return: A stream that contains tab delimited csv data
     :rtype: StringIO
     """
-    buffer = StringIO()
-    writer = csv.writer(buffer, delimiter='\t', lineterminator='\r\n', quotechar='~')
-    [writer.writerow([(x is None and '\N' or x) for x in row]) for row in data]
-    buffer.seek(0)
-    return buffer
+    buf = StringIO()
+    writer = csv.writer(buf, delimiter=COPY_DB_DELIMITER, lineterminator='\n', quotechar='~')
+    [writer.writerow([(x is None and '\\N' or x) for x in row]) for row in data]
+    buf.seek(0)
+    return buf
 
 
 def get_column_dict(columns):

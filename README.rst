@@ -56,16 +56,17 @@ be treated.
 **Example**::
 
     tables:
-        - auth_user:
-            primary_key: id
-            fields:
-                - first_name:
-                    provider: clear
-        - customer_email:
-            fields:
-                - email:
-                    provider: md5
-                    append: @localhost
+     - auth_user:
+        primary_key: id
+        fields:
+         - first_name:
+            provider: clear
+     - customer_email:
+        fields:
+         - email:
+            provider: md5
+            append: @localhost
+
 
 Providers
 ---------
@@ -86,10 +87,11 @@ The ``clear`` provider will set a database field to ``null``.
 **Example usage**::
 
     tables:
-        - auth_user:
-            fields:
-                - first_name:
-                    provider: clear
+     - auth_user:
+        fields:
+         - first_name:
+            provider: clear
+
 
 ``fake``
 ~~~~~~~~
@@ -109,10 +111,11 @@ the provider with ``faker`` and use the provider function from the Faker library
 **Example usage**::
 
     tables:
-        - auth_user:
-            fields:
-                - email:
-                    provider: fake.email
+     - auth_user:
+        fields:
+         - email:
+            provider: fake.email
+
 
 ``md5``
 ~~~~~~~
@@ -124,10 +127,11 @@ This provider will hash the given field value with the MD5 algorithm.
 **Example usage**::
 
     tables:
-        - auth_user:
-            fields:
-                - password:
-                    provider: md5
+     - auth_user:
+        fields:
+         - password:
+            provider: md5
+
 
 ``set``
 ~~~~~~~
@@ -139,11 +143,31 @@ This provider will hash the given field value with the MD5 algorithm.
 **Example usage**::
 
     tables:
-        - auth_user:
-            fields:
-                - first_name:
-                    provider: set
-                    value: "Foo"
+     - auth_user:
+        fields:
+         - first_name:
+            provider: set
+            value: "Foo"
+
+
+Arguments
+---------
+
+In addition to the providers there is also a list of arguments that can be added to each provider:
+
+``append``
+~~~~~~~~~~
+
+This argument will append a value at the end of the altered value:
+
+**Example usage**::
+
+    tables:
+     - auth_user:
+        fields:
+         - email:
+            provider: md5
+            append: "@example.com"
 
 Quickstart
 ----------
@@ -226,6 +250,7 @@ TODOs
 -----
 * Add tests
 * Add option to create a database dump
+* Add ``choice``provider to randomly choice from a list of values
 
 
 .. _Faker: https://faker.readthedocs.io/en/master/providers.html
