@@ -7,9 +7,10 @@ import psycopg2
 import psycopg2.extras
 from faker import Faker
 from progress.bar import IncrementalBar
+from psycopg2.errors import BadCopyFileFormat
 
 from pganonymizer.constants import DATABASE_ARGS, DEFAULT_PRIMARY_KEY
-from pganonymizer.exceptions import InvalidFieldProvider
+from pganonymizer.exceptions import BadDataFormat, InvalidFieldProvider
 
 fake_data = Faker()
 
@@ -83,7 +84,10 @@ def copy_from(connection, data, table, columns):
     """
     new_data = data2csv(data)
     cursor = connection.cursor()
-    cursor.copy_from(new_data, table, columns=columns)
+    try:
+        cursor.copy_from(new_data, table, columns=columns)
+    except BadCopyFileFormat as e:
+        raise BadDataFormat(e)
     cursor.close()
 
 
