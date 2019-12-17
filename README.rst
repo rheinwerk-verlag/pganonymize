@@ -249,6 +249,7 @@ the ``BROWSER`` make variable, e.g.::
 TODOs
 -----
 * Add tests
+* Add exceptions for certain field values
 * Add option to create a database dump
 * Add ``choice`` provider to randomly choice from a list of values
 
