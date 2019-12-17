@@ -4,14 +4,92 @@ from cStringIO import StringIO
 from hashlib import md5
 
 import psycopg2
+import psycopg2.extras
 from faker import Faker
+from progress.bar import IncrementalBar
 
-from pganonymizer.constants import DATABASE_ARGS
+from pganonymizer.constants import DATABASE_ARGS, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import InvalidFieldProvider
 
 
 fake_data = Faker()
 log = logging.getLogger(__name__)
+
+
+def anonymize_tables(connection, definitions, verbose=False):
+    """
+
+    """
+    for definition in definitions:
+        table_name = definition.keys()[0]
+        log.info('Found table definition "%s"', table_name)
+        table_definition = definition[table_name]
+        columns = table_definition.get('fields', [])
+        column_dict = get_column_dict(columns)
+        primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
+        total_count = get_table_count(connection, table_name)
+        data, table_columns = build_data(connection, table_name, columns, total_count, verbose)
+        import_data(connection, column_dict, table_name, table_columns, primary_key, data)
+
+
+def build_data(connection, table, columns, total_count, verbose=False):
+    """
+
+    """
+    bar = IncrementalBar('Anonymizing', max=total_count)
+    sql = "SELECT * FROM {table};".format(table=table)
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
+    cursor.execute(sql)
+    data = []
+    table_columns = None
+    while True:
+        records = cursor.fetchmany(size=2000)
+        if not records:
+            break
+        for row in records:
+            row_column_dict = get_column_values(row, columns)
+            for key, value in row_column_dict.items():
+                row[key] = value
+            if verbose:
+                bar.next()
+            table_columns = row.keys()
+            if not row_column_dict:
+                continue
+            data.append(row.values())
+    if verbose:
+        bar.finish()
+    cursor.close()
+    return data, table_columns
+
+
+def copy_from(connection, data, table, columns):
+    """
+
+    """
+    new_data = data2csv(data)
+    cursor = connection.cursor()
+    cursor.copy_from(new_data, table, columns=columns)
+    cursor.close()
+
+
+def import_data(connection, column_dict, source_table, table_columns, primary_key, data):
+    """
+
+    """
+    primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
+    cursor = connection.cursor()
+    cursor.execute('CREATE TEMP TABLE source(LIKE %s INCLUDING ALL) ON COMMIT DROP;' % source_table)
+    copy_from(connection, data, 'source', table_columns)
+    set_columns = ', '.join(['{column} = s.{column}'.format(column=key) for key in column_dict.keys()])
+    sql = (
+        'UPDATE {table} t '
+        'SET {columns} '
+        'FROM source s '
+        'WHERE t.{primary_key} = s.{primary_key}'
+    ).format(table=source_table, primary_key=primary_key, columns=set_columns)
+    cursor.execute(sql)
+    cursor.execute('DROP TABLE source;')
+    cursor.close()
 
 
 def get_connection(args):
@@ -52,16 +130,16 @@ def data2csv(data):
     :return: A stream that contains tab delimited csv data
     :rtype: StringIO
     """
-    stream = StringIO()
-    writer = csv.writer(stream, delimiter='\t', lineterminator='\n', quotechar='|')
-    [writer.writerow([(x is None and '\\N' or x) for x in row]) for row in data]
-    stream.seek(0)
-    return stream
+    buffer = StringIO()
+    writer = csv.writer(buffer, delimiter='\t', lineterminator='\r\n', quotechar='~')
+    [writer.writerow([(x is None and '\N' or x) for x in row]) for row in data]
+    buffer.seek(0)
+    return buffer
 
 
 def get_column_dict(columns):
     """
-    Return a dictionary with all fields from the table defintion and None as value.
+    Return a dictionary with all fields from the table definition and None as value.
 
     :param list columns: A list of field definitions from the YAML schema, e.g.:
 
