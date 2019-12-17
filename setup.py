@@ -40,20 +40,6 @@ class ToxTestCommand(distutils.cmd.Command):
 
 exec(read('pganonymizer', 'version.py'))
 
-classifiers = """
-Development Status :: 2 - Pre-Alpha
-Intended Audience :: Developers
-License :: Other/Proprietary License
-Operating System :: POSIX
-Programming Language :: Python
-Programming Language :: Python :: 2.7
-Programming Language :: Python :: 3.5
-Programming Language :: Python :: 3.6
-Programming Language :: Python :: 3.7
-Programming Language :: Python :: 3.8
-Topic :: Internet
-"""
-
 install_requires = [
     'faker',
     'six',
@@ -84,8 +70,20 @@ setup(
     maintainer_email='henning.kage@gmail.com',
     url='https://github.com/hkage/postgresql-anonymizer',
     license='Proprietary',
-    classifiers=[c.strip() for c in classifiers.splitlines()
-                 if c.strip() and not c.startswith('#')],
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: POSIX',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Environment :: Console',
+        'Topic :: Database'
+    ],
     packages=find_packages(include=['pganonymizer*']),
     include_package_data=True,
     install_requires=install_requires,
