@@ -16,7 +16,11 @@ fake_data = Faker()
 
 def anonymize_tables(connection, definitions, verbose=False):
     """
+    Anonymize a list of tables according to the schema definition.
 
+    :param connection: A database connection instance.
+    :param list definitions: A list of table definitions from the YAML schema.
+    :param bool verbose: Display logging information and a progress bar.
     """
     for definition in definitions:
         table_name = definition.keys()[0]
@@ -32,7 +36,15 @@ def anonymize_tables(connection, definitions, verbose=False):
 
 def build_data(connection, table, columns, total_count, verbose=False):
     """
+    Select all data from a table and build
 
+    :param connection: A database connection instance.
+    :param str table: Name of the table to retrieve the data.
+    :param list columns:
+    :param int total_count: The amount of rows for the current table
+    :param bool verbose: Display logging information and a progress bar.
+    :return: A tuple containing the data list and a complete list of all table columns.
+    :rtype: (list, list)
     """
     bar = IncrementalBar('Anonymizing', max=total_count)
     sql = "SELECT * FROM {table};".format(table=table)
@@ -62,7 +74,12 @@ def build_data(connection, table, columns, total_count, verbose=False):
 
 def copy_from(connection, data, table, columns):
     """
+    Copy the data from a table to a temporary table.
 
+    :param connection: A database connection instance.
+    :param list data: The data of a table.
+    :param str table: Name of the temporary table used for copying the data.
+    :param list columns: All columns of the current table.
     """
     new_data = data2csv(data)
     cursor = connection.cursor()
@@ -72,8 +89,16 @@ def copy_from(connection, data, table, columns):
 
 def import_data(connection, column_dict, source_table, table_columns, primary_key, data):
     """
+    Import the temporary and anonymized data to a temporary table and write the changes back.
 
+    :param connection: A database connection instance.
+    :param dict column_dict:
+    :param str source_table: Name of the table to be anonymized.
+    :param list table_columns: A list of all table columns.
+    :param str primary_key: Name of the tables primary key.
+    :param list data: The table data.
     """
+    import ipdb; ipdb.set_trace()
     primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
     cursor = connection.cursor()
     cursor.execute('CREATE TEMP TABLE source(LIKE %s INCLUDING ALL) ON COMMIT DROP;' % source_table)
