@@ -249,6 +249,8 @@ the ``BROWSER`` make variable, e.g.::
 TODOs
 -----
 * Add tests
+* Add exceptions for certain field values
+* Make the providers more pluggable (e.g. as own classes with a unqiue character id)
 * Add option to create a database dump
 * Add ``choice`` provider to randomly choice from a list of values
 
