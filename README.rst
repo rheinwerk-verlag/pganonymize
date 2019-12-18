@@ -5,7 +5,7 @@ PostgreSQL Anonymizer
     :target: https://travis-ci.org/rheinwerk-verlag/postgresql-anonymizer
 
 .. image:: https://img.shields.io/badge/license-MIT-green.svg
-    :target: https://github.com/hkage/postgresql-anonymizer/blob/master/LICENSE.rst
+    :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/LICENSE.rst
 
 
 A commandline tool to anonymize PostgreSQL databases.
