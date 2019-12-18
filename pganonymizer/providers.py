@@ -92,7 +92,7 @@ class MD5Provider(with_metaclass(ProviderMeta, Provider)):
     id = 'md5'
 
     def alter_value(self, value):
-        return md5(value).hexdigest()
+        return md5(value.encode('utf-8')).hexdigest()
 
 
 class SetProvider(with_metaclass(ProviderMeta, Provider)):
