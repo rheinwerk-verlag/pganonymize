@@ -1,7 +1,6 @@
 import csv
 import logging
 from cStringIO import StringIO
-from hashlib import md5
 
 import psycopg2
 import psycopg2.extras
@@ -9,7 +8,7 @@ from progress.bar import IncrementalBar
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 
 from pganonymizer.constants import COPY_DB_DELIMITER, DATABASE_ARGS, DEFAULT_PRIMARY_KEY
-from pganonymizer.exceptions import BadDataFormat, InvalidFieldProvider
+from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
 
 

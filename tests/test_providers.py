@@ -1,7 +1,7 @@
 import pytest
 import six
 
-from mock import Mock, patch
+from mock import patch
 
 from pganonymizer import exceptions, providers
 
@@ -24,7 +24,6 @@ class TestFakeProvider:
         provider.alter_value('Foo')
         assert getattr(mock_fake_data, function_name).call_count == 1
 
-    
     @pytest.mark.parametrize('name', [
         'fake.foo_name'
     ])
@@ -32,8 +31,6 @@ class TestFakeProvider:
         provider = providers.FakeProvider(name=name)
         with pytest.raises(exceptions.InvalidProviderArgument):
             provider.alter_value('Foo')
-
-
 
 
 class TestMD5Provider:

@@ -35,7 +35,7 @@ def get_provider(provider_config):
 
 class ProviderMeta(type):
     """Metaclass to register all provider classes."""
-    
+
     def __new__(cls, clsname, bases, attrs):
         newclass = super(ProviderMeta, cls).__new__(cls, clsname, bases, attrs)
         if clsname != 'Provider':
