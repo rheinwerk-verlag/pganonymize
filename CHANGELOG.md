@@ -2,6 +2,8 @@
 
 ## Development
 
+* Added provider classes
+
 ## 0.1.1 (2019-12-18)
 
 Changed setup.py

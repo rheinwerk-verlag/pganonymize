@@ -8,10 +8,10 @@ PostgreSQL Anonymizer
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/LICENSE.rst
 
 
-A commandline tool to anonymize PostgreSQL databases.
-
 Installation
 ------------
+
+``pganonymize`` is Python 2 and Python 3 compatible.
 
 The default installation method is to use ``pip``::
 
@@ -60,11 +60,13 @@ be treated.
         primary_key: id
         fields:
          - first_name:
-            provider: clear
+            provider: 
+              name: clear
      - customer_email:
         fields:
          - email:
-            provider: md5
+            provider: 
+              name: md5
             append: @localhost
 
 
@@ -90,7 +92,8 @@ The ``clear`` provider will set a database field to ``null``.
      - auth_user:
         fields:
          - first_name:
-            provider: clear
+            provider: 
+              name: clear
 
 
 ``fake``
@@ -114,7 +117,8 @@ the provider with ``faker`` and use the provider function from the Faker library
      - auth_user:
         fields:
          - email:
-            provider: fake.email
+            provider: 
+              name: fake.email
 
 
 ``md5``
@@ -130,7 +134,8 @@ This provider will hash the given field value with the MD5 algorithm.
      - auth_user:
         fields:
          - password:
-            provider: md5
+            provider: 
+              name: md5
 
 
 ``set``
@@ -146,8 +151,9 @@ This provider will hash the given field value with the MD5 algorithm.
      - auth_user:
         fields:
          - first_name:
-            provider: set
-            value: "Foo"
+            provider: 
+              name: set
+              value: "Foo"
 
 
 Arguments
@@ -166,7 +172,8 @@ This argument will append a value at the end of the altered value:
      - auth_user:
         fields:
          - email:
-            provider: md5
+            provider: 
+              name: md5
             append: "@example.com"
 
 Quickstart
@@ -250,7 +257,6 @@ TODOs
 -----
 * Add tests
 * Add exceptions for certain field values
-* Make the providers more pluggable (e.g. as own classes with a unqiue character id)
 * Add option to create a database dump
 * Add ``choice`` provider to randomly choice from a list of values
 
