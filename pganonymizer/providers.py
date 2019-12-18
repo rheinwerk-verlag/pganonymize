@@ -3,7 +3,7 @@ from hashlib import md5
 from faker import Faker
 from six import with_metaclass
 
-from pganonymizer.exceptions import InvalidProvider
+from pganonymizer.exceptions import InvalidProvider, InvalidProviderArgument
 
 
 PROVIDERS = []
@@ -79,7 +79,10 @@ class FakeProvider(with_metaclass(ProviderMeta, Provider)):
 
     def alter_value(self, value):
         func_name = self.kwargs['name'].split('.')[1]
-        func = getattr(fake_data, func_name)
+        try:
+            func = getattr(fake_data, func_name)
+        except AttributeError as exc:
+            raise InvalidProviderArgument(exc)
         return func()
 
 
