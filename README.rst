@@ -7,6 +7,9 @@ PostgreSQL Anonymizer
 .. image:: https://img.shields.io/badge/license-MIT-green.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/LICENSE.rst
 
+.. image:: https://badge.fury.io/py/pganonymize.svg
+    :target: https://badge.fury.io/py/pganonymize
+
 
 Installation
 ------------
@@ -258,7 +261,7 @@ TODOs
 * Add tests
 * Add exceptions for certain field values
 * Add option to create a database dump
-* Add ``choice`` provider to randomly choice from a list of values
+* Add a commandline argument to list all available providers
 
 
 .. _Faker: https://faker.readthedocs.io/en/master/providers.html

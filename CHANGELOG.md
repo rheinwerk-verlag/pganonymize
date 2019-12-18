@@ -3,6 +3,9 @@
 ## Development
 
 * Added provider classes
+* Added new providers:
+  * choice - returns a random list element
+  * mask - replaces the original value with a static sign
 
 ## 0.1.1 (2019-12-18)
 

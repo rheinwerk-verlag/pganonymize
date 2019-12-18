@@ -6,6 +6,15 @@ from mock import patch
 from pganonymizer import exceptions, providers
 
 
+class TestChoiceProvider:
+
+    def test_alter_value(self):
+        choices = ['Foo', 'Bar', 'Baz']
+        provider = providers.ChoiceProvider(values=choices)
+        for choice in choices:
+            assert provider.alter_value('Foo') in choices
+
+
 class TestClearProvider:
 
     def test_alter_value(self):

@@ -1,3 +1,4 @@
+import random
 from hashlib import md5
 
 from faker import Faker
@@ -59,6 +60,15 @@ class Provider(object):
         raise NotImplementedError
 
 
+class ChoiceProvider(with_metaclass(ProviderMeta, Provider)):
+    """Provider that returns a random value from a list of choices."""
+
+    id = 'choice'
+
+    def alter_value(self, value):
+        return random.choice(self.kwargs.get('values'))
+
+
 class ClearProvider(with_metaclass(ProviderMeta, Provider)):
     """Provider to set a field value to None."""
 
@@ -85,6 +95,15 @@ class FakeProvider(with_metaclass(ProviderMeta, Provider)):
             raise InvalidProviderArgument(exc)
         return func()
 
+
+class MaskProvider(with_metaclass(ProviderMeta, Provider)):
+    """Provider that masks the original value."""
+
+    id = 'mask'
+
+    def alter_value(self, value):
+        return self.kwargs.get('sign', 'X') * len(value)
+        
 
 class MD5Provider(with_metaclass(ProviderMeta, Provider)):
     """Provider to hash a value with the md5 algorithm."""
