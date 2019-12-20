@@ -319,8 +319,7 @@ the ``BROWSER`` make variable, e.g.::
 
 TODOs
 -----
-* Add tests
-* Add exceptions for certain field values
+* Add more tests
 * Add option to create a database dump
 * Add a commandline argument to list all available providers
 
