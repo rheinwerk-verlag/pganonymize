@@ -79,6 +79,29 @@ Providers
 Provider are the tools, that means functions, used to alter the data within the database.
 The following provider are currently supported:
 
+``choice``
+~~~~~~~~~~
+
+This provider will define a list of possible values for a database field and will randomly make a choice
+from this list.
+
+**Arguments:** 
+
+* ``values``: All list of values
+
+**Example usage**::
+
+    tables:
+     - auth_user:
+        fields:
+         - first_name:
+            provider: 
+              name: choice
+              values:
+                - "John"
+                - "Lisa"
+                - "Tom"
+
 ``clear``
 ~~~~~~~~~
 
@@ -122,6 +145,25 @@ the provider with ``faker`` and use the provider function from the Faker library
          - email:
             provider: 
               name: fake.email
+
+``mask``
+~~~~~~~~
+
+This provider will replace each character with a static sign.
+
+**Arguments:** 
+
+* ``sign``: The sign to be used to replace the original characters (default ``X``).
+
+**Example usage**::
+
+    tables:
+     - auth_user:
+        fields:
+         - last_name:
+            provider: 
+              name: mask
+              sign: '?'
 
 
 ``md5``
