@@ -2,7 +2,7 @@
 
 ## Development
 
-* Added regular expression field excludes (to skip data under certain conditions)
+* Added field based, regular expression excludes (to skip data under certain conditions)
 
 ## 0.2.0 (2019-12-20)
 

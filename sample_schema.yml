@@ -13,3 +13,6 @@ tables:
         provider: 
           name: md5
         append: "@localhost"
+    excludes:
+      - email:
+        - "\\S.*@example.com"

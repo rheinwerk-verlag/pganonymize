@@ -26,20 +26,22 @@ def anonymize_tables(connection, definitions, verbose=False):
         logging.info('Found table definition "%s"', table_name)
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
+        excludes = table_definition.get('excludes', [])
         column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
-        data, table_columns = build_data(connection, table_name, columns, total_count, verbose)
+        data, table_columns = build_data(connection, table_name, columns, excludes, total_count, verbose)
         import_data(connection, column_dict, table_name, table_columns, primary_key, data)
 
 
-def build_data(connection, table, columns, total_count, verbose=False):
+def build_data(connection, table, columns, excludes, total_count, verbose=False):
     """
     Select all data from a table and build
 
     :param connection: A database connection instance.
     :param str table: Name of the table to retrieve the data.
     :param list columns:
+    :param list[dict] excludes: A list of exclude definitions.
     :param int total_count: The amount of rows for the current table
     :param bool verbose: Display logging information and a progress bar.
     :return: A tuple containing the data list and a complete list of all table columns.
@@ -56,9 +58,11 @@ def build_data(connection, table, columns, total_count, verbose=False):
         if not records:
             break
         for row in records:
-            row_column_dict = get_column_values(row, columns)
-            for key, value in row_column_dict.items():
-                row[key] = value
+            row_column_dict = {}
+            if not row_matches_excludes(row, excludes):
+                row_column_dict = get_column_values(row, columns)
+                for key, value in row_column_dict.items():
+                    row[key] = value
             if verbose:
                 bar.next()
             table_columns = row.keys()
@@ -69,6 +73,17 @@ def build_data(connection, table, columns, total_count, verbose=False):
         bar.finish()
     cursor.close()
     return data, table_columns
+
+
+def row_matches_excludes(row, excludes=None):
+    excludes = excludes if excludes else []
+    for definition in excludes:
+        column = definition.keys()[0]
+        for exclude in definition.get(column, []):
+            pattern = re.compile(exclude, re.IGNORECASE)
+            if pattern.match(row[column]):
+                return True
+    return False
 
 
 def copy_from(connection, data, table, columns):
@@ -185,16 +200,6 @@ def get_column_dict(columns):
     return column_dict
 
 
-def value_matches_patterns(value, patterns):
-    matches = False
-    for exclude in patterns:
-        pattern = re.compile(exclude)
-        if pattern.match(value) is not None:
-            matches = True
-            break
-    return matches
-
-
 def get_column_values(row, columns):
     """
     Return a dictionary for a single data row, with altered data.
@@ -221,10 +226,6 @@ def get_column_values(row, columns):
         if not orig_value:
             # Skip the current column if there is no value to be altered
             continue
-        exclude_patterns = column_definition.get('exclude', [])
-        if exclude_patterns:
-            if value_matches_patterns(orig_value, exclude_patterns):
-                continue
         provider = get_provider(provider_config)
         value = provider.alter_value(orig_value)
         append = column_definition.get('append')
