@@ -47,7 +47,8 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
     :return: A tuple containing the data list and a complete list of all table columns.
     :rtype: (list, list)
     """
-    bar = IncrementalBar('Anonymizing', max=total_count)
+    if verbose:
+        bar = IncrementalBar('Anonymizing', max=total_count)
     sql = "SELECT * FROM {table};".format(table=table)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
