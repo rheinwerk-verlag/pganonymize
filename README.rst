@@ -1,17 +1,20 @@
 PostgreSQL Anonymizer
 =====================
 
-.. image:: https://travis-ci.org/hkage/postgresql-anonymizer.svg?branch=master
-    :target: https://travis-ci.org/hkage/postgresql-anonymizer
+.. image:: https://travis-ci.org/rheinwerk-verlag/postgresql-anonymizer.svg?branch=master
+    :target: https://travis-ci.org/rheinwerk-verlag/postgresql-anonymizer
 
 .. image:: https://img.shields.io/badge/license-MIT-green.svg
-    :target: https://github.com/hkage/postgresql-anonymizer/blob/master/LICENSE.rst
+    :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/LICENSE.rst
 
+.. image:: https://badge.fury.io/py/pganonymize.svg
+    :target: https://badge.fury.io/py/pganonymize
 
-A commandline tool to anonymize PostgreSQL databases.
 
 Installation
 ------------
+
+``pganonymize`` is Python 2 and Python 3 compatible.
 
 The default installation method is to use ``pip``::
 
@@ -60,11 +63,13 @@ be treated.
         primary_key: id
         fields:
          - first_name:
-            provider: clear
+            provider: 
+              name: clear
      - customer_email:
         fields:
          - email:
-            provider: md5
+            provider: 
+              name: md5
             append: @localhost
 
 
@@ -73,6 +78,29 @@ Providers
 
 Provider are the tools, that means functions, used to alter the data within the database.
 The following provider are currently supported:
+
+``choice``
+~~~~~~~~~~
+
+This provider will define a list of possible values for a database field and will randomly make a choice
+from this list.
+
+**Arguments:** 
+
+* ``values``: All list of values
+
+**Example usage**::
+
+    tables:
+     - auth_user:
+        fields:
+         - first_name:
+            provider: 
+              name: choice
+              values:
+                - "John"
+                - "Lisa"
+                - "Tom"
 
 ``clear``
 ~~~~~~~~~
@@ -90,7 +118,8 @@ The ``clear`` provider will set a database field to ``null``.
      - auth_user:
         fields:
          - first_name:
-            provider: clear
+            provider: 
+              name: clear
 
 
 ``fake``
@@ -114,7 +143,27 @@ the provider with ``faker`` and use the provider function from the Faker library
      - auth_user:
         fields:
          - email:
-            provider: fake.email
+            provider: 
+              name: fake.email
+
+``mask``
+~~~~~~~~
+
+This provider will replace each character with a static sign.
+
+**Arguments:** 
+
+* ``sign``: The sign to be used to replace the original characters (default ``X``).
+
+**Example usage**::
+
+    tables:
+     - auth_user:
+        fields:
+         - last_name:
+            provider: 
+              name: mask
+              sign: '?'
 
 
 ``md5``
@@ -130,7 +179,8 @@ This provider will hash the given field value with the MD5 algorithm.
      - auth_user:
         fields:
          - password:
-            provider: md5
+            provider: 
+              name: md5
 
 
 ``set``
@@ -146,8 +196,9 @@ This provider will hash the given field value with the MD5 algorithm.
      - auth_user:
         fields:
          - first_name:
-            provider: set
-            value: "Foo"
+            provider: 
+              name: set
+              value: "Foo"
 
 
 Arguments
@@ -166,7 +217,8 @@ This argument will append a value at the end of the altered value:
      - auth_user:
         fields:
          - email:
-            provider: md5
+            provider: 
+              name: md5
             append: "@example.com"
 
 Quickstart
@@ -250,9 +302,8 @@ TODOs
 -----
 * Add tests
 * Add exceptions for certain field values
-* Make the providers more pluggable (e.g. as own classes with a unqiue character id)
 * Add option to create a database dump
-* Add ``choice`` provider to randomly choice from a list of values
+* Add a commandline argument to list all available providers
 
 
 .. _Faker: https://faker.readthedocs.io/en/master/providers.html
