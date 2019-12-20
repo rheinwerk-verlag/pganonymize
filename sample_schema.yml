@@ -3,11 +3,13 @@ tables:
     primary_key: id
     fields:
      - first_name:
-        provider: set
-        value: "Foo"
+        provider: 
+          name: fake.first_name
      - last_name:
-        provider: set
-        value: "Bar"
+        provider:
+          name: set
+          value: "Bar"
      - email:
-        provider: md5
+        provider: 
+          name: md5
         append: "@localhost"

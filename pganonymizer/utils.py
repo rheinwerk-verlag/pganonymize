@@ -1,18 +1,15 @@
 import csv
 import logging
 from cStringIO import StringIO
-from hashlib import md5
 
 import psycopg2
 import psycopg2.extras
-from faker import Faker
 from progress.bar import IncrementalBar
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 
 from pganonymizer.constants import COPY_DB_DELIMITER, DATABASE_ARGS, DEFAULT_PRIMARY_KEY
-from pganonymizer.exceptions import BadDataFormat, InvalidFieldProvider
-
-fake_data = Faker()
+from pganonymizer.exceptions import BadDataFormat
+from pganonymizer.providers import get_provider
 
 
 def anonymize_tables(connection, definitions, verbose=False):
@@ -208,23 +205,13 @@ def get_column_values(row, columns):
     for definition in columns:
         column_name = definition.keys()[0]
         column_definition = definition[column_name]
-        provider = column_definition.get('provider')
+        provider_config = column_definition.get('provider')
         orig_value = row.get(column_name)
         if not orig_value:
             # Skip the current column if there is no value to be altered
             continue
-        if provider.startswith('fake'):
-            func_name = provider.split('.')[1]
-            func = getattr(fake_data, func_name)
-            value = func()
-        elif provider == 'md5':
-            value = md5(orig_value).hexdigest()
-        elif provider == 'clear':
-            value = None
-        elif provider == 'set':
-            value = column_definition.get('value')
-        else:
-            raise InvalidFieldProvider('Unknown provider for field {}: {}'.format(column_name, provider))
+        provider = get_provider(provider_config)
+        value = provider.alter_value(orig_value)
         append = column_definition.get('append')
         if append:
             value = value + append
