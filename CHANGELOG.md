@@ -2,6 +2,8 @@
 
 ## Development
 
+## 0.2.0 (2019-12-20)
+
 * Added provider classes
 * Added new providers:
   * choice - returns a random list element
