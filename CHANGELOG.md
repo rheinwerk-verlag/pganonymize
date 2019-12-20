@@ -2,6 +2,8 @@
 
 ## Development
 
+* Hide the progressbar completely if verbose is set to ``False``
+
 ## 0.2.1 (2019-12-20)
 
 * Added field based, regular expression excludes (to skip data under certain conditions).
