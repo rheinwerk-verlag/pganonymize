@@ -52,6 +52,7 @@ class TestMaskProvider:
         provider = providers.MaskProvider(sign=sign)
         assert provider.alter_value(value) == expected
 
+
 class TestMD5Provider:
 
     def test_alter_value(self):
