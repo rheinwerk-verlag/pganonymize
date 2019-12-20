@@ -1,5 +1,6 @@
 import csv
 import logging
+import re
 from cStringIO import StringIO
 
 import psycopg2
@@ -25,20 +26,22 @@ def anonymize_tables(connection, definitions, verbose=False):
         logging.info('Found table definition "%s"', table_name)
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
+        excludes = table_definition.get('excludes', [])
         column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
-        data, table_columns = build_data(connection, table_name, columns, total_count, verbose)
+        data, table_columns = build_data(connection, table_name, columns, excludes, total_count, verbose)
         import_data(connection, column_dict, table_name, table_columns, primary_key, data)
 
 
-def build_data(connection, table, columns, total_count, verbose=False):
+def build_data(connection, table, columns, excludes, total_count, verbose=False):
     """
     Select all data from a table and build
 
     :param connection: A database connection instance.
     :param str table: Name of the table to retrieve the data.
     :param list columns:
+    :param list[dict] excludes: A list of exclude definitions.
     :param int total_count: The amount of rows for the current table
     :param bool verbose: Display logging information and a progress bar.
     :return: A tuple containing the data list and a complete list of all table columns.
@@ -55,9 +58,11 @@ def build_data(connection, table, columns, total_count, verbose=False):
         if not records:
             break
         for row in records:
-            row_column_dict = get_column_values(row, columns)
-            for key, value in row_column_dict.items():
-                row[key] = value
+            row_column_dict = {}
+            if not row_matches_excludes(row, excludes):
+                row_column_dict = get_column_values(row, columns)
+                for key, value in row_column_dict.items():
+                    row[key] = value
             if verbose:
                 bar.next()
             table_columns = row.keys()
@@ -68,6 +73,30 @@ def build_data(connection, table, columns, total_count, verbose=False):
         bar.finish()
     cursor.close()
     return data, table_columns
+
+
+def row_matches_excludes(row, excludes=None):
+    """
+    Check whether a row matches a list of field exclusion patterns.
+
+    :param list row: The data row
+    :param list excludes: A list of field exclusion roles, e.g.:
+
+        [
+            {'email': ['\\S.*@example.com', '\\S.*@foobar.com', ]}
+        ]
+
+    :return: True or False
+    :rtype: bool
+    """
+    excludes = excludes if excludes else []
+    for definition in excludes:
+        column = definition.keys()[0]
+        for exclude in definition.get(column, []):
+            pattern = re.compile(exclude, re.IGNORECASE)
+            if pattern.match(row[column]):
+                return True
+    return False
 
 
 def copy_from(connection, data, table, columns):
