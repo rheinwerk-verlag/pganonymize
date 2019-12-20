@@ -76,6 +76,19 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
 
 
 def row_matches_excludes(row, excludes=None):
+    """
+    Check whether a row matches a list of field exclusion patterns.
+
+    :param list row: The data row
+    :param list excludes: A list of field exclusion roles, e.g.:
+
+        [
+            {'email': ['\\S.*@example.com', '\\S.*@foobar.com', ]}
+        ]
+
+    :return: True or False
+    :rtype: bool
+    """
     excludes = excludes if excludes else []
     for definition in excludes:
         column = definition.keys()[0]
