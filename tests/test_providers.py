@@ -42,6 +42,16 @@ class TestFakeProvider:
             provider.alter_value('Foo')
 
 
+class TestMaskProvider:
+
+    @pytest.mark.parametrize('value, sign, expected', [
+        ('Foo', None, 'XXX'),
+        ('Baaaar', '?', '??????'),
+    ])
+    def test_alter_value(self, value, sign, expected):
+        provider = providers.MaskProvider(sign=sign)
+        assert provider.alter_value(value) == expected
+
 class TestMD5Provider:
 
     def test_alter_value(self):
