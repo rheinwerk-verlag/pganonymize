@@ -72,6 +72,25 @@ be treated.
               name: md5
             append: @localhost
 
+For each table you can also specify a list of ``excludes``. Each entry has to be a field name which contains
+a list of exclude patterns. If one of these patterns matches, the whole table row won't ne anonymized.
+
+**Example:**::
+
+    tables:
+     - auth_user:
+        primary_key: id
+        fields:
+         - first_name:
+            provider: 
+              name: clear
+        excludes:
+         - email:
+           - "\\S.*@example.com"
+
+This will exclude all data from the table ``auth_user`` that have an ``email`` field which matches the
+regular expression pattern ``\S.*@example.com`` (the backslash is to escape the string for YAML).
+
 
 Providers
 ---------
@@ -300,8 +319,7 @@ the ``BROWSER`` make variable, e.g.::
 
 TODOs
 -----
-* Add tests
-* Add exceptions for certain field values
+* Add more tests
 * Add option to create a database dump
 * Add a commandline argument to list all available providers
 
