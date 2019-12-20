@@ -2,6 +2,8 @@
 
 ## Development
 
+* Added regular expression field excludes (to skip data under certain conditions)
+
 ## 0.2.0 (2019-12-20)
 
 * Added provider classes

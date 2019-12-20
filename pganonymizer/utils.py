@@ -1,5 +1,6 @@
 import csv
 import logging
+import re
 from cStringIO import StringIO
 
 import psycopg2
@@ -184,6 +185,16 @@ def get_column_dict(columns):
     return column_dict
 
 
+def value_matches_patterns(value, patterns):
+    matches = False
+    for exclude in patterns:
+        pattern = re.compile(exclude)
+        if pattern.match(value) is not None:
+            matches = True
+            break
+    return matches
+
+
 def get_column_values(row, columns):
     """
     Return a dictionary for a single data row, with altered data.
@@ -210,6 +221,10 @@ def get_column_values(row, columns):
         if not orig_value:
             # Skip the current column if there is no value to be altered
             continue
+        exclude_patterns = column_definition.get('exclude', [])
+        if exclude_patterns:
+            if value_matches_patterns(orig_value, exclude_patterns):
+                continue
         provider = get_provider(provider_config)
         value = provider.alter_value(orig_value)
         append = column_definition.get('append')
