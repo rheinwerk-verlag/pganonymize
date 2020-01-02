@@ -1,15 +1,16 @@
 PostgreSQL Anonymizer
 =====================
 
-.. image:: https://travis-ci.org/rheinwerk-verlag/postgresql-anonymizer.svg?branch=master
-    :target: https://travis-ci.org/rheinwerk-verlag/postgresql-anonymizer
-
 .. image:: https://img.shields.io/badge/license-MIT-green.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/LICENSE.rst
 
 .. image:: https://badge.fury.io/py/pganonymize.svg
     :target: https://badge.fury.io/py/pganonymize
 
+
+This commandline tool makes PostgreSQL database anonymization easy. It uses a YAML definition file
+to define which tables and fields should be anonymized and provides various methods of anonymization
+(e.g. masking, faking or truncating complete tables). 
 
 Installation
 ------------
@@ -319,6 +320,7 @@ the ``BROWSER`` make variable, e.g.::
 
 TODOs
 -----
+* Better schema validation / error handling
 * Add more tests
 * Add option to create a database dump
 * Add a commandline argument to list all available providers

@@ -2,6 +2,11 @@
 
 ## Development
 
+## 0.2.3 (2020-01-02)
+
+* Fixed the wrong cStringIO import for Python 3
+* Removed Travis-CI file in favor of the Github actions
+
 ## 0.2.2 (2020-01-02)
 
 * Hide the progressbar completely if verbose is set to ``False``
