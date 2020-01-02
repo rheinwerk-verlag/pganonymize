@@ -148,7 +148,7 @@ The ``clear`` provider will set a database field to ``null``.
 **Arguments:** none
 
 ``pganonymize`` supports all providers from the Python library Faker_. All you have to do is prefix
-the provider with ``faker`` and use the provider function from the Faker library, e.g:
+the provider with ``fake`` and then use the function name from the Faker library, e.g:
 
 * ``fake.first_name``
 * ``fake.street_name``
