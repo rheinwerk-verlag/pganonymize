@@ -1,6 +1,5 @@
 -r test.in
 
-attrs==19.1.0              # Pin to a version prior to 19.2.0 as it breaks pytest 3.x
 coverage==4.5.1
 ipdb==0.12.3
 ipython==5.8.0
