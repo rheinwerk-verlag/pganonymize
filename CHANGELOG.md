@@ -2,6 +2,8 @@
 
 ## Development
 
+## 0.2.3 (2020-01-02)
+
 * Fixed the wrong cStringIO import for Python 3
 * Removed Travis-CI file in favor of the Github actions
 
