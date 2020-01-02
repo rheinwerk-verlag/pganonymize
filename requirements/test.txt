@@ -18,7 +18,7 @@ execnet==1.7.1            # via pytest-cache
 faker==3.0.0
 flake8==3.7.9
 funcsigs==1.0.2           # via mock, pytest
-functools32==3.2.3.post2  # via flake8
+functools32==3.2.3.post2 ; python_version == "2.7"
 ipaddress==1.0.23         # via faker
 mccabe==0.6.1             # via flake8
 mock==2.0.0
