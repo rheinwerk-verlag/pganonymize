@@ -129,7 +129,7 @@ from this list.
 The ``clear`` provider will set a database field to ``null``.
 
 .. note::
-   But remember, that you can set fields to ``null`` only if the database field is not nullable.
+   But remember, that you can set fields to ``null`` only if the database field allows null values.
 
 **Example usage**::
 
