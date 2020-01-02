@@ -2,6 +2,8 @@
 
 ## Development
 
+* Fixed the wrong cStringIO import for Python 3
+
 ## 0.2.2 (2020-01-02)
 
 * Hide the progressbar completely if verbose is set to ``False``

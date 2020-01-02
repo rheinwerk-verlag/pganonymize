@@ -1,12 +1,12 @@
 import csv
 import logging
 import re
-from cStringIO import StringIO
 
 import psycopg2
 import psycopg2.extras
 from progress.bar import IncrementalBar
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
+from six import StringIO
 
 from pganonymizer.constants import COPY_DB_DELIMITER, DATABASE_ARGS, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import BadDataFormat
