@@ -3,6 +3,7 @@
 ## Development
 
 * Hide the progressbar completely if verbose is set to ``False``
+* Restructured the requirement files and added flake8 to Travis CI
 
 ## 0.2.1 (2019-12-20)
 

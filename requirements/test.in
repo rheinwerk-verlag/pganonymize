@@ -1,0 +1,9 @@
+-r base.in
+
+flake8==3.5.0
+mock==2.0.0
+more-itertools==5.0.0      # Version 5 is the last one to support Python 2.7
+pytest==3.6.2
+pytest-pep8==1.0.6
+pytest-cov==2.5.1
+pytest-pythonpath==0.7.2

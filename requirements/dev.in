@@ -1,8 +1,14 @@
--r tox.in
+-r test.in
 
+attrs==19.1.0              # Pin to a version prior to 19.2.0 as it breaks pytest 3.x
+coverage==4.5.1
 ipdb==0.12.3
 ipython==5.8.0
+isort==4.3.4
+pep8==1.7.1
 pip-tools==1.11.0
+pydocstyle==2.1.1
+pylint==1.8.2
 Jinja2>=2.10.1
 recommonmark==0.4.0
 requests>=2.20.0
