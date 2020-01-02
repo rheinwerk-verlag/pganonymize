@@ -2,6 +2,11 @@
 
 ## Development
 
+## 0.2.2 (2020-01-02)
+
+* Hide the progressbar completely if verbose is set to ``False``
+* Restructured the requirement files and added flake8 to Travis CI
+
 ## 0.2.1 (2019-12-20)
 
 * Added field based, regular expression excludes (to skip data under certain conditions).

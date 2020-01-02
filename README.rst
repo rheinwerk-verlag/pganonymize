@@ -75,7 +75,7 @@ be treated.
 For each table you can also specify a list of ``excludes``. Each entry has to be a field name which contains
 a list of exclude patterns. If one of these patterns matches, the whole table row won't ne anonymized.
 
-**Example:**::
+**Example**::
 
     tables:
      - auth_user:
@@ -95,7 +95,7 @@ regular expression pattern ``\S.*@example.com`` (the backslash is to escape the 
 Providers
 ---------
 
-Provider are the tools, that means functions, used to alter the data within the database.
+Providers are the tools, which means functions, used to alter the data within the database.
 The following provider are currently supported:
 
 ``choice``
@@ -129,7 +129,7 @@ from this list.
 The ``clear`` provider will set a database field to ``null``.
 
 .. note::
-   But remember, that you can set fields to ``null`` only if the database field is not nullable.
+   But remember, that you can set fields to ``null`` only if the database field allows null values.
 
 **Example usage**::
 

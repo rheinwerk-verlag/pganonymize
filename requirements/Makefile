@@ -1,16 +1,16 @@
 REQUIREMENTS_SOURCES := $(wildcard *.in)
 REQUIREMENTS := $(REQUIREMENTS_SOURCES:.in=.txt)
-PIP_INDEX_URL ?= https://devpi.intern.rheinwerk.de/rheinwerk/prod/+simple
 
 all: $(REQUIREMENTS)
 
-dev.txt: tox.txt
+dev.txt: base.txt
+
+production.txt: base.txt
 
 %.txt: %.in
 	pip-compile \
 	    --verbose \
 	    --rebuild \
-	    --index-url=$(PIP_INDEX_URL) \
 	    --output-file=$@ $<
 	sed -i -e 's|^--|#--|' $@
 

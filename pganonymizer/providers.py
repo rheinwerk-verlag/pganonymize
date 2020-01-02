@@ -105,7 +105,7 @@ class MaskProvider(with_metaclass(ProviderMeta, Provider)):
     def alter_value(self, value):
         sign = self.kwargs.get('sign', self.default_sign) or self.default_sign
         return sign * len(value)
-        
+
 
 class MD5Provider(with_metaclass(ProviderMeta, Provider)):
     """Provider to hash a value with the md5 algorithm."""
