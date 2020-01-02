@@ -319,6 +319,7 @@ the ``BROWSER`` make variable, e.g.::
 
 TODOs
 -----
+* Better schema validation / error handling
 * Add more tests
 * Add option to create a database dump
 * Add a commandline argument to list all available providers
