@@ -11,6 +11,10 @@ PostgreSQL Anonymizer
     :target: https://badge.fury.io/py/pganonymize
 
 
+This commandline tool makes PostgreSQL database anonymization easy. It uses a YAML definition file
+to define which tables and fields should be anonymized and provides various methods of anonymization
+(e.g. masking, faking or truncating complete tables). 
+
 Installation
 ------------
 
