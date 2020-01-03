@@ -9,5 +9,6 @@ exclude =
     .tox
     .git
     .eggs
+    .venv
     .vscode
     .github
