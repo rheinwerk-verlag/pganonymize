@@ -22,7 +22,7 @@ def anonymize_tables(connection, definitions, verbose=False):
     :param bool verbose: Display logging information and a progress bar.
     """
     for definition in definitions:
-        table_name = definition.keys()[0]
+        table_name = list(definition.keys())[0]
         logging.info('Found table definition "%s"', table_name)
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
@@ -92,7 +92,7 @@ def row_matches_excludes(row, excludes=None):
     """
     excludes = excludes if excludes else []
     for definition in excludes:
-        column = definition.keys()[0]
+        column = list(definition.keys())[0]
         for exclude in definition.get(column, []):
             pattern = re.compile(exclude, re.IGNORECASE)
             if pattern.match(row[column]):
@@ -209,7 +209,7 @@ def get_column_dict(columns):
     """
     column_dict = {}
     for definition in columns:
-        column_name = definition.keys()[0]
+        column_name = list(definition.keys())[0]
         column_dict[column_name] = None
     return column_dict
 
@@ -233,7 +233,7 @@ def get_column_values(row, columns):
     """
     column_dict = {}
     for definition in columns:
-        column_name = definition.keys()[0]
+        column_name = list(definition.keys())[0]
         column_definition = definition[column_name]
         provider_config = column_definition.get('provider')
         orig_value = row.get(column_name)

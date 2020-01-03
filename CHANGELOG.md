@@ -2,6 +2,10 @@
 
 ## Development
 
+## 0.2.4 (2020-01-03)
+
+* Fixed several issues with the usage of ``dict.keys`` and Python 3
+
 ## 0.2.3 (2020-01-02)
 
 * Fixed the wrong cStringIO import for Python 3
