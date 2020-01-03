@@ -19,7 +19,7 @@
 ## 0.2.1 (2019-12-20)
 
 * Added field based, regular expression excludes (to skip data under certain conditions).
-  Currently only regular expressions are supported and the exlusion affects the whole row,
+  Currently only regular expressions are supported and the exclusion affects the whole row,
   not just one single column.
 
 ## 0.2.0 (2019-12-20)

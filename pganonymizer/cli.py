@@ -17,7 +17,7 @@ def main():
     parser.add_argument('--password', default='', help='Password for the database user')
     parser.add_argument('--host', help='Database hostname', default='localhost')
     parser.add_argument('--port', help='Port of the database', default='5432')
-    parser.add_argument('--dry-run', action='store_true', help='Dont commit changes made on the database',
+    parser.add_argument('--dry-run', action='store_true', help='Don\'t commit changes made on the database',
                         default=False)
     args = parser.parse_args()
     loglevel = logging.WARNING
@@ -37,7 +37,7 @@ def main():
     connection.close()
 
     end_time = time.time()
-    logging.info('Anonymization took {:.2f}s.'.format(end_time - start_time))
+    logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
 
 
 if __name__ == '__main__':

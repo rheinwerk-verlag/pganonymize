@@ -87,10 +87,10 @@ a list of exclude patterns. If one of these patterns matches, the whole table ro
               name: clear
         excludes:
          - email:
-           - "\\S.*@example.com"
+           - "\\S[^@]*@example.com"
 
 This will exclude all data from the table ``auth_user`` that have an ``email`` field which matches the
-regular expression pattern ``\S.*@example.com`` (the backslash is to escape the string for YAML).
+regular expression pattern ``\S[^@]*@example.com`` (the backslash is to escape the string for YAML).
 
 
 Providers
@@ -246,7 +246,7 @@ Quickstart
 
 Clone repo::
 
-    $ git clone git@github.com:hkage/postgresql-anonymizer.git
+    $ git clone git@github.com:rheinwerk-verlag/postgresql-anonymizer.git
     $ cd postgresql-anonymizer
 
 Install tox, either system-wide via your distribution's package manager,
