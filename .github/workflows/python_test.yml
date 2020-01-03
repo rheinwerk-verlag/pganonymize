@@ -1,6 +1,6 @@
 name: Test
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -17,13 +17,25 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Install and set up Poetry
+      run: |
+        python get-poetry.py --preview -y
+        source $HOME/.poetry/env
+        poetry config virtualenvs.in-project true
+    - name: Set up cache
+      uses: actions/cache@v1
+      with:
+        path: .venv
+        key: ${{ runner.os }}-venv-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements/test.txt
-    - name: Lint with flake8
-      run: |
-        make flake8
+        source $HOME/.poetry/env
+        poetry install
     - name: Test with pytest
       run: |
-        pytest
+        source $HOME/.poetry/env
+        poetry run pytest -q tests
+    - name: Lint with flake8
+      run: |
+        source $HOME/.poetry/env
+        make flake8
