@@ -35,7 +35,3 @@ jobs:
       run: |
         source $HOME/.poetry/env
         poetry run pytest -q tests
-    - name: Lint with flake8
-      run: |
-        source $HOME/.poetry/env
-        make flake8
