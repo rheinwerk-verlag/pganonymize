@@ -59,3 +59,6 @@ install: clean ## install the package to the active Python's site-packages
 
 test:
 	@poetry run pytest --cov=poetry --cov-config .coveragerc tests/ -sq
+
+test-all: ## run tests on every Python version with tox
+	@tox
