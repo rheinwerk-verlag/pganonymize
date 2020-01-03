@@ -27,6 +27,7 @@ pytest-cov = "^2.8.1"
 pytest-pythonpath = "^0.7.3"
 ipdb = "^0.12.3"
 isort = "^4.3.21"
+wheel = "^0.33.6"
 
 [build-system]
 requires = ["poetry>=0.12"]

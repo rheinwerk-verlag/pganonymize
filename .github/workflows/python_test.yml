@@ -3,8 +3,8 @@ name: Test
 on: [push, pull_request]
 
 jobs:
-  build:
-
+  
+  testing:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
