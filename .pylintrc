@@ -1,0 +1,5 @@
+[MESSAGES CONTROL]
+# disable:
+# C0301: "Line too long", because it's already check by flake8
+# I0011: "Locally disabling ...", because it was disabled for a reason
+disable=C0301,I0011

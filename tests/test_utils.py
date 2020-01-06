@@ -1,6 +1,6 @@
-from mock import patch, Mock
+from mock import call, patch, Mock
 
-from pganonymizer.utils import get_connection
+from pganonymizer.utils import get_connection, truncate_tables
 
 
 class TestGetConnection:
@@ -18,3 +18,17 @@ class TestGetConnection:
         mock_args.configure_mock(**connection_data)
         get_connection(mock_args)
         mock_connect.assert_called_once_with(**connection_data)
+
+
+class TestTruncateTables:
+
+    def test(self):
+        mock_cursor = Mock()
+        connection = Mock()
+        connection.cursor.return_value = mock_cursor
+        truncate_tables(connection, ['table_a', 'table_b'])
+        assert mock_cursor.execute.call_args_list == [
+            call('TRUNCATE TABLE table_a;'),
+            call('TRUNCATE TABLE table_b;')
+        ]
+        mock_cursor.close.assert_called_once()
