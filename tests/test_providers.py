@@ -12,14 +12,14 @@ class TestChoiceProvider:
         choices = ['Foo', 'Bar', 'Baz']
         provider = providers.ChoiceProvider(values=choices)
         for choice in choices:
-            assert provider.alter_value('Foo') in choices
+            assert provider.alter_value(choice) in choices
 
 
 class TestClearProvider:
 
     def test_alter_value(self):
         provider = providers.ClearProvider()
-        provider.alter_value('Foo') is None
+        assert provider.alter_value('Foo') is None
 
 
 class TestFakeProvider:

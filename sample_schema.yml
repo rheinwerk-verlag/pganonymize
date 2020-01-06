@@ -3,16 +3,16 @@ tables:
     primary_key: id
     fields:
      - first_name:
-        provider: 
+        provider:
           name: fake.first_name
      - last_name:
         provider:
           name: set
           value: "Bar"
      - email:
-        provider: 
+        provider:
           name: md5
         append: "@localhost"
     excludes:
       - email:
-        - "\\S.*@example.com"
+        - "\\S[^@]*@example\\.com"

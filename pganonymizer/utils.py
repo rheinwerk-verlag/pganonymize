@@ -36,11 +36,11 @@ def anonymize_tables(connection, definitions, verbose=False):
 
 def build_data(connection, table, columns, excludes, total_count, verbose=False):
     """
-    Select all data from a table and build
+    Select all data from a table and return it together with a list of table columns.
 
     :param connection: A database connection instance.
     :param str table: Name of the table to retrieve the data.
-    :param list columns:
+    :param list columns: A list of table fields
     :param list[dict] excludes: A list of exclude definitions.
     :param int total_count: The amount of rows for the current table
     :param bool verbose: Display logging information and a progress bar.
@@ -82,11 +82,9 @@ def row_matches_excludes(row, excludes=None):
 
     :param list row: The data row
     :param list excludes: A list of field exclusion roles, e.g.:
-
         [
             {'email': ['\\S.*@example.com', '\\S.*@foobar.com', ]}
         ]
-
     :return: True or False
     :rtype: bool
     """
@@ -124,7 +122,8 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
     Import the temporary and anonymized data to a temporary table and write the changes back.
 
     :param connection: A database connection instance.
-    :param dict column_dict:
+    :param dict column_dict: A dictionary with all columns (specified by the schema definition) and a default value of
+      None.
     :param str source_table: Name of the table to be anonymized.
     :param list table_columns: A list of all table columns.
     :param str primary_key: Name of the tables primary key.
@@ -139,7 +138,7 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
         'UPDATE {table} t '
         'SET {columns} '
         'FROM source s '
-        'WHERE t.{primary_key} = s.{primary_key}'
+        'WHERE t.{primary_key} = s.{primary_key};'
     ).format(table=source_table, primary_key=primary_key, columns=set_columns)
     cursor.execute(sql)
     cursor.execute('DROP TABLE source;')
@@ -150,8 +149,8 @@ def get_connection(args):
     """
     Return a connection to the database.
 
-    :param args:
-    :return: Connection instance
+    :param argparse.Namespace args: The parsed commandline arguments
+    :return: A psycopg connection instance
     :rtype: psycopg2.connection
     """
     pg_args = ({name: value for name, value in
@@ -196,15 +195,12 @@ def get_column_dict(columns):
     Return a dictionary with all fields from the table definition and None as value.
 
     :param list columns: A list of field definitions from the YAML schema, e.g.:
-
         [
             {'first_name': {'provider': 'set', 'value': 'Foo'}},
             {'guest_email': {'append': '@localhost', 'provider': 'md5'}},
         ]
-    :return: A dictionary containing all fields to be altered with a default value of None, e.g.:
-
+    :return: A dictionary containing all fields to be altered with a default value of None, e.g.::
         {'guest_email': None}
-
     :rtype: dict
     """
     column_dict = {}
@@ -220,15 +216,11 @@ def get_column_values(row, columns):
 
     :param psycopg2.extras.DictRow row: A data row from the current table to be altered
     :param list columns: A list of table columns with their provider rules, e.g.:
-
         [
             {'guest_email': {'append': '@localhost', 'provider': 'md5'}}
         ]
-
     :return: A dictionary with all fields that have to be altered and their value for a single data row, e.g.:
-
         {'guest_email': '12faf5a9bb6f6f067608dca3027c8fcb@localhost'}
-
     :rtype: dict
     """
     column_dict = {}
@@ -259,5 +251,5 @@ def truncate_tables(connection, tables):
     cursor = connection.cursor()
     for table_name in tables:
         logging.info('Truncating table "%s"', table_name)
-        cursor.execute('TRUNCATE TABLE {table}'.format(table=table_name))
+        cursor.execute('TRUNCATE TABLE {table};'.format(table=table_name))
     cursor.close()
