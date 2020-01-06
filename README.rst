@@ -87,10 +87,10 @@ a list of exclude patterns. If one of these patterns matches, the whole table ro
               name: clear
         excludes:
          - email:
-           - "\\S[^@]*@example.com"
+           - "\\S[^@]*@example\\.com"
 
 This will exclude all data from the table ``auth_user`` that have an ``email`` field which matches the
-regular expression pattern ``\S[^@]*@example.com`` (the backslash is to escape the string for YAML).
+regular expression pattern (the backslash is to escape the string for YAML).
 
 
 Providers
