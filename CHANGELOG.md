@@ -2,6 +2,8 @@
 
 ## Development
 
+* Use [python-poetry](https://github.com/python-poetry/poetry) for requirements management
+
 ## 0.2.4 (2020-01-03)
 
 * Fixed several issues with the usage of ``dict.keys`` and Python 3

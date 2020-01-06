@@ -1,0 +1,14 @@
+[flake8]
+max-line-length = 120
+ignore = E731,W504
+exclude = 
+    dist
+    docs
+    setup.py
+    get-poetry.py
+    .tox
+    .git
+    .eggs
+    .venv
+    .vscode
+    .github
