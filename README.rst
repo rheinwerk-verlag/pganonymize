@@ -249,27 +249,36 @@ Clone repo::
     $ git clone git@github.com:rheinwerk-verlag/postgresql-anonymizer.git
     $ cd postgresql-anonymizer
 
-Install tox, either system-wide via your distribution's package manager,
+For making changes and developing pganonymizer, you need to install ``poetry``::
+
+    $ sudo pip install poetry
+
+Now you cann install all requirements and activate the virtualenv::
+
+    $ poetry install
+    $ poetry shell
+
+For testing you have to install tox, either system-wide via your distribution's package manager,
 e.g. on debian/Ubuntu with::
 
     $ sudo apt-get install python-tox
 
-... or create a virtualenv and install tox into it::
+or via pip::
 
-    $ mkvirtualenv postgresql-anonymizer
-    (postgresql-anonymizer)$ pip install tox
-
-Run the tests with the default Python version::
-
-    $ py.test -v tests/
-
-or::
-
-    $ make test
+    $ sudo pip install tox
 
 Run the tests via tox for all Python versions configured in ``tox.ini``::
 
     $ tox
+
+If you want to test only against your default Python version, just run::
+
+    $ make test
+
+or activate the virtualenv and run::
+
+    $ poetry shell
+    $ pytest -v
 
 To see all available make target just run ``make`` without arguments.
 
