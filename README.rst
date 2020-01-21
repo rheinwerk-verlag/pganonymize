@@ -348,5 +348,5 @@ TODOs
     :target: https://pepy.tech/project/pganonymize
     :alt: Download count
 
-.. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Build/badge.svg
+.. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Test/badge.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/actions
