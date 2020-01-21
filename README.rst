@@ -7,7 +7,7 @@ to define which tables and fields should be anonymized and provides various meth
 
 .. class:: no-web no-pdf
 
-    |license| |pypi| |downloads|
+    |license| |pypi| |downloads| |build|
 
 .. contents::
 
@@ -347,3 +347,6 @@ TODOs
 .. |downloads| image:: https://pepy.tech/badge/pganonymize
     :target: https://pepy.tech/project/pganonymize
     :alt: Download count
+
+.. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Build/badge.svg
+    :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/actions
