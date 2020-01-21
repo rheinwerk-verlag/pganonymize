@@ -3,6 +3,7 @@
 ## Development
 
 * Use [python-poetry](https://github.com/python-poetry/poetry) for requirements management
+* Added commandline argument to list all available providers (#4)
 
 ## 0.2.4 (2020-01-03)
 
