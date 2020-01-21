@@ -5,7 +5,7 @@ This commandline tool makes PostgreSQL database anonymization easy. It uses a YA
 to define which tables and fields should be anonymized and provides various methods of anonymization
 (e.g. masking, faking or truncating complete tables).
 
-. class:: no-web no-pdf
+.. class:: no-web no-pdf
 
     |license| |pypi| |downloads|
 
