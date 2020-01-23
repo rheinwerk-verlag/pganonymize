@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import csv
 import logging
 import re
@@ -112,8 +114,8 @@ def copy_from(connection, data, table, columns):
     cursor = connection.cursor()
     try:
         cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N', columns=columns)
-    except (BadCopyFileFormat, InvalidTextRepresentation) as e:
-        raise BadDataFormat(e)
+    except (BadCopyFileFormat, InvalidTextRepresentation) as exc:
+        raise BadDataFormat(exc)
     cursor.close()
 
 

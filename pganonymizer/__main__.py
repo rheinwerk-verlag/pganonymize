@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 
 import sys
 
@@ -6,7 +7,8 @@ import sys
 def main():
     from pganonymizer.cli import main
     try:
-        exit_status = main()
+        main()
+        exit_status = 0
     except KeyboardInterrupt:
         exit_status = 1
     sys.exit(exit_status)

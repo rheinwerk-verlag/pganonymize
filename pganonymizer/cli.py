@@ -1,5 +1,8 @@
+from __future__ import absolute_import
+
 import argparse
 import logging
+import sys
 import time
 
 import yaml
@@ -12,7 +15,7 @@ from pganonymizer.utils import anonymize_tables, get_connection, truncate_tables
 def main():
     parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
     parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
-    parser.add_argument('--list-providers', action='store_true', help='Show a list of all available providers',
+    parser.add_argument('-l', '--list-providers', action='store_true', help='Show a list of all available providers',
                         default=False)
     parser.add_argument('--schema', help='A YAML file that contains the anonymization rules',
                         default=DEFAULT_SCHEMA_FILE)
@@ -34,6 +37,7 @@ def main():
         print('Available provider classes:\n')
         for provider_cls in PROVIDERS:
             print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
+        sys.exit(0)
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
     connection = get_connection(args)
