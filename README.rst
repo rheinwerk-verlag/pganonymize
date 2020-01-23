@@ -27,7 +27,7 @@ Usage
 
 ::
 
-    usage: __main__.py [-h] [-v] [-l] [--schema SCHEMA] [--dbname DBNAME]
+    usage: pganonymize [-h] [-v] [-l] [--schema SCHEMA] [--dbname DBNAME]
                        [--user USER] [--password PASSWORD] [--host HOST]
                        [--port PORT] [--dry-run]
 
