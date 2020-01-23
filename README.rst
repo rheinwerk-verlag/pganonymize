@@ -27,22 +27,25 @@ Usage
 
 ::
 
-    usage: pganonymize [-h] [-v] --schema SCHEMA [--dbname DBNAME] [--user USER]
-              [--password PASSWORD] [--host HOST] [--port PORT] [--dry-run]
+    usage: __main__.py [-h] [-v] [-l] [--schema SCHEMA] [--dbname DBNAME]
+                       [--user USER] [--password PASSWORD] [--host HOST]
+                       [--port PORT] [--dry-run]
 
     Anonymize data of a PostgreSQL database
 
     optional arguments:
-    -h, --help           show this help message and exit
-    -v, --verbose        Increase verbosity
-    --schema SCHEMA      A YAML file that contains the anonymization rules
-    --dbname DBNAME      Name of the database
-    --user USER          Name of the database user
-    --password PASSWORD  Password for the database user
-    --host HOST          Database hostname
-    --port PORT          Port of the database
-    --dry-run            Dont commit changes made on the database
-
+      -h, --help            show this help message and exit
+      -v, --verbose         Increase verbosity
+      -l, --list-providers  Show a list of all available providers
+      --schema SCHEMA       A YAML schema file that contains the anonymization
+                            rules
+      --dbname DBNAME       Name of the database
+      --user USER           Name of the database user
+      --password PASSWORD   Password for the database user
+      --host HOST           Database hostname
+      --port PORT           Port of the database
+      --dry-run             Don't commit changes made on the database
+      
 Schema definition
 -----------------
 
