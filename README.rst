@@ -45,6 +45,15 @@ Usage
       --host HOST           Database hostname
       --port PORT           Port of the database
       --dry-run             Don't commit changes made on the database
+
+Example call::
+
+    $ pganonymize --schema=myschema.yml \
+        --dbname=test_database \
+        --user=username \
+        --password=mysecret \
+        --host=db.host.example.com \
+        -v
       
 Schema definition
 -----------------
