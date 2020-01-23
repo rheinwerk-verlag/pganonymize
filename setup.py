@@ -93,7 +93,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'pganonymize=pganonymizer.cli:main'
+            'pganonymize = pganonymizer.__main__:main'
         ]
     }
 )

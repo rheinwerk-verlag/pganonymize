@@ -1,16 +1,17 @@
 PostgreSQL Anonymizer
 =====================
 
-.. image:: https://img.shields.io/badge/license-MIT-green.svg
-    :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/LICENSE.rst
-
-.. image:: https://badge.fury.io/py/pganonymize.svg
-    :target: https://badge.fury.io/py/pganonymize
-
-
 This commandline tool makes PostgreSQL database anonymization easy. It uses a YAML definition file
 to define which tables and fields should be anonymized and provides various methods of anonymization
-(e.g. masking, faking or truncating complete tables). 
+(e.g. masking, faking or truncating complete tables).
+
+.. class:: no-web no-pdf
+
+    |license| |pypi| |downloads| |build|
+
+.. contents::
+
+.. section-numbering::
 
 Installation
 ------------
@@ -64,12 +65,12 @@ be treated.
         primary_key: id
         fields:
          - first_name:
-            provider: 
+            provider:
               name: clear
      - customer_email:
         fields:
          - email:
-            provider: 
+            provider:
               name: md5
             append: @localhost
 
@@ -83,7 +84,7 @@ a list of exclude patterns. If one of these patterns matches, the whole table ro
         primary_key: id
         fields:
          - first_name:
-            provider: 
+            provider:
               name: clear
         excludes:
          - email:
@@ -105,7 +106,7 @@ The following provider are currently supported:
 This provider will define a list of possible values for a database field and will randomly make a choice
 from this list.
 
-**Arguments:** 
+**Arguments:**
 
 * ``values``: All list of values
 
@@ -115,7 +116,7 @@ from this list.
      - auth_user:
         fields:
          - first_name:
-            provider: 
+            provider:
               name: choice
               values:
                 - "John"
@@ -138,7 +139,7 @@ The ``clear`` provider will set a database field to ``null``.
      - auth_user:
         fields:
          - first_name:
-            provider: 
+            provider:
               name: clear
 
 
@@ -163,7 +164,7 @@ the provider with ``fake`` and then use the function name from the Faker library
      - auth_user:
         fields:
          - email:
-            provider: 
+            provider:
               name: fake.email
 
 ``mask``
@@ -171,7 +172,7 @@ the provider with ``fake`` and then use the function name from the Faker library
 
 This provider will replace each character with a static sign.
 
-**Arguments:** 
+**Arguments:**
 
 * ``sign``: The sign to be used to replace the original characters (default ``X``).
 
@@ -181,7 +182,7 @@ This provider will replace each character with a static sign.
      - auth_user:
         fields:
          - last_name:
-            provider: 
+            provider:
               name: mask
               sign: '?'
 
@@ -199,7 +200,7 @@ This provider will hash the given field value with the MD5 algorithm.
      - auth_user:
         fields:
          - password:
-            provider: 
+            provider:
               name: md5
 
 
@@ -216,7 +217,7 @@ This provider will hash the given field value with the MD5 algorithm.
      - auth_user:
         fields:
          - first_name:
-            provider: 
+            provider:
               name: set
               value: "Foo"
 
@@ -237,7 +238,7 @@ This argument will append a value at the end of the altered value:
      - auth_user:
         fields:
          - email:
-            provider: 
+            provider:
               name: md5
             append: "@example.com"
 
@@ -336,3 +337,16 @@ TODOs
 
 
 .. _Faker: https://faker.readthedocs.io/en/master/providers.html
+
+.. |license| image:: https://img.shields.io/badge/license-MIT-green.svg
+    :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/LICENSE.rst
+
+.. |pypi| image:: https://badge.fury.io/py/pganonymize.svg
+    :target: https://badge.fury.io/py/pganonymize
+
+.. |downloads| image:: https://pepy.tech/badge/pganonymize
+    :target: https://pepy.tech/project/pganonymize
+    :alt: Download count
+
+.. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Test/badge.svg
+    :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/actions
