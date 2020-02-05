@@ -319,35 +319,25 @@ or activate the virtualenv and run::
 
 To see all available make target just run ``make`` without arguments.
 
-Code Quality Assurance
-----------------------
+Docker
+------
 
-The included Makefile is set up to run several Python static code
-checking and reporting tools. To print a list of available Makefile
-targets and the tools they run, simple run::
+If you want to run the anonymizher within a Docker container you first have to build the image::
 
-    $ make
+    $ docker build -t pganonymizer .
 
-Unless noted otherwise, these targets run all tools directly, i.e.
-without tox, which means they need to be installed in your Python
-environment, preferably in a project-specific virtual environment.
-To create a virtual environment with Python 3 (you may have to
-install the package ``python3-virtualenv`` first) run::
+After that you can pass a schema file to the container, using Docker volumes, and call the anonymizer::
 
-    $ python3 -m venv postgresql-anonymizer
-
-Or with Python 2 (you may have to install the packages
-``virtualenv`` and ``virtualenvwrapper``) run::
-
-    $ mkvirtualenv postgresql-anonymizer --python=python3.5
-
-and to install all supported tools and their dependencies run::
-
-    (postgresql-anonymizer)$ pip install -r requirements/dev.txt
-
-Then run the Makefile target of your choice, e.g.::
-
-    $ make flake8
+    $ docker run \
+        -v <path to your schema>:/schema.yml \
+        -it pganonymizer \
+        /usr/local/bin/pganonymize \
+        --schema=/schema.yml \
+        --dbname=<database> \
+        --user=<user> \
+        --password=<password> \
+        --host=<host> \
+        -v
 
 Documentation
 -------------
@@ -362,14 +352,6 @@ You can override the command to open the browser (default ``xdg-open``) with
 the ``BROWSER`` make variable, e.g.::
 
     $ make BROWSER=chromium-browser docs
-
-
-TODOs
------
-* Better schema validation / error handling
-* Add more tests
-* Add option to create a database dump
-* Add a commandline argument to list all available providers
 
 
 .. _Faker: https://faker.readthedocs.io/en/master/providers.html
