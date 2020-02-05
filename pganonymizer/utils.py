@@ -251,7 +251,7 @@ def truncate_tables(connection, tables):
     :param list[str] tables: A list of table names
     """
     cursor = connection.cursor()
-    for table_name in tables:
-        logging.info('Truncating table "%s"', table_name)
-        cursor.execute('TRUNCATE TABLE {table};'.format(table=table_name))
+    table_names = ', '.join(tables)
+    logging.info('Truncating tables "%s"', table_names)
+    cursor.execute('TRUNCATE TABLE {tables};'.format(tables=table_names))
     cursor.close()

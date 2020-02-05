@@ -28,7 +28,6 @@ class TestTruncateTables:
         connection.cursor.return_value = mock_cursor
         truncate_tables(connection, ['table_a', 'table_b'])
         assert mock_cursor.execute.call_args_list == [
-            call('TRUNCATE TABLE table_a;'),
-            call('TRUNCATE TABLE table_b;')
+            call('TRUNCATE TABLE table_a, table_b;'),
         ]
         mock_cursor.close.assert_called_once()
