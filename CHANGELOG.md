@@ -4,7 +4,7 @@
 
 * Use [python-poetry](https://github.com/python-poetry/poetry) for requirements management
 * Added commandline argument to list all available providers (#4)
-* Execute table truncation in one statement to avoid dependencies (thanks to [W1ldPo1nter](https://github.com/W1ldPo1nter))
+* Execute table truncation in one statement to avoid foreign key constraint errors (thanks to [W1ldPo1nter](https://github.com/W1ldPo1nter))
 
 ## 0.2.4 (2020-01-03)
 
