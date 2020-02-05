@@ -295,6 +295,9 @@ Now you cann install all requirements and activate the virtualenv::
     $ poetry install
     $ poetry shell
 
+Testing
+-------
+
 For testing you have to install tox, either system-wide via your distribution's package manager,
 e.g. on debian/Ubuntu with::
 
