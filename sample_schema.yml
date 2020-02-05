@@ -16,3 +16,6 @@ tables:
     excludes:
       - email:
         - "\\S[^@]*@example\\.com"
+
+truncate:
+  - django_session

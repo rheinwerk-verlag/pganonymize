@@ -60,13 +60,19 @@ Schema definition
 
 ``pganonymize`` uses a YAML based schema definition for the anonymization rules.
 
+``tables``
+~~~~~~~~~~
+
 On the top level a list of tables can be defined with the ``tables`` keyword. This will define
 which tables should be anonymized.
 
 On the table level you can specify the tables primary key with the keyword ``primary_key`` if it
 isn't the default ``id``.
 
-Starting with the keyword ``fields`` you can specify all fields, that should be available for the
+``fields``
+~~~~~~~~~~
+
+Starting with the keyword ``fields`` you can specify all fields of a table, that should be available for the
 anonymization process. Each field entry has its own ``provider`` that defines how the field should
 be treated.
 
@@ -85,6 +91,9 @@ be treated.
             provider:
               name: md5
             append: @localhost
+
+``excludes``
+~~~~~~~~~~~~
 
 For each table you can also specify a list of ``excludes``. Each entry has to be a field name which contains
 a list of exclude patterns. If one of these patterns matches, the whole table row won't ne anonymized.
@@ -105,6 +114,21 @@ a list of exclude patterns. If one of these patterns matches, the whole table ro
 This will exclude all data from the table ``auth_user`` that have an ``email`` field which matches the
 regular expression pattern (the backslash is to escape the string for YAML).
 
+``truncate``
+~~~~~~~~~~~~
+
+In addition to the field level providers you can also specify a list of tables that should be cleared with
+the  `truncated` key. This is useful if you don't need the table data for development purposes or the reduce 
+the size of the database dump.
+
+**Example**::
+
+    truncate:
+     - django_session
+     - my_other_table
+
+If two tables have a foreign key relation and you don't need to keep one of the table's data, just add the
+second table and they will be truncated at once, without causing a constraint error.
 
 Providers
 ---------
