@@ -62,7 +62,7 @@ Database dump
 
 With the ``--dump-file`` argument it is possible to create a database dump file after anonymizing the database.
 Please note, that the ``pg_dump`` command from the ``postgresql-client-common`` library is necessary to create
-the dump file for the connected database, e.g. under Linux::
+the dump file for t he connected database, e.g. under Linux::
 
     sudo apt-get install postgresql-client-common
 
@@ -88,7 +88,7 @@ For making changes and developing pganonymizer, you need to install ``poetry``::
 
     $ sudo pip install poetry
 
-Now you cann install all requirements and activate the virtualenv::
+Now you can install all requirements and activate the virtualenv::
 
     $ poetry install
     $ poetry shell
