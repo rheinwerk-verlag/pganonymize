@@ -8,6 +8,7 @@ Contents:
 
    readme
    install
+   schema
    deploy
    tests
    api
