@@ -7,7 +7,6 @@ Contents:
    :maxdepth: 2
 
    readme
-   install
    schema
    deploy
    tests
