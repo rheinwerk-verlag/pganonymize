@@ -8,9 +8,10 @@ Contents:
 
    readme
    schema
-   deploy
-   tests
    api
+   tests
+   documentation
+   deploy
    license
    changelog
 

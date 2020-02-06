@@ -1,5 +1,7 @@
+License
+=======
+
 The MIT License
-===============
 
 Copyright (c) 2019-2020, Rheinwerk Verlag GmbH
 
