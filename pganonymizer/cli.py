@@ -7,9 +7,21 @@ import time
 
 import yaml
 
-from pganonymizer.constants import DEFAULT_SCHEMA_FILE
+from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
 from pganonymizer.providers import PROVIDERS
-from pganonymizer.utils import anonymize_tables, get_connection, truncate_tables
+from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
+
+
+def get_pg_args(args):
+    """
+    Map all commandline arguments with database keys.
+
+    :param argparse.Namespace args: The commandline arguments
+    :return: A dictionary with database arguments
+    :rtype: dict
+    """
+    return ({name: value for name, value in
+             zip(DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
 
 
 def list_provider_classes():
@@ -33,8 +45,10 @@ def main():
     parser.add_argument('--port', help='Port of the database', default='5432')
     parser.add_argument('--dry-run', action='store_true', help='Don\'t commit changes made on the database',
                         default=False)
-    args = parser.parse_args()
+    parser.add_argument('--dump-file', help='Create a database dump file with the given name')
 
+    args = parser.parse_args()
+    
     loglevel = logging.WARNING
     if args.verbose:
         loglevel = logging.DEBUG
@@ -45,7 +59,9 @@ def main():
         sys.exit(0)
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
-    connection = get_connection(args)
+
+    pg_args = get_pg_args(args)
+    connection = get_connection(pg_args)
 
     start_time = time.time()
     truncate_tables(connection, schema.get('truncate', []))
@@ -57,6 +73,9 @@ def main():
 
     end_time = time.time()
     logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
+
+    if args.dump_file:
+        create_database_dump(args.dump_file, pg_args)
 
 
 if __name__ == '__main__':

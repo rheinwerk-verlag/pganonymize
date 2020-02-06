@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import csv
 import logging
 import re
+import subprocess
 
 import psycopg2
 import psycopg2.extras
@@ -10,7 +11,7 @@ from progress.bar import IncrementalBar
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 from six import StringIO
 
-from pganonymizer.constants import COPY_DB_DELIMITER, DATABASE_ARGS, DEFAULT_PRIMARY_KEY
+from pganonymizer.constants import COPY_DB_DELIMITER, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
 
@@ -147,16 +148,14 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
     cursor.close()
 
 
-def get_connection(args):
+def get_connection(pg_args):
     """
     Return a connection to the database.
 
-    :param argparse.Namespace args: The parsed commandline arguments
+    :param pg_args:
     :return: A psycopg connection instance
     :rtype: psycopg2.connection
     """
-    pg_args = ({name: value for name, value in
-                zip(DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
     return psycopg2.connect(**pg_args)
 
 
@@ -255,3 +254,19 @@ def truncate_tables(connection, tables):
     logging.info('Truncating tables "%s"', table_names)
     cursor.execute('TRUNCATE TABLE {tables};'.format(tables=table_names))
     cursor.close()
+
+
+def create_database_dump(filename, db_args):
+    """
+    Create a dump file from the current database.
+
+    :param filename:
+    :param db_args:
+    """
+    arguments = '-d {dbname} -U {user} -h {host} -p {port}'.format(**db_args)
+    cmd = 'pg_dump -p -Fc -Z 9 {args} -f {filename}'.format(
+        args=arguments,
+        filename=filename
+    )
+    logging.info('Creating database dump file "{}"'.format(filename))
+    subprocess.run(cmd, shell=True)

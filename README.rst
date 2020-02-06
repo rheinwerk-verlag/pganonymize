@@ -27,24 +27,26 @@ Usage
 
 ::
 
-    usage: pganonymize [-h] [-v] [-l] [--schema SCHEMA] [--dbname DBNAME]
-                       [--user USER] [--password PASSWORD] [--host HOST]
-                       [--port PORT] [--dry-run]
+    usage: __main__.py [-h] [-v] [-l] [--schema SCHEMA] [--dbname DBNAME]
+                   [--user USER] [--password PASSWORD] [--host HOST]
+                   [--port PORT] [--dry-run] [--dump-file DUMP_FILE]
 
     Anonymize data of a PostgreSQL database
 
     optional arguments:
-      -h, --help            show this help message and exit
-      -v, --verbose         Increase verbosity
-      -l, --list-providers  Show a list of all available providers
-      --schema SCHEMA       A YAML schema file that contains the anonymization
+    -h, --help            show this help message and exit
+    -v, --verbose         Increase verbosity
+    -l, --list-providers  Show a list of all available providers
+    --schema SCHEMA       A YAML schema file that contains the anonymization
                             rules
-      --dbname DBNAME       Name of the database
-      --user USER           Name of the database user
-      --password PASSWORD   Password for the database user
-      --host HOST           Database hostname
-      --port PORT           Port of the database
-      --dry-run             Don't commit changes made on the database
+    --dbname DBNAME       Name of the database
+    --user USER           Name of the database user
+    --password PASSWORD   Password for the database user
+    --host HOST           Database hostname
+    --port PORT           Port of the database
+    --dry-run             Don't commit changes made on the database
+    --dump-file DUMP_FILE
+                            Create a database dump file with the given name
 
 Example call::
 
@@ -54,6 +56,15 @@ Example call::
         --password=mysecret \
         --host=db.host.example.com \
         -v
+
+Database dump
+~~~~~~~~~~~~~
+
+With the `--dump-file` argument it is possible to create a database dump file after anonymizing the database.
+Please note, that the `pg_dump` command from the `postgresql-client-common` library is necessary to create
+the dump file for the connected database, e.g. under Linux::
+
+    sudo apt-get install postgresql-client-common
       
 Schema definition
 -----------------
