@@ -1,3 +1,5 @@
+"""Commandline implementation"""
+
 from __future__ import absolute_import, print_function
 
 import argparse
@@ -32,6 +34,7 @@ def list_provider_classes():
 
 
 def main():
+    """Main method"""
     parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
     parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
     parser.add_argument('-l', '--list-providers', action='store_true', help='Show a list of all available providers',

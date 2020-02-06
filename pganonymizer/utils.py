@@ -1,3 +1,5 @@
+"""Helper methods"""
+
 from __future__ import absolute_import
 
 import csv
@@ -51,7 +53,7 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
     :rtype: (list, list)
     """
     if verbose:
-        bar = IncrementalBar('Anonymizing', max=total_count)
+        progress_bar = IncrementalBar('Anonymizing', max=total_count)
     sql = "SELECT * FROM {table};".format(table=table)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
@@ -68,13 +70,13 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
                 for key, value in row_column_dict.items():
                     row[key] = value
             if verbose:
-                bar.next()
+                progress_bar.next()
             table_columns = row.keys()
             if not row_column_dict:
                 continue
             data.append(row.values())
     if verbose:
-        bar.finish()
+        progress_bar.finish()
     cursor.close()
     return data, table_columns
 
@@ -268,5 +270,5 @@ def create_database_dump(filename, db_args):
         args=arguments,
         filename=filename
     )
-    logging.info('Creating database dump file "{}"'.format(filename))
+    logging.info('Creating database dump file "%s"', filename)
     subprocess.run(cmd, shell=True)
