@@ -35,7 +35,8 @@ Features
 | ip         | 157.50.1.20          | ``set``               | 127.0.0.1                        |
 +------------+----------------------+-----------------------+----------------------------------+
 
-See the documentation for a more detailed description of the provided anonymization methods.
+See the documentation (https://python-postgresql-anonymizer.readthedocs.io/en/latest/) for a more 
+detailed description of the provided anonymization methods.
 
 Installation
 ------------
