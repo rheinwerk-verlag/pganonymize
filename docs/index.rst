@@ -7,10 +7,11 @@ Contents:
    :maxdepth: 2
 
    readme
-   install
-   deploy
-   tests
+   schema
    api
+   tests
+   documentation
+   deploy
    license
    changelog
 

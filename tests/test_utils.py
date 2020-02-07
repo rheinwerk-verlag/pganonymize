@@ -14,9 +14,7 @@ class TestGetConnection:
             'host': 'localhost',
             'port': 5432
         }
-        mock_args = Mock()
-        mock_args.configure_mock(**connection_data)
-        get_connection(mock_args)
+        get_connection(connection_data)
         mock_connect.assert_called_once_with(**connection_data)
 
 
