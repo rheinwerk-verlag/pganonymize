@@ -2,8 +2,7 @@ PostgreSQL Anonymizer
 =====================
 
 This commandline tool makes PostgreSQL database anonymization easy. It uses a YAML definition file
-to define which tables and fields should be anonymized and provides various methods of anonymization
-(e.g. masking, faking or truncating complete tables).
+to define which tables and fields should be anonymized and provides various methods of anonymization.
 
 .. class:: no-web no-pdf
 
@@ -15,6 +14,10 @@ to define which tables and fields should be anonymized and provides various meth
 
 Features
 --------
+
+* Anonymize PostgreSQL tables on data level entry with various methods (s. table below)
+* Exclude data for anonymization depending on regular expressions
+* Truncate entire tables for unwanted data
 
 +------------+----------------------+-----------------------+----------------------------------+
 | Field      | Value                | Provider              | Output                           |
@@ -31,6 +34,8 @@ Features
 +------------+----------------------+-----------------------+----------------------------------+
 | ip         | 157.50.1.20          | ``set``               | 127.0.0.1                        |
 +------------+----------------------+-----------------------+----------------------------------+
+
+See the documentation for a more detailed description of the provided anonymization methods.
 
 Installation
 ------------
