@@ -262,8 +262,8 @@ def create_database_dump(filename, db_args):
     """
     Create a dump file from the current database.
 
-    :param filename:
-    :param db_args:
+    :param str filename: Path to the dumpfile that should be created
+    :param dict db_args: A dictionary with database related information
     """
     arguments = '-d {dbname} -U {user} -h {host} -p {port}'.format(**db_args)
     cmd = 'pg_dump -p -Fc -Z 9 {args} -f {filename}'.format(
