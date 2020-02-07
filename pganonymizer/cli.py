@@ -51,7 +51,7 @@ def main():
     parser.add_argument('--dump-file', help='Create a database dump file with the given name')
 
     args = parser.parse_args()
-    
+
     loglevel = logging.WARNING
     if args.verbose:
         loglevel = logging.DEBUG
