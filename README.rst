@@ -74,7 +74,7 @@ Despite the database connection values, you will have to define a YAML schema fi
 all anonymization rules for that database. Take a look at the `schema documentation`_ or the
 `YAML sample schema`_.
 
-.. include:: ./sample_schema.yml
+.. include:: ../sample_schema.yml
 
 Example call::
 
