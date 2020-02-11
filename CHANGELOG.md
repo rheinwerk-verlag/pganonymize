@@ -2,6 +2,8 @@
 
 ## Development
 
+## 0.3.0 (2020-02-11)
+
 * Use [python-poetry](https://github.com/python-poetry/poetry) for requirements management
 * Added commandline argument to list all available providers (#4)
 * Added commandline argument to create a dump file (#5)
