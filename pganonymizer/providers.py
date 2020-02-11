@@ -24,9 +24,9 @@ def get_provider(provider_config):
     :rtype: Provider
     """
     def get_provider_class(cid):
-        for cls in PROVIDERS:
-            if cls.matches(name):
-                return cls
+        for klass in PROVIDERS:
+            if klass.matches(cid):
+                return klass
     name = provider_config['name']
     cls = get_provider_class(name)
     if cls is None:

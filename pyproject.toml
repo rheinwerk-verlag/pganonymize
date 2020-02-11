@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "postgresql-anonymizer"
+version = "0.2.4"
+description = "Commandline tool to anonymize PostgreSQL databases"
+authors = [
+    "Henning Kage <henning.kage@rheinwerk-verlag.de>"
+]
+license = "MIT"
+readme = "README.rst"
+homepage = "https://github.com/rheinwerk-verlag/postgresql-anonymizer"
+repository = "https://github.com/rheinwerk-verlag/postgresql-anonymizer"
+
+[tool.poetry.dependencies]
+python = "~2.7 || ^3.5"
+Faker = "^3.0.0"
+progress = "^1.5"
+psycopg2-binary = "^2.8.4"
+pyyaml = "^5.2"
+six = "^1.13.0"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^3.7.9"
+mock = "^3.0.5"
+pytest = "^4.1"
+pytest-pep8 = "^1.0.6"
+pytest-cov = "^2.8.1"
+pytest-pythonpath = "^0.7.3"
+ipdb = "^0.12.3"
+isort = "^4.3.21"
+wheel = "^0.33.6"
+Sphinx = {version = "<2.3.1", optional = true}
+recommonmark = {version = "^0.6.0", optional = true}
+sphinx_rtd_theme = {version = "^0.4.3", optional = true}
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

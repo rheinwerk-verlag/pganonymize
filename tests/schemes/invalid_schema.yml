@@ -1,0 +1,10 @@
+tables:
+  - table_a:
+  - table_b:
+      fields:
+        - field_a
+  - table_c:
+      fields:
+        - field_a:
+            provider:
+

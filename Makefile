@@ -41,51 +41,9 @@ clean-pyc: ## remove Python file artifacts
 
 clean-test: ## remove test and coverage artifacts
 	rm -fr .tox/
-	rm -f .coverage
-	rm -fr reports/
-
-test: ## run tests quickly with the default Python
-	python setup.py test
-
-test-all: ## run tests on every Python version with tox
-	tox
-
-pylint: ## run style checks and static analysis with pylint
-	@-mkdir -p reports/
-	@-pylint $(PYTHON_PACKAGE) -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > reports/pylint.txt
-	@echo "See reports/pylint.txt"
-	@-pylint $(PYTHON_PACKAGE)
 
 flake8: ## run style checks and static analysis with flake8
-	@-mkdir -p reports/
-	flake8 $(PYTHON_PACKAGE) $(TESTS_PACKAGE) --format='%(path)s:%(row)d: [%(code)s(%(code)s), ] %(text)s' --output-file=reports/flake8.txt --tee
-
-docstrings: ## check docstring presence and style conventions with pydocstyle
-	pydocstyle $(PYTHON_PACKAGE)
-
-lint: flake8 docstrings pylint
-
-coverage: ## check code coverage quickly with the default Python
-	py.test --cov-report html:reports/htmlcov --cov-report xml:reports/coverage.xml
-	@echo "See reports/htmlcov/index.html"
-
-metrics: ## print code metrics with radon
-	radon raw -s $(PYTHON_PACKAGE) $(TEST_PACKAGE)
-	radon cc -s $(PYTHON_PACKAGE) $(TEST_PACKAGE)
-	radon mi -s $(PYTHON_PACKAGE) $(TEST_PACKAGE)
-
-docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/$(PYTHON_PACKAGE).rst
-	rm -f docs/modules.rst
-	sphinx-apidoc --no-toc -o docs/ $(PYTHON_PACKAGE)
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
-	@echo "See docs/_build/html/index.html"
-
-docs-open:
-	$(BROWSER) docs/_build/html/index.html
-
-docs-all: docs docs-open
+	@poetry run flake8
 
 release: clean ## package and upload a release
 	python setup.py sdist upload
@@ -98,3 +56,9 @@ dist: clean ## builds source and wheel package
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+test:
+	@poetry run pytest --cov=poetry --cov-config .coveragerc tests/ -sq
+
+test-all: ## run tests on every Python version with tox
+	@tox

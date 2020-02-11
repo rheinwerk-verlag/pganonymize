@@ -1,6 +1,11 @@
+"""Helper methods"""
+
+from __future__ import absolute_import
+
 import csv
 import logging
 import re
+import subprocess
 
 import psycopg2
 import psycopg2.extras
@@ -8,7 +13,7 @@ from progress.bar import IncrementalBar
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 from six import StringIO
 
-from pganonymizer.constants import COPY_DB_DELIMITER, DATABASE_ARGS, DEFAULT_PRIMARY_KEY
+from pganonymizer.constants import COPY_DB_DELIMITER, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
 
@@ -36,11 +41,11 @@ def anonymize_tables(connection, definitions, verbose=False):
 
 def build_data(connection, table, columns, excludes, total_count, verbose=False):
     """
-    Select all data from a table and build
+    Select all data from a table and return it together with a list of table columns.
 
     :param connection: A database connection instance.
     :param str table: Name of the table to retrieve the data.
-    :param list columns:
+    :param list columns: A list of table fields
     :param list[dict] excludes: A list of exclude definitions.
     :param int total_count: The amount of rows for the current table
     :param bool verbose: Display logging information and a progress bar.
@@ -48,7 +53,7 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
     :rtype: (list, list)
     """
     if verbose:
-        bar = IncrementalBar('Anonymizing', max=total_count)
+        progress_bar = IncrementalBar('Anonymizing', max=total_count)
     sql = "SELECT * FROM {table};".format(table=table)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
@@ -65,13 +70,13 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
                 for key, value in row_column_dict.items():
                     row[key] = value
             if verbose:
-                bar.next()
+                progress_bar.next()
             table_columns = row.keys()
             if not row_column_dict:
                 continue
             data.append(row.values())
     if verbose:
-        bar.finish()
+        progress_bar.finish()
     cursor.close()
     return data, table_columns
 
@@ -82,11 +87,9 @@ def row_matches_excludes(row, excludes=None):
 
     :param list row: The data row
     :param list excludes: A list of field exclusion roles, e.g.:
-
         [
             {'email': ['\\S.*@example.com', '\\S.*@foobar.com', ]}
         ]
-
     :return: True or False
     :rtype: bool
     """
@@ -114,8 +117,8 @@ def copy_from(connection, data, table, columns):
     cursor = connection.cursor()
     try:
         cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N', columns=columns)
-    except (BadCopyFileFormat, InvalidTextRepresentation) as e:
-        raise BadDataFormat(e)
+    except (BadCopyFileFormat, InvalidTextRepresentation) as exc:
+        raise BadDataFormat(exc)
     cursor.close()
 
 
@@ -124,7 +127,8 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
     Import the temporary and anonymized data to a temporary table and write the changes back.
 
     :param connection: A database connection instance.
-    :param dict column_dict:
+    :param dict column_dict: A dictionary with all columns (specified by the schema definition) and a default value of
+      None.
     :param str source_table: Name of the table to be anonymized.
     :param list table_columns: A list of all table columns.
     :param str primary_key: Name of the tables primary key.
@@ -139,23 +143,21 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
         'UPDATE {table} t '
         'SET {columns} '
         'FROM source s '
-        'WHERE t.{primary_key} = s.{primary_key}'
+        'WHERE t.{primary_key} = s.{primary_key};'
     ).format(table=source_table, primary_key=primary_key, columns=set_columns)
     cursor.execute(sql)
     cursor.execute('DROP TABLE source;')
     cursor.close()
 
 
-def get_connection(args):
+def get_connection(pg_args):
     """
     Return a connection to the database.
 
-    :param args:
-    :return: Connection instance
+    :param pg_args:
+    :return: A psycopg connection instance
     :rtype: psycopg2.connection
     """
-    pg_args = ({name: value for name, value in
-                zip(DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
     return psycopg2.connect(**pg_args)
 
 
@@ -196,15 +198,12 @@ def get_column_dict(columns):
     Return a dictionary with all fields from the table definition and None as value.
 
     :param list columns: A list of field definitions from the YAML schema, e.g.:
-
         [
             {'first_name': {'provider': 'set', 'value': 'Foo'}},
             {'guest_email': {'append': '@localhost', 'provider': 'md5'}},
         ]
-    :return: A dictionary containing all fields to be altered with a default value of None, e.g.:
-
+    :return: A dictionary containing all fields to be altered with a default value of None, e.g.::
         {'guest_email': None}
-
     :rtype: dict
     """
     column_dict = {}
@@ -220,15 +219,11 @@ def get_column_values(row, columns):
 
     :param psycopg2.extras.DictRow row: A data row from the current table to be altered
     :param list columns: A list of table columns with their provider rules, e.g.:
-
         [
             {'guest_email': {'append': '@localhost', 'provider': 'md5'}}
         ]
-
     :return: A dictionary with all fields that have to be altered and their value for a single data row, e.g.:
-
         {'guest_email': '12faf5a9bb6f6f067608dca3027c8fcb@localhost'}
-
     :rtype: dict
     """
     column_dict = {}
@@ -257,7 +252,23 @@ def truncate_tables(connection, tables):
     :param list[str] tables: A list of table names
     """
     cursor = connection.cursor()
-    for table_name in tables:
-        logging.info('Truncating table "%s"', table_name)
-        cursor.execute('TRUNCATE TABLE {table}'.format(table=table_name))
+    table_names = ', '.join(tables)
+    logging.info('Truncating tables "%s"', table_names)
+    cursor.execute('TRUNCATE TABLE {tables};'.format(tables=table_names))
     cursor.close()
+
+
+def create_database_dump(filename, db_args):
+    """
+    Create a dump file from the current database.
+
+    :param str filename: Path to the dumpfile that should be created
+    :param dict db_args: A dictionary with database related information
+    """
+    arguments = '-d {dbname} -U {user} -h {host} -p {port}'.format(**db_args)
+    cmd = 'pg_dump -p -Fc -Z 9 {args} -f {filename}'.format(
+        args=arguments,
+        filename=filename
+    )
+    logging.info('Creating database dump file "%s"', filename)
+    subprocess.run(cmd, shell=True)
