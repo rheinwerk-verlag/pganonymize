@@ -86,9 +86,9 @@ Example call::
 Database dump
 ~~~~~~~~~~~~~
 
-With the ``--dump-file`` argument it is possible to create a database dump file after anonymizing the database.
-Please note, that the ``pg_dump`` command from the ``postgresql-client-common`` library is necessary to create
-the dump file for t he connected database, e.g. under Linux::
+With the ``--dump-file`` argument it is possible to create a dump file after anonymizing the database. Please note,
+that the ``pg_dump`` command from the ``postgresql-client-common`` library is necessary to create the dump file for the
+database, e.g. under Linux::
 
     sudo apt-get install postgresql-client-common
 
