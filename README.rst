@@ -122,7 +122,7 @@ Now you can install all requirements and activate the virtualenv::
 Docker
 ------
 
-If you want to run the anonymizher within a Docker container you first have to build the image::
+If you want to run the anonymizer within a Docker container you first have to build the image::
 
     $ docker build -t pganonymizer .
 
