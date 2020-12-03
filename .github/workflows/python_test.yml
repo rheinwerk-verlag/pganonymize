@@ -24,29 +24,32 @@ jobs:
 
     - name: Install poetry ${{ matrix.poetry-version }}
       run: |
-          python -m ensurepip
-          python -m pip install --upgrade pip
-          python -m pip install poetry==${{ matrix.poetry-version }}
-          source $HOME/.poetry/env
-          poetry config virtualenvs.in-project true
+          curl -fsS -o get-poetry.py https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
+          python get-poetry.py -y
+          echo "::set-env name=PATH::$HOME/.poetry/bin:$PATH"
+
+    - name: Configure poetry
+      run: poetry config virtualenvs.in-project true
 
     - name: Set up cache
       uses: actions/cache@v1
+      id: cache
       with:
-        path: .venv
-        key: ${{ runner.os }}-venv-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
+
+    -   name: Ensure cache is healthy
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
 
     - name: Install dependencies
       run: |
-        source $HOME/.poetry/env
         poetry install
 
     - name: Test with pytest
       run: |
-        source $HOME/.poetry/env
         poetry run pytest -q tests
 
     - name: Lint with flake8
       run: |
-        source $HOME/.poetry/env
         poetry run flake8
