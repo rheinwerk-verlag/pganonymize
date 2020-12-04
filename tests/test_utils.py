@@ -32,7 +32,7 @@ class TestTruncateTables:
         truncate_tables(connection, tables)
         if tables:
             connection.cursor.assert_called_once()
-            assert mock_cursor.execute.call_args_list == [call(expected_sql),]
+            assert mock_cursor.execute.call_args_list == [call(expected_sql)]
             mock_cursor.close.assert_called_once()
         else:
             connection.cursor.assert_not_called()
