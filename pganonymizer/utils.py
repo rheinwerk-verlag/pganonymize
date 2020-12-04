@@ -254,7 +254,7 @@ def truncate_tables(connection, tables):
     cursor = connection.cursor()
     table_names = ', '.join(tables)
     logging.info('Truncating tables "%s"', table_names)
-    cursor.execute('TRUNCATE TABLE {tables};'.format(tables=table_names))
+    cursor.execute('TRUNCATE TABLE {tables};'.format(tables=table_names)) if len(tables) else None
     cursor.close()
 
 
