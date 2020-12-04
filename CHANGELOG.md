@@ -2,6 +2,10 @@
 
 ## Development
 
+## 0.3.1 (2020-12-04)
+
+* [#13](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/13>): Fixed a syntax error if no truncated tables are defined ([ray-man](https://github.com/ray-man>))
+
 ## 0.3.0 (2020-02-11)
 
 * Use [python-poetry](https://github.com/python-poetry/poetry) for requirements management
