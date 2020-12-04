@@ -35,8 +35,7 @@ Features
 | ``ip``         | 157.50.1.20          | ``set``               | 127.0.0.1                        |
 +----------------+----------------------+-----------------------+----------------------------------+
 
-See the documentation (https://python-postgresql-anonymizer.readthedocs.io/en/latest/) for a more 
-detailed description of the provided anonymization methods.
+See the `documentation`_ for a more detailed description of the provided anonymization methods.
 
 Installation
 ------------
@@ -71,6 +70,10 @@ Usage
     --dump-file DUMP_FILE
                             Create a database dump file with the given name
 
+Despite the database connection values, you will have to define a YAML schema file, that includes
+all anonymization rules for that database. Take a look at the `schema documentation`_ or the
+`YAML sample schema`_.
+
 Example call::
 
     $ pganonymize --schema=myschema.yml \
@@ -83,9 +86,9 @@ Example call::
 Database dump
 ~~~~~~~~~~~~~
 
-With the ``--dump-file`` argument it is possible to create a database dump file after anonymizing the database.
-Please note, that the ``pg_dump`` command from the ``postgresql-client-common`` library is necessary to create
-the dump file for t he connected database, e.g. under Linux::
+With the ``--dump-file`` argument it is possible to create a dump file after anonymizing the database. Please note,
+that the ``pg_dump`` command from the ``postgresql-client-common`` library is necessary to create the dump file for the
+database, e.g. under Linux::
 
     sudo apt-get install postgresql-client-common
 
@@ -119,7 +122,7 @@ Now you can install all requirements and activate the virtualenv::
 Docker
 ------
 
-If you want to run the anonymizher within a Docker container you first have to build the image::
+If you want to run the anonymizer within a Docker container you first have to build the image::
 
     $ docker build -t pganonymizer .
 
@@ -137,7 +140,9 @@ After that you can pass a schema file to the container, using Docker volumes, an
         -v
 
 
-.. _Faker: https://faker.readthedocs.io/en/master/providers.html
+.. _documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/
+.. _schema documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/schema.html
+.. _YAML sample schema: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/sample_schema.yml
 
 .. |license| image:: https://img.shields.io/badge/license-MIT-green.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/LICENSE.rst

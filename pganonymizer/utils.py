@@ -251,6 +251,8 @@ def truncate_tables(connection, tables):
     :param connection: A database connection instance
     :param list[str] tables: A list of table names
     """
+    if not tables:
+        return
     cursor = connection.cursor()
     table_names = ', '.join(tables)
     logging.info('Truncating tables "%s"', table_names)

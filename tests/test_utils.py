@@ -1,4 +1,5 @@
-from mock import call, patch, Mock
+import pytest
+from mock import Mock, call, patch
 
 from pganonymizer.utils import get_connection, truncate_tables
 
@@ -20,12 +21,20 @@ class TestGetConnection:
 
 class TestTruncateTables:
 
-    def test(self):
+    @pytest.mark.parametrize('tables, expected_sql', [
+        [('table_a', 'table_b'), 'TRUNCATE TABLE table_a, table_b;'],
+        [(), None],
+    ])
+    def test(self, tables, expected_sql):
         mock_cursor = Mock()
         connection = Mock()
         connection.cursor.return_value = mock_cursor
-        truncate_tables(connection, ['table_a', 'table_b'])
-        assert mock_cursor.execute.call_args_list == [
-            call('TRUNCATE TABLE table_a, table_b;'),
-        ]
-        mock_cursor.close.assert_called_once()
+        truncate_tables(connection, tables)
+        if tables:
+            connection.cursor.assert_called_once()
+            assert mock_cursor.execute.call_args_list == [call(expected_sql)]
+            mock_cursor.close.assert_called_once()
+        else:
+            connection.cursor.assert_not_called()
+            mock_cursor.execute.assert_not_called()
+            mock_cursor.close.assert_not_called()
