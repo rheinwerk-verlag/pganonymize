@@ -6,7 +6,6 @@ from six import with_metaclass
 
 from pganonymizer.exceptions import InvalidProvider, InvalidProviderArgument
 
-
 PROVIDERS = []
 
 fake_data = Faker()
