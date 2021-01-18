@@ -98,7 +98,7 @@ def row_matches_excludes(row, excludes=None):
         column = list(definition.keys())[0]
         for exclude in definition.get(column, []):
             pattern = re.compile(exclude, re.IGNORECASE)
-            if pattern.match(row[column]):
+            if row[column] is not None and pattern.match(row[column]):
                 return True
     return False
 
