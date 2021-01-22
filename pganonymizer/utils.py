@@ -188,7 +188,7 @@ def data2csv(data):
     """
     buf = StringIO()
     writer = csv.writer(buf, delimiter=COPY_DB_DELIMITER, lineterminator='\n', quotechar='~')
-    [writer.writerow([(x is None and '\\N' or x) for x in row]) for row in data]
+    [writer.writerow([(x is None and '\\N' or (x.strip() if type(x) == str else x)) for x in row]) for row in data]
     buf.seek(0)
     return buf
 
