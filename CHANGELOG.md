@@ -2,9 +2,13 @@
 
 ## Development
 
+## 0.3.2 (2021-01-25)
+
+* [#15](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/15): Fix for exclude bug ([abhinavvaidya90](https://github.com/abhinavvaidya90))
+
 ## 0.3.1 (2020-12-04)
 
-* [#13](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/13): Fixed a syntax error if no truncated tables are defined ([ray-man](https://github.com/ray-man>))
+* [#13](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/13): Fixed a syntax error if no truncated tables are defined ([ray-man](https://github.com/ray-man))
 
 ## 0.3.0 (2020-02-11)
 
