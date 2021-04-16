@@ -150,7 +150,7 @@ After that you can pass a schema file to the container, using Docker volumes, an
 .. |pypi| image:: https://badge.fury.io/py/pganonymize.svg
     :target: https://badge.fury.io/py/pganonymize
 
-.. |downloads| image:: https://static.pepy.tech/personalized-badge/pganonymize?period=month&units=international_system&left_color=blue&right_color=black&left_text=Downloads
+.. |downloads| image:: https://static.pepy.tech/personalized-badge/pganonymize?period=total&units=international_system&left_color=blue&right_color=black&left_text=Downloads
     :target: https://pepy.tech/project/pganonymize
     :alt: Download count
     
