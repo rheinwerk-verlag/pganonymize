@@ -150,9 +150,9 @@ After that you can pass a schema file to the container, using Docker volumes, an
 .. |pypi| image:: https://badge.fury.io/py/pganonymize.svg
     :target: https://badge.fury.io/py/pganonymize
 
-.. |downloads| image:: https://pepy.tech/badge/pganonymize
+.. |downloads| image:: https://static.pepy.tech/personalized-badge/pganonymize?period=month&units=international_system&left_color=blue&right_color=black&left_text=Downloads
     :target: https://pepy.tech/project/pganonymize
     :alt: Download count
-
+    
 .. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Test/badge.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/actions
