@@ -69,7 +69,7 @@ setup(
     maintainer='Rheinwerk Verlag GmbH Webteam',
     maintainer_email='webteam@rheinwerk-verlag.de',
     url='https://github.com/rheinwerk-verlag/postgresql-anonymizer',
-    license='Proprietary',
+    license='MIT license',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
