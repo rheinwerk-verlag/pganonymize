@@ -71,7 +71,7 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
                     row[key] = value
             if verbose:
                 progress_bar.next()
-            table_columns = row.keys()
+            table_columns = ['"{}"'.format(column) for column in row.keys()]
             if not row_column_dict:
                 continue
             data.append(row.values())
@@ -135,18 +135,19 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
     :param list data: The table data.
     """
     primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
+    temp_table = '"tmp_{table}"'.format(table=source_table)
     cursor = connection.cursor()
-    cursor.execute('CREATE TEMP TABLE source(LIKE %s INCLUDING ALL) ON COMMIT DROP;' % source_table)
-    copy_from(connection, data, 'source', table_columns)
-    set_columns = ', '.join(['{column} = s.{column}'.format(column=key) for key in column_dict.keys()])
+    cursor.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
+    copy_from(connection, data, temp_table, table_columns)
+    set_columns = ', '.join(['{column} = s.{column}'.format(column='"{}"'.format(key)) for key in column_dict.keys()])
     sql = (
         'UPDATE {table} t '
         'SET {columns} '
-        'FROM source s '
+        'FROM {source} s '
         'WHERE t.{primary_key} = s.{primary_key};'
-    ).format(table=source_table, primary_key=primary_key, columns=set_columns)
+    ).format(table=source_table, columns=set_columns, source=temp_table, primary_key=primary_key)
     cursor.execute(sql)
-    cursor.execute('DROP TABLE source;')
+    cursor.execute('DROP TABLE %s;' % temp_table)
     cursor.close()
 
 

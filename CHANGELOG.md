@@ -2,6 +2,10 @@
 
 ## Development
 
+## 0.3.3 (2021-04-16)
+
+* [#16](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/16): Preserve column and table cases during the copy process
+
 ## 0.3.2 (2021-01-25)
 
 * [#15](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/15): Fix for exclude bug ([abhinavvaidya90](https://github.com/abhinavvaidya90))
