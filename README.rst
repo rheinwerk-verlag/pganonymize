@@ -6,7 +6,7 @@ to define which tables and fields should be anonymized and provides various meth
 
 .. class:: no-web no-pdf
 
-    |license| |pypi| |downloads| |build|
+    |python| |license| |pypi| |downloads| |build|
 
 .. contents::
 
@@ -143,6 +143,9 @@ After that you can pass a schema file to the container, using Docker volumes, an
 .. _documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/
 .. _schema documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/schema.html
 .. _YAML sample schema: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/sample_schema.yml
+
+.. |python| image:: https://img.shields.io/pypi/pyversions/pganonymize 
+    :alt: PyPI - Python Version
 
 .. |license| image:: https://img.shields.io/badge/license-MIT-green.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/LICENSE.rst
