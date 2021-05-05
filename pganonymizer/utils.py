@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import csv
+import json
 import logging
 import re
 import subprocess
@@ -189,7 +190,19 @@ def data2csv(data):
     """
     buf = StringIO()
     writer = csv.writer(buf, delimiter=COPY_DB_DELIMITER, lineterminator='\n', quotechar='~')
-    [writer.writerow([(x is None and '\\N' or (x.strip() if type(x) == str else x)) for x in row]) for row in data]
+    for row in data:
+        row_data = []
+        for x in row:
+            if x is None:
+                val = '\\N'
+            elif type(x) == str:
+                val = x.strip()
+            elif type(x) == dict:
+                val = json.dumps(x)
+            else:
+                val = x
+            row_data.append(val)
+        writer.writerow(row_data)
     buf.seek(0)
     return buf
 
