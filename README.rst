@@ -146,7 +146,7 @@ After that you can pass a schema file to the container, using Docker volumes, an
 .. _schema documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/schema.html
 .. _YAML sample schema: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/sample_schema.yml
 
-.. |python| image:: https://img.shields.io/pypi/pyversions/pganonymize 
+.. |python| image:: https://img.shields.io/pypi/pyversions/pganonymize
     :alt: PyPI - Python Version
 
 .. |license| image:: https://img.shields.io/badge/license-MIT-green.svg
@@ -158,6 +158,6 @@ After that you can pass a schema file to the container, using Docker volumes, an
 .. |downloads| image:: https://static.pepy.tech/personalized-badge/pganonymize?period=total&units=international_system&left_color=blue&right_color=black&left_text=Downloads
     :target: https://pepy.tech/project/pganonymize
     :alt: Download count
-    
+
 .. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Test/badge.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/actions

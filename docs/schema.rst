@@ -1,6 +1,9 @@
 Schema
 ======
 
+Definition
+----------
+
 ``pganonymize`` uses a YAML based schema definition for the anonymization rules.
 
 ``tables``
@@ -92,8 +95,8 @@ This is useful if you need to anonymize one or more specific records, eg for "Ri
 Providers
 ---------
 
-Providers are the tools, which means functions, used to alter the data within the database.
-The following provider are currently supported:
+Providers are the tools, which means functions, used to alter the data within the database. The following provider are
+currently supported:
 
 ``choice``
 ~~~~~~~~~~
