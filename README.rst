@@ -1,8 +1,9 @@
 PostgreSQL Anonymizer
 =====================
 
-This commandline tool makes PostgreSQL database anonymization easy. It uses a YAML definition file
-to define which tables and fields should be anonymized and provides various methods of anonymization.
+A commandline tool to anonymize PostgreSQL databases for GDPR purposes.
+
+It uses a YAML definition file to define which tables and fields should be anonymized and provides various methods of anonymization.
 
 .. class:: no-web no-pdf
 
@@ -15,6 +16,7 @@ to define which tables and fields should be anonymized and provides various meth
 Features
 --------
 
+* Intentionally compatible with Python 2.7 (for old, productive platforms)
 * Anonymize PostgreSQL tables on data level entry with various methods (s. table below)
 * Exclude data for anonymization depending on regular expressions
 * Truncate entire tables for unwanted data
