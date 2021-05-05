@@ -58,7 +58,7 @@ def build_data(connection, table, columns, excludes, search_condition, total_cou
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
     sql_select = "SELECT * FROM {table}".format(table=table)
     if search_condition:
-        sql = "{select} WHERE {search_condition}".format(select=sql_select, search_condition=search_condition)
+        sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=search_condition)
     else:
         sql = "{select};".format(select=sql_select)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
