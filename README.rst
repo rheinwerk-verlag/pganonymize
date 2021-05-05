@@ -1,12 +1,13 @@
 PostgreSQL Anonymizer
 =====================
 
-This commandline tool makes PostgreSQL database anonymization easy. It uses a YAML definition file
-to define which tables and fields should be anonymized and provides various methods of anonymization.
+A commandline tool to anonymize PostgreSQL databases for GDPR purposes.
+
+It uses a YAML definition file to define which tables and fields should be anonymized and provides various methods of anonymization.
 
 .. class:: no-web no-pdf
 
-    |license| |pypi| |downloads| |build|
+    |python| |license| |pypi| |downloads| |build|
 
 .. contents::
 
@@ -15,6 +16,7 @@ to define which tables and fields should be anonymized and provides various meth
 Features
 --------
 
+* Intentionally compatible with Python 2.7 (for old, productive platforms)
 * Anonymize PostgreSQL tables on data level entry with various methods (s. table below)
 * Exclude data for anonymization depending on regular expressions
 * Truncate entire tables for unwanted data
@@ -144,15 +146,18 @@ After that you can pass a schema file to the container, using Docker volumes, an
 .. _schema documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/schema.html
 .. _YAML sample schema: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/sample_schema.yml
 
+.. |python| image:: https://img.shields.io/pypi/pyversions/pganonymize 
+    :alt: PyPI - Python Version
+
 .. |license| image:: https://img.shields.io/badge/license-MIT-green.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/LICENSE.rst
 
 .. |pypi| image:: https://badge.fury.io/py/pganonymize.svg
     :target: https://badge.fury.io/py/pganonymize
 
-.. |downloads| image:: https://pepy.tech/badge/pganonymize
+.. |downloads| image:: https://static.pepy.tech/personalized-badge/pganonymize?period=total&units=international_system&left_color=blue&right_color=black&left_text=Downloads
     :target: https://pepy.tech/project/pganonymize
     :alt: Download count
-
+    
 .. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Test/badge.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/actions

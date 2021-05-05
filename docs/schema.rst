@@ -61,7 +61,7 @@ regular expression pattern (the backslash is to escape the string for YAML).
 ~~~~~~~~~~~~
 
 In addition to the field level providers you can also specify a list of tables that should be cleared with
-the  `truncated` key. This is useful if you don't need the table data for development purposes or the reduce 
+the  `truncated` key. This is useful if you don't need the table data for development purposes or the reduce
 the size of the database dump.
 
 **Example**::
@@ -72,6 +72,22 @@ the size of the database dump.
 
 If two tables have a foreign key relation and you don't need to keep one of the table's data, just add the
 second table and they will be truncated at once, without causing a constraint error.
+
+``search``
+~~~~~~~~~~
+
+You can also specify a (SQL WHERE) `search_condition`, to filter the table for rows to be anonymized.
+This is useful if you need to anonymize one or more specific records, eg for "Right to be forgotten" (GDPR etc) purpose.
+
+**Example**::
+
+    tables:
+     - auth_user:
+        search: id BETWEEN 18 AND 140 AND user_type = 'customer'
+        fields:
+         - first_name:
+            provider:
+              name: clear
 
 Providers
 ---------
@@ -149,11 +165,11 @@ the provider with ``fake`` and then use the function name from the Faker library
 ``mask``
 ~~~~~~~~
 
-This provider will replace each character with a static sign.
-
 **Arguments:**
 
 * ``sign``: The sign to be used to replace the original characters (default ``X``).
+
+This provider will replace each character with a static sign.
 
 **Example usage**::
 
@@ -200,6 +216,15 @@ This provider will hash the given field value with the MD5 algorithm.
               name: set
               value: "Foo"
 
+The value can also be a dictionary for JSONB columns::
+
+    tables:
+     - auth_user:
+        fields:
+         - first_name:
+            provider:
+              name: set
+              value: '{"foo": "bar", "baz": 1}'
 
 Arguments
 ---------
