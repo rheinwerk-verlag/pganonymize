@@ -33,14 +33,15 @@ def anonymize_tables(connection, definitions, verbose=False):
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
+        search = table_definition.get('search')
         column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
-        data, table_columns = build_data(connection, table_name, columns, excludes, total_count, verbose)
+        data, table_columns = build_data(connection, table_name, columns, excludes, search, total_count, verbose)
         import_data(connection, column_dict, table_name, table_columns, primary_key, data)
 
 
-def build_data(connection, table, columns, excludes, total_count, verbose=False):
+def build_data(connection, table, columns, excludes, search, total_count, verbose=False):
     """
     Select all data from a table and return it together with a list of table columns.
 
@@ -48,6 +49,7 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
     :param str table: Name of the table to retrieve the data.
     :param list columns: A list of table fields
     :param list[dict] excludes: A list of exclude definitions.
+    :param str search: A SQL WHERE (search_condition) to filter and keep only the searched rows.
     :param int total_count: The amount of rows for the current table
     :param bool verbose: Display logging information and a progress bar.
     :return: A tuple containing the data list and a complete list of all table columns.
@@ -55,7 +57,11 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
     """
     if verbose:
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
-    sql = "SELECT * FROM {table};".format(table=table)
+    sql_select = "SELECT * FROM {table}".format(table=table)
+    if search:
+        sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=search)
+    else:
+        sql = "{select};".format(select=sql_select)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
     data = []

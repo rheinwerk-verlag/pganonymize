@@ -73,6 +73,22 @@ the size of the database dump.
 If two tables have a foreign key relation and you don't need to keep one of the table's data, just add the
 second table and they will be truncated at once, without causing a constraint error.
 
+``search``
+~~~~~~~~~~
+
+You can also specify a (SQL WHERE) `search_condition`, to filter the table for rows to be anonymized.
+This is useful if you need to anonymize one or more specific records, eg for "Right to be forgotten" (GDPR etc) purpose.
+
+**Example**::
+
+    tables:
+     - auth_user:
+        search: id BETWEEN 18 AND 140 AND user_type = 'customer'
+        fields:
+         - first_name:
+            provider:
+              name: clear
+
 Providers
 ---------
 
