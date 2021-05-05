@@ -2,6 +2,8 @@
 
 ## Development
 
+* [#17](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/17): Fix anonymizing error if there is a JSONB column in a table ([koptelovav](https://github.com/koptelovav))
+
 ## 0.3.3 (2021-04-16)
 
 * [#16](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/16): Preserve column and table cases during the copy process

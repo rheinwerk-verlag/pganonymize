@@ -61,7 +61,7 @@ regular expression pattern (the backslash is to escape the string for YAML).
 ~~~~~~~~~~~~
 
 In addition to the field level providers you can also specify a list of tables that should be cleared with
-the  `truncated` key. This is useful if you don't need the table data for development purposes or the reduce 
+the  `truncated` key. This is useful if you don't need the table data for development purposes or the reduce
 the size of the database dump.
 
 **Example**::
@@ -149,11 +149,11 @@ the provider with ``fake`` and then use the function name from the Faker library
 ``mask``
 ~~~~~~~~
 
-This provider will replace each character with a static sign.
-
 **Arguments:**
 
 * ``sign``: The sign to be used to replace the original characters (default ``X``).
+
+This provider will replace each character with a static sign.
 
 **Example usage**::
 
@@ -200,6 +200,15 @@ This provider will hash the given field value with the MD5 algorithm.
               name: set
               value: "Foo"
 
+The value can also be a dictionary for JSONB columns::
+
+    tables:
+     - auth_user:
+        fields:
+         - first_name:
+            provider:
+              name: set
+              value: '{"foo": "bar", "baz": 1}'
 
 Arguments
 ---------
