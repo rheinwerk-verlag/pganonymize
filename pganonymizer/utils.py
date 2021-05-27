@@ -14,7 +14,7 @@ from progress.bar import IncrementalBar
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 from six import StringIO
 
-from pganonymizer.constants import COPY_DB_DELIMITER, DEFAULT_PRIMARY_KEY
+from pganonymizer.constants import COPY_DB_DELIMITER, DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
 
@@ -37,11 +37,13 @@ def anonymize_tables(connection, definitions, verbose=False):
         column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
-        data, table_columns = build_data(connection, table_name, columns, excludes, search, total_count, verbose)
+        chunk_size = table_definition.get('chunk_size', DEFAULT_CHUNK_SIZE)
+        data, table_columns = build_data(connection, table_name, columns, excludes, search, total_count, chunk_size,
+                                         verbose)
         import_data(connection, column_dict, table_name, table_columns, primary_key, data)
 
 
-def build_data(connection, table, columns, excludes, search, total_count, verbose=False):
+def build_data(connection, table, columns, excludes, search, total_count, chunk_size, verbose=False):
     """
     Select all data from a table and return it together with a list of table columns.
 
@@ -51,6 +53,7 @@ def build_data(connection, table, columns, excludes, search, total_count, verbos
     :param list[dict] excludes: A list of exclude definitions.
     :param str search: A SQL WHERE (search_condition) to filter and keep only the searched rows.
     :param int total_count: The amount of rows for the current table
+    :param int chunk_size: Number of data rows to fetch with the cursor
     :param bool verbose: Display logging information and a progress bar.
     :return: A tuple containing the data list and a complete list of all table columns.
     :rtype: (list, list)
@@ -67,7 +70,7 @@ def build_data(connection, table, columns, excludes, search, total_count, verbos
     data = []
     table_columns = None
     while True:
-        records = cursor.fetchmany(size=2000)
+        records = cursor.fetchmany(size=chunk_size)
         if not records:
             break
         for row in records:

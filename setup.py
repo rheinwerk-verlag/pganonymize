@@ -66,8 +66,8 @@ setup(
     long_description=read('README.rst'),
     author='Henning Kage',
     author_email='henning.kage@rheinwerk-verlag.de',
-    maintainer='Rheinwerk Verlag GmbH Webteam',
-    maintainer_email='webteam@rheinwerk-verlag.de',
+    maintainer='Henning Kage',
+    maintainer_email='henning.kage@rheinwerk-verlag.de',
     url='https://github.com/rheinwerk-verlag/postgresql-anonymizer',
     license='MIT license',
     classifiers=[

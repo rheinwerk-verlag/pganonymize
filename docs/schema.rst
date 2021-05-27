@@ -3,14 +3,56 @@ Schema
 
 ``pganonymize`` uses a YAML based schema definition for the anonymization rules.
 
+Top level
+---------
+
 ``tables``
 ~~~~~~~~~~
 
 On the top level a list of tables can be defined with the ``tables`` keyword. This will define
 which tables should be anonymized.
 
-On the table level you can specify the tables primary key with the keyword ``primary_key`` if it
-isn't the default ``id``.
+**Example**::
+
+    tables:
+     - table_a:
+        fields:
+         - field_a: ...
+         - field_b: ...
+     - table_b:
+        fields:
+         - field_a: ...
+         - field_b: ...
+
+``truncate``
+~~~~~~~~~~~~
+
+You can also specify a list of tables that should be cleared instead of anonymized with the  `truncated` key. This is
+useful if you don't need the table data for development purposes or the reduce the size of the database dump.
+
+**Example**::
+
+    truncate:
+     - django_session
+     - my_other_table
+
+If two tables have a foreign key relation and you don't need to keep one of the table's data, just add the
+second table and they will be truncated at once, without causing a constraint error.
+
+Table level
+-----------
+
+``primary_key``
+~~~~~~~~~~~~~~~
+
+Defines the name of the primary key field for the current table. The default is ``id``.
+
+**Example**::
+
+    tables:
+     - my_table:
+        primary_key: my_primary_key
+        fields: ...
 
 ``fields``
 ~~~~~~~~~~
@@ -23,7 +65,6 @@ be treated.
 
     tables:
      - auth_user:
-        primary_key: id
         fields:
          - first_name:
             provider:
@@ -39,7 +80,7 @@ be treated.
 ~~~~~~~~~~~~
 
 For each table you can also specify a list of ``excludes``. Each entry has to be a field name which contains
-a list of exclude patterns. If one of these patterns matches, the whole table row won't ne anonymized.
+a list of exclude patterns. If one of these patterns matches, the whole table row won't be anonymized.
 
 **Example**::
 
@@ -57,22 +98,6 @@ a list of exclude patterns. If one of these patterns matches, the whole table ro
 This will exclude all data from the table ``auth_user`` that have an ``email`` field which matches the
 regular expression pattern (the backslash is to escape the string for YAML).
 
-``truncate``
-~~~~~~~~~~~~
-
-In addition to the field level providers you can also specify a list of tables that should be cleared with
-the  `truncated` key. This is useful if you don't need the table data for development purposes or the reduce
-the size of the database dump.
-
-**Example**::
-
-    truncate:
-     - django_session
-     - my_other_table
-
-If two tables have a foreign key relation and you don't need to keep one of the table's data, just add the
-second table and they will be truncated at once, without causing a constraint error.
-
 ``search``
 ~~~~~~~~~~
 
@@ -89,11 +114,59 @@ This is useful if you need to anonymize one or more specific records, eg for "Ri
             provider:
               name: clear
 
-Providers
----------
+``chunk_size``
+~~~~~~~~~~~~~~
 
-Providers are the tools, which means functions, used to alter the data within the database.
-The following provider are currently supported:
+Defines how many data rows should be fetched for each iteration of anonymizing the current table. The default is 2000.
+
+**Example**::
+
+    tables:
+     - auth_user:
+        chunk_size: 5000
+        fields: ...
+
+Field level
+-----------
+
+``provider``
+~~~~~~~~~~~~
+
+Providers are the tools, which means functions, used to alter the data within the database. You can specify on field
+level which provider should be used to alter the specific field. The reference a provider you will have can use the
+``name`` attribute.
+
+**Example**::
+
+    tables:
+     - auth_user:
+        fields:
+         - first_name:
+            provider:
+              name: set
+              value: "Foo"
+
+
+For a complete list of providers see the next section.
+
+``append``
+~~~~~~~~~~
+
+This argument will append a value at the end of the altered value:
+
+**Example usage**::
+
+    tables:
+     - auth_user:
+        fields:
+         - email:
+            provider:
+              name: md5
+            append: "@example.com"
+
+
+Provider
+--------
 
 ``choice``
 ~~~~~~~~~~
@@ -225,23 +298,3 @@ The value can also be a dictionary for JSONB columns::
             provider:
               name: set
               value: '{"foo": "bar", "baz": 1}'
-
-Arguments
----------
-
-In addition to the providers there is also a list of arguments that can be added to each provider:
-
-``append``
-~~~~~~~~~~
-
-This argument will append a value at the end of the altered value:
-
-**Example usage**::
-
-    tables:
-     - auth_user:
-        fields:
-         - email:
-            provider:
-              name: md5
-            append: "@example.com"

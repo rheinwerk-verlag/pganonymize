@@ -2,6 +2,10 @@
 
 ## Development
 
+## 0.4.1 (2021-05-27)
+
+* [#19](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/19): Make chunk size in the table definition dynamic ([halilkaya](https://github.com/halilkaya))
+
 ## 0.4.0 (2021-05-05)
 
 * [#18](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/18): Specify (SQL WHERE) search_condition, to filter the table for rows to be anonymized ([bobslee](https://github.com/bobslee))
