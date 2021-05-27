@@ -1,6 +1,7 @@
 tables:
  - auth_user:
     primary_key: id
+    chunk_size: 5000
     fields:
      - first_name:
         provider:
