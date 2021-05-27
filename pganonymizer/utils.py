@@ -161,15 +161,15 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
     cursor.close()
 
 
-def get_connection(pg_args):
+def get_connection(dsn):
     """
     Return a connection to the database.
 
-    :param pg_args:
+    :param dsn:
     :return: A psycopg connection instance
     :rtype: psycopg2.connection
     """
-    return psycopg2.connect(**pg_args)
+    return psycopg2.connect(dsn)
 
 
 def get_table_count(connection, table):
@@ -283,14 +283,14 @@ def truncate_tables(connection, tables):
     cursor.close()
 
 
-def create_database_dump(filename, db_args):
+def create_database_dump(filename, connection):
     """
     Create a dump file from the current database.
 
     :param str filename: Path to the dumpfile that should be created
-    :param dict db_args: A dictionary with database related information
+    :param connection:
     """
-    arguments = '-d {dbname} -U {user} -h {host} -p {port}'.format(**db_args)
+    arguments = '-d {dbname} -U {user} -h {host} -p {port}'.format(**connection.get_dsn_parameters())
     cmd = 'pg_dump -p -Fc -Z 9 {args} -f {filename}'.format(
         args=arguments,
         filename=filename

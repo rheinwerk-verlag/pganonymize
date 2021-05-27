@@ -2,6 +2,8 @@
 
 ## Development
 
+* Simplified the CLI database connection arguments
+
 ## 0.4.1 (2021-05-27)
 
 * [#19](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/19): Make chunk size in the table definition dynamic ([halilkaya](https://github.com/halilkaya))

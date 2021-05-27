@@ -11,6 +11,13 @@ PROVIDERS = []
 fake_data = Faker()
 
 
+def list_provider_classes():
+    """List all available provider classes."""
+    print('Available provider classes:\n')
+    for provider_cls in PROVIDERS:
+        print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
+
+
 def get_provider(provider_config):
     """
     Return a provider instance, according to the schema definition of a field.

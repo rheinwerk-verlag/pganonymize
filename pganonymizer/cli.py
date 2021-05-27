@@ -9,28 +9,9 @@ import time
 
 import yaml
 
-from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
-from pganonymizer.providers import PROVIDERS
+from pganonymizer.constants import DEFAULT_SCHEMA_FILE
+from pganonymizer.providers import list_provider_classes
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
-
-
-def get_pg_args(args):
-    """
-    Map all commandline arguments with database keys.
-
-    :param argparse.Namespace args: The commandline arguments
-    :return: A dictionary with database arguments
-    :rtype: dict
-    """
-    return ({name: value for name, value in
-             zip(DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
-
-
-def list_provider_classes():
-    """List all available provider classes."""
-    print('Available provider classes:\n')
-    for provider_cls in PROVIDERS:
-        print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
 
 
 def main():
@@ -41,11 +22,8 @@ def main():
                         default=False)
     parser.add_argument('--schema', help='A YAML schema file that contains the anonymization rules',
                         default=DEFAULT_SCHEMA_FILE)
-    parser.add_argument('--dbname', help='Name of the database')
-    parser.add_argument('--user', help='Name of the database user')
-    parser.add_argument('--password', default='', help='Password for the database user')
-    parser.add_argument('--host', help='Database hostname', default='localhost')
-    parser.add_argument('--port', help='Port of the database', default='5432')
+    parser.add_argument('--dsn', help='Connection string (dsn) for the database, e.g. '
+                                      'postgresql://localhost/dbname?user=username&password=secret')
     parser.add_argument('--dry-run', action='store_true', help='Don\'t commit changes made on the database',
                         default=False)
     parser.add_argument('--dump-file', help='Create a database dump file with the given name')
@@ -63,12 +41,14 @@ def main():
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
 
-    pg_args = get_pg_args(args)
-    connection = get_connection(pg_args)
+    connection = get_connection(args.dsn)
 
     start_time = time.time()
     truncate_tables(connection, schema.get('truncate', []))
     anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
+
+    if args.dump_file:
+        create_database_dump(args.dump_file, connection)
 
     if not args.dry_run:
         connection.commit()
@@ -76,9 +56,6 @@ def main():
 
     end_time = time.time()
     logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
-
-    if args.dump_file:
-        create_database_dump(args.dump_file, pg_args)
 
 
 if __name__ == '__main__':
