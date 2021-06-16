@@ -7,7 +7,7 @@ It uses a YAML file to define which tables and fields should be anonymized and p
 
 .. class:: no-web no-pdf
 
-    |python| |license| |pypi| |downloads| |build|
+    |python| |license| |pypi| |downloads| |build| |health|
 
 .. contents::
 
@@ -161,3 +161,8 @@ After that you can pass a schema file to the container, using Docker volumes, an
 
 .. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Test/badge.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/actions
+    
+.. |health| image:: https://snyk.io/advisor/python/pganonymize/badge.svg
+  :target: https://snyk.io/advisor/python/pganonymize
+  :alt: pganonymize
+
