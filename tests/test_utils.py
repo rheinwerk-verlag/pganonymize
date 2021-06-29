@@ -1,7 +1,7 @@
 import pytest
-from mock import Mock, call, patch
+from mock import ANY, Mock, call, patch
 
-from pganonymizer.utils import get_connection, truncate_tables
+from pganonymizer.utils import get_connection, truncate_tables, import_data
 
 
 class TestGetConnection:
@@ -38,3 +38,23 @@ class TestTruncateTables:
             connection.cursor.assert_not_called()
             mock_cursor.execute.assert_not_called()
             mock_cursor.close.assert_not_called()
+
+
+class TestImportData:
+
+    @pytest.mark.parametrize('column_dict, source_table, table_columns, primary_key, data, expected_tbl_name', [
+        [{'foo': None}, 'src_tbl', ['id', 'col1'], 'id', [], 'tmp_src_tbl' ]
+    ])
+    def test(self, column_dict, source_table, table_columns, primary_key, data, expected_tbl_name):
+        mock_cursor = Mock()
+
+        connection = Mock()
+        connection.cursor.return_value = mock_cursor
+
+        import_data(connection, column_dict, source_table, table_columns, primary_key, data)
+       
+        assert connection.cursor.call_count == 2
+        assert mock_cursor.close.call_count == 2
+
+        mock_cursor.copy_from.assert_called_once()
+        assert mock_cursor.copy_from.call_args_list == [call(ANY, expected_tbl_name, columns=ANY, null=ANY, sep=ANY)]

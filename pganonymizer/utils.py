@@ -81,7 +81,7 @@ def build_data(connection, table, columns, excludes, search, total_count, chunk_
                     row[key] = value
             if verbose:
                 progress_bar.next()
-            table_columns = ['"{}"'.format(column) for column in row.keys()]
+            table_columns = [column for column in row.keys()]
             if not row_column_dict:
                 continue
             data.append(row.values())
@@ -145,9 +145,9 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
     :param list data: The table data.
     """
     primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
-    temp_table = '"tmp_{table}"'.format(table=source_table)
+    temp_table = 'tmp_{table}'.format(table=source_table)
     cursor = connection.cursor()
-    cursor.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
+    cursor.execute('CREATE TEMP TABLE "%s" (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
     copy_from(connection, data, temp_table, table_columns)
     set_columns = ', '.join(['{column} = s.{column}'.format(column='"{}"'.format(key)) for key in column_dict.keys()])
     sql = (
