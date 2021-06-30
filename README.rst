@@ -39,6 +39,8 @@ Features
 | ``ip``         | 157.50.1.20          | ``set``               | 127.0.0.1                        |
 +----------------+----------------------+-----------------------+----------------------------------+
 
+Note: `faker.unique.[provider]` only supported on python3.5+ (Faker library min supported python version)
+
 See the `documentation`_ for a more detailed description of the provided anonymization methods.
 
 Installation
