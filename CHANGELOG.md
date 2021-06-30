@@ -2,6 +2,7 @@
 
 ## Development
 
+* [#22](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/22): Fix table and column name quotes in cursor.copy_from call ([nurikk](https://github.com/nurikk))
 * [#23](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/23): Allow uniq faker ([nurikk](https://github.com/nurikk))
 
 ## 0.4.1 (2021-05-27)
