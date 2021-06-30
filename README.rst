@@ -34,8 +34,12 @@ Features
 +----------------+----------------------+-----------------------+----------------------------------+
 | ``email``      | jane.doe@example.com | ``md5``               | 0cba00ca3da1b283a57287bcceb17e35 |
 +----------------+----------------------+-----------------------+----------------------------------+
+| ``email``      | jane.doe@example.com | ``faker.unique.email``| alex7@sample.com                 |
++----------------+----------------------+-----------------------+----------------------------------+
 | ``ip``         | 157.50.1.20          | ``set``               | 127.0.0.1                        |
 +----------------+----------------------+-----------------------+----------------------------------+
+
+Note: `faker.unique.[provider]` only supported on python3.5+ (Faker library min supported python version)
 
 See the `documentation`_ for a more detailed description of the provided anonymization methods.
 
