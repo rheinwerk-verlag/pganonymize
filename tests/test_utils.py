@@ -42,19 +42,20 @@ class TestTruncateTables:
 
 class TestImportData:
 
-    @pytest.mark.parametrize('column_dict, source_table, table_columns, primary_key, data, expected_tbl_name, expected_columns', [
-        [{'FOO': None}, 'src_tbl', ['id', 'COL_1'], 'id', [], 'tmp_src_tbl', ['"id"', '"COL_1"'] ]
+    @pytest.mark.parametrize('column_dict, source_table, table_columns, primary_key, expected_tbl_name, expected_columns', [
+        [{'FOO': None}, 'src_tbl', ['id', 'COL_1'], 'id', 'tmp_src_tbl', ['"id"', '"COL_1"']]
     ])
-    def test(self, column_dict, source_table, table_columns, primary_key, data, expected_tbl_name, expected_columns):
+    def test(self, column_dict, source_table, table_columns, primary_key, expected_tbl_name, expected_columns):
         mock_cursor = Mock()
 
         connection = Mock()
         connection.cursor.return_value = mock_cursor
 
-        import_data(connection, column_dict, source_table, table_columns, primary_key, data)
-       
+        import_data(connection, column_dict, source_table, table_columns, primary_key, [])
+
         assert connection.cursor.call_count == 2
         assert mock_cursor.close.call_count == 2
 
         mock_cursor.copy_from.assert_called_once()
-        assert mock_cursor.copy_from.call_args_list == [call(ANY, expected_tbl_name, columns=expected_columns, null=ANY, sep=ANY)]
+        expected = [call(ANY, expected_tbl_name, columns=expected_columns, null=ANY, sep=ANY)]
+        assert mock_cursor.copy_from.call_args_list == expected
