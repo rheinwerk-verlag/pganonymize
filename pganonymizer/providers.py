@@ -89,7 +89,6 @@ class FakeProvider(with_metaclass(ProviderMeta, Provider)):
 
     def alter_value(self, value):
         func_name = self.kwargs['name'].split('.', 1)[1]
-        print(func_name)
         try:
             func = operator.attrgetter(func_name)(fake_data)
         except AttributeError as exc:
