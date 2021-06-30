@@ -54,6 +54,7 @@ Usage
 -----
 
 ::
+
     usage: pganonymize [-h] [-v] [-l] [--schema SCHEMA] [--dsn DSN] [--dry-run] [--dump-file DUMP_FILE]
 
     Anonymize data of a PostgreSQL database
