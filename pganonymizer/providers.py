@@ -1,4 +1,5 @@
 import random
+import operator
 from hashlib import md5
 
 from faker import Faker
@@ -87,9 +88,10 @@ class FakeProvider(with_metaclass(ProviderMeta, Provider)):
         return cls.id.lower() == name.split('.')[0].lower()
 
     def alter_value(self, value):
-        func_name = self.kwargs['name'].split('.')[1]
+        func_name = self.kwargs['name'].split('.', 1)[1]
+        print(func_name)
         try:
-            func = getattr(fake_data, func_name)
+            func = operator.attrgetter(func_name)(fake_data)
         except AttributeError as exc:
             raise InvalidProviderArgument(exc)
         return func()
