@@ -54,26 +54,18 @@ Usage
 -----
 
 ::
-
-    usage: pganonymize [-h] [-v] [-l] [--schema SCHEMA] [--dbname DBNAME]
-                   [--user USER] [--password PASSWORD] [--host HOST]
-                   [--port PORT] [--dry-run] [--dump-file DUMP_FILE]
+    usage: pganonymize [-h] [-v] [-l] [--schema SCHEMA] [--dsn DSN] [--dry-run] [--dump-file DUMP_FILE]
 
     Anonymize data of a PostgreSQL database
 
     optional arguments:
-    -h, --help            show this help message and exit
-    -v, --verbose         Increase verbosity
-    -l, --list-providers  Show a list of all available providers
-    --schema SCHEMA       A YAML schema file that contains the anonymization
-                            rules
-    --dbname DBNAME       Name of the database
-    --user USER           Name of the database user
-    --password PASSWORD   Password for the database user
-    --host HOST           Database hostname
-    --port PORT           Port of the database
-    --dry-run             Don't commit changes made on the database
-    --dump-file DUMP_FILE
+      -h, --help            show this help message and exit
+      -v, --verbose         Increase verbosity
+      -l, --list-providers  Show a list of all available providers
+      --schema SCHEMA       A YAML schema file that contains the anonymization rules
+      --dsn DSN             Connection string (dsn) for the database, e.g. postgresql://localhost/dbname?user=username&password=secret
+      --dry-run             Don't commit changes made on the database
+      --dump-file DUMP_FILE
                             Create a database dump file with the given name
 
 Despite the database connection values, you will have to define a YAML schema file, that includes
@@ -83,10 +75,7 @@ all anonymization rules for that database. Take a look at the `schema documentat
 Example call::
 
     $ pganonymize --schema=myschema.yml \
-        --dbname=test_database \
-        --user=username \
-        --password=mysecret \
-        --host=db.host.example.com \
+        --dsn="postgresql://localhost/dbname?user=user&password=password" \
         -v
 
 Database dump
@@ -101,10 +90,7 @@ database, e.g. under Linux::
 Example call::
 
     $ pganonymize --schema=myschema.yml \
-        --dbname=test_database \
-        --user=username \
-        --password=mysecret \
-        --host=db.host.example.com \
+        --dsn="postgresql://localhost/dbname?user=user&password=password" \
         --dump-file=/tmp/dump.gz \
         -v
 
@@ -139,10 +125,7 @@ After that you can pass a schema file to the container, using Docker volumes, an
         -it pganonymizer \
         /usr/local/bin/pganonymize \
         --schema=/schema.yml \
-        --dbname=<database> \
-        --user=<user> \
-        --password=<password> \
-        --host=<host> \
+        --dsn="postgresql://localhost/dbname?user=user&password=password" \
         -v
 
 
@@ -165,7 +148,7 @@ After that you can pass a schema file to the container, using Docker volumes, an
 
 .. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Test/badge.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/actions
-    
+
 .. |health| image:: https://snyk.io/advisor/python/pganonymize/badge.svg
   :target: https://snyk.io/advisor/python/pganonymize
   :alt: pganonymize
