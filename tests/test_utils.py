@@ -43,7 +43,7 @@ class TestTruncateTables:
 class TestImportData:
 
     @pytest.mark.parametrize('source_table, table_columns, primary_key, expected_tbl_name, expected_columns', [
-        [{'FOO': None}, 'src_tbl', ['id', 'COL_1'], 'id', 'tmp_src_tbl', ['"id"', '"COL_1"']]
+        ['src_tbl', ['id', 'COL_1'], 'id', 'tmp_src_tbl', ['"id"', '"COL_1"']]
     ])
     def test(self, source_table, table_columns, primary_key, expected_tbl_name, expected_columns):
         mock_cursor = Mock()
