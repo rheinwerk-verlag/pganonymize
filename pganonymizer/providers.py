@@ -1,5 +1,5 @@
-import random
 import operator
+import random
 from hashlib import md5
 
 from faker import Faker

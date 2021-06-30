@@ -1,6 +1,7 @@
+import operator
+
 import pytest
 import six
-import operator
 from mock import patch
 
 from pganonymizer import exceptions, providers
