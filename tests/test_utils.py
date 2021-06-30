@@ -1,7 +1,7 @@
 import pytest
 from mock import ANY, Mock, call, patch
 
-from pganonymizer.utils import get_connection, truncate_tables, import_data
+from pganonymizer.utils import get_connection, import_data, truncate_tables
 
 
 class TestGetConnection:
