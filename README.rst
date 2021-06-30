@@ -1,13 +1,13 @@
 PostgreSQL Anonymizer
 =====================
 
-A commandline tool to anonymize PostgreSQL databases for GDPR purposes.
+A commandline tool to anonymize PostgreSQL databases for DSGVO/GDPR purposes.
 
-It uses a YAML definition file to define which tables and fields should be anonymized and provides various methods of anonymization.
+It uses a YAML file to define which tables and fields should be anonymized and provides various methods of anonymization. The tool requires a direct PostgreSQL connection to perform the anonymization.
 
 .. class:: no-web no-pdf
 
-    |python| |license| |pypi| |downloads| |build|
+    |python| |license| |pypi| |downloads| |build| |health|
 
 .. contents::
 
@@ -34,8 +34,12 @@ Features
 +----------------+----------------------+-----------------------+----------------------------------+
 | ``email``      | jane.doe@example.com | ``md5``               | 0cba00ca3da1b283a57287bcceb17e35 |
 +----------------+----------------------+-----------------------+----------------------------------+
+| ``email``      | jane.doe@example.com | ``faker.unique.email``| alex7@sample.com                 |
++----------------+----------------------+-----------------------+----------------------------------+
 | ``ip``         | 157.50.1.20          | ``set``               | 127.0.0.1                        |
 +----------------+----------------------+-----------------------+----------------------------------+
+
+Note: `faker.unique.[provider]` only supported on python3.5+ (Faker library min supported python version)
 
 See the `documentation`_ for a more detailed description of the provided anonymization methods.
 
@@ -161,3 +165,8 @@ After that you can pass a schema file to the container, using Docker volumes, an
 
 .. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Test/badge.svg
     :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/actions
+    
+.. |health| image:: https://snyk.io/advisor/python/pganonymize/badge.svg
+  :target: https://snyk.io/advisor/python/pganonymize
+  :alt: pganonymize
+

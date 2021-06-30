@@ -1,6 +1,7 @@
+import operator
+
 import pytest
 import six
-
 from mock import patch
 
 from pganonymizer import exceptions, providers
@@ -26,12 +27,13 @@ class TestFakeProvider:
 
     @pytest.mark.parametrize('name, function_name', [
         ('fake.first_name', 'first_name'),
+        ('fake.unique.first_name', 'unique.first_name'),
     ])
     @patch('pganonymizer.providers.fake_data')
     def test_alter_value(self, mock_fake_data, name, function_name):
         provider = providers.FakeProvider(name=name)
         provider.alter_value('Foo')
-        assert getattr(mock_fake_data, function_name).call_count == 1
+        assert operator.attrgetter(function_name)(mock_fake_data).call_count == 1
 
     @pytest.mark.parametrize('name', [
         'fake.foo_name'

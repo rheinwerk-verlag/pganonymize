@@ -216,8 +216,8 @@ The ``clear`` provider will set a database field to ``null``.
 
 **Arguments:** none
 
-``pganonymize`` supports all providers from the Python library Faker_. All you have to do is prefix
-the provider with ``fake`` and then use the function name from the Faker library, e.g:
+``pganonymize`` supports all providers from the Python library `Faker`_. All you have to do is prefix the provider with
+``fake`` and then use the function name from the Faker library, e.g:
 
 * ``fake.first_name``
 * ``fake.street_name``
@@ -234,6 +234,8 @@ the provider with ``fake`` and then use the function name from the Faker library
          - email:
             provider:
               name: fake.email
+
+See the `Faker documentation`_ for a full set of providers.
 
 ``mask``
 ~~~~~~~~
@@ -298,3 +300,6 @@ The value can also be a dictionary for JSONB columns::
             provider:
               name: set
               value: '{"foo": "bar", "baz": 1}'
+
+.. _Faker: https://github.com/joke2k/faker
+.. _Faker documentation: http://faker.rtfd.org/
