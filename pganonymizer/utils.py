@@ -97,9 +97,11 @@ def row_matches_excludes(row, excludes=None):
 
     :param list row: The data row
     :param list excludes: A list of field exclusion roles, e.g.:
-        [
-            {'email': ['\\S.*@example.com', '\\S.*@foobar.com', ]}
-        ]
+
+    >>> [
+    >>>     {'email': ['\\S.*@example.com', '\\S.*@foobar.com', ]}
+    >>> ]
+
     :return: True or False
     :rtype: bool
     """
@@ -221,10 +223,12 @@ def get_column_dict(columns):
     Return a dictionary with all fields from the table definition and None as value.
 
     :param list columns: A list of field definitions from the YAML schema, e.g.:
-        [
-            {'first_name': {'provider': 'set', 'value': 'Foo'}},
-            {'guest_email': {'append': '@localhost', 'provider': 'md5'}},
-        ]
+
+    >>> [
+    >>>     {'first_name': {'provider': 'set', 'value': 'Foo'}},
+    >>>     {'guest_email': {'append': '@localhost', 'provider': 'md5'}},
+    >>> ]
+
     :return: A dictionary containing all fields to be altered with a default value of None, e.g.::
         {'guest_email': None}
     :rtype: dict
@@ -242,9 +246,11 @@ def get_column_values(row, columns):
 
     :param psycopg2.extras.DictRow row: A data row from the current table to be altered
     :param list columns: A list of table columns with their provider rules, e.g.:
-        [
-            {'guest_email': {'append': '@localhost', 'provider': 'md5'}}
-        ]
+
+    >>> [
+    >>>     {'guest_email': {'append': '@localhost', 'provider': 'md5'}}
+    >>> ]
+
     :return: A dictionary with all fields that have to be altered and their value for a single data row, e.g.:
         {'guest_email': '12faf5a9bb6f6f067608dca3027c8fcb@localhost'}
     :rtype: dict
