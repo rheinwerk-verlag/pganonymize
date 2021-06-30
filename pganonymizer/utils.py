@@ -126,7 +126,7 @@ def copy_from(connection, data, table, columns):
     new_data = data2csv(data)
     cursor = connection.cursor()
     try:
-        cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N', columns=columns)
+        cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N', columns=['"{}"'.format(column) for column in columns])
     except (BadCopyFileFormat, InvalidTextRepresentation) as exc:
         raise BadDataFormat(exc)
     cursor.close()
