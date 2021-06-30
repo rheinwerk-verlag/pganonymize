@@ -8,15 +8,9 @@ class TestGetConnection:
 
     @patch('pganonymizer.utils.psycopg2.connect')
     def test(self, mock_connect):
-        connection_data = {
-            'dbname': 'test',
-            'user': 'user',
-            'password': 'password',
-            'host': 'localhost',
-            'port': 5432
-        }
-        get_connection(connection_data)
-        mock_connect.assert_called_once_with(**connection_data)
+        dsn = 'postgresql://localhost/anon_test?user=postgres&password=postgres'
+        get_connection(dsn)
+        mock_connect.assert_called_once_with(dsn)
 
 
 class TestTruncateTables:
