@@ -298,7 +298,7 @@ def create_database_dump(filename, connection):
     :param connection:
     """
     arguments = '-d {dbname} -U {user} -h {host} -p {port}'.format(**connection.get_dsn_parameters())
-    cmd = 'pg_dump -p -Fc -Z 9 {args} -f {filename}'.format(
+    cmd = 'pg_dump -Fc -Z 9 {args} -f {filename}'.format(
         args=arguments,
         filename=filename
     )
