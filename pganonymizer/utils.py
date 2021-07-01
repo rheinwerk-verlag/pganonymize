@@ -34,15 +34,15 @@ def anonymize_tables(connection, definitions, verbose=False):
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
         search = table_definition.get('search')
-        column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
         chunk_size = table_definition.get('chunk_size', DEFAULT_CHUNK_SIZE)
-        data = build_data(connection, table_name, columns, excludes, search, total_count, chunk_size, verbose)
-        import_data(connection, column_dict, table_name, primary_key, data)
+        build_and_then_import_data(connection, table_name, primary_key, columns, excludes,
+                                   search, total_count, chunk_size, verbose=verbose)
 
 
-def build_data(connection, table, columns, excludes, search, total_count, chunk_size, verbose=False):
+def build_and_then_import_data(connection, table, primary_key, columns,
+                               excludes, search, total_count, chunk_size, verbose=False):
     """
     Select all data from a table and return it together with a list of table columns.
 
@@ -54,8 +54,6 @@ def build_data(connection, table, columns, excludes, search, total_count, chunk_
     :param int total_count: The amount of rows for the current table
     :param int chunk_size: Number of data rows to fetch with the cursor
     :param bool verbose: Display logging information and a progress bar.
-    :return: A list containing the data.
-    :rtype: list
     """
     if verbose:
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
@@ -66,8 +64,8 @@ def build_data(connection, table, columns, excludes, search, total_count, chunk_
         sql = "{select};".format(select=sql_select)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
-    data = []
     while True:
+        data = []
         records = cursor.fetchmany(size=chunk_size)
         if not records:
             break
@@ -82,10 +80,11 @@ def build_data(connection, table, columns, excludes, search, total_count, chunk_
             if not row_column_dict:
                 continue
             data.append(row.values())
+        import_data(connection, columns, table, primary_key, data)
+
     if verbose:
         progress_bar.finish()
     cursor.close()
-    return data
 
 
 def row_matches_excludes(row, excludes=None):
@@ -125,18 +124,18 @@ def copy_from(connection, data, table):
     cursor = connection.cursor()
     try:
         cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N')
+        new_data.close()
     except (BadCopyFileFormat, InvalidTextRepresentation) as exc:
         raise BadDataFormat(exc)
     cursor.close()
 
 
-def import_data(connection, column_dict, source_table, primary_key, data):
+def import_data(connection, definitions, source_table, primary_key, data):
     """
     Import the temporary and anonymized data to a temporary table and write the changes back.
 
     :param connection: A database connection instance.
-    :param dict column_dict: A dictionary with all columns (specified by the schema definition) and a default value of
-      None.
+    :param list columns: A list of table fields
     :param str source_table: Name of the table to be anonymized.
     :param str primary_key: Name of the tables primary key.
     :param list data: The table data.
@@ -146,7 +145,9 @@ def import_data(connection, column_dict, source_table, primary_key, data):
     cursor = connection.cursor()
     cursor.execute('CREATE TEMP TABLE "%s" (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
     copy_from(connection, data, temp_table)
-    set_columns = ', '.join(['{column} = s.{column}'.format(column='"{}"'.format(key)) for key in column_dict.keys()])
+
+    column_names = ['"{}"'.format(list(definition.keys())[0]) for definition in definitions]
+    set_columns = ', '.join(['{column} = s.{column}'.format(column=column) for column in column_names])
     sql = (
         'UPDATE {table} t '
         'SET {columns} '
@@ -211,28 +212,6 @@ def data2csv(data):
         writer.writerow(row_data)
     buf.seek(0)
     return buf
-
-
-def get_column_dict(columns):
-    """
-    Return a dictionary with all fields from the table definition and None as value.
-
-    :param list columns: A list of field definitions from the YAML schema, e.g.:
-
-    >>> [
-    >>>     {'first_name': {'provider': 'set', 'value': 'Foo'}},
-    >>>     {'guest_email': {'append': '@localhost', 'provider': 'md5'}},
-    >>> ]
-
-    :return: A dictionary containing all fields to be altered with a default value of None, e.g.::
-        {'guest_email': None}
-    :rtype: dict
-    """
-    column_dict = {}
-    for definition in columns:
-        column_name = list(definition.keys())[0]
-        column_dict[column_name] = None
-    return column_dict
 
 
 def get_column_values(row, columns):
