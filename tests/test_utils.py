@@ -42,20 +42,20 @@ class TestTruncateTables:
 
 class TestImportData:
 
-    @pytest.mark.parametrize('source_table, table_columns, primary_key, expected_tbl_name, expected_columns', [
-        ['src_tbl', ['id', 'COL_1'], 'id', 'tmp_src_tbl', ['"id"', '"COL_1"']]
+    @pytest.mark.parametrize('source_table, primary_key, expected_tbl_name', [
+        ['src_tbl', 'id', 'tmp_src_tbl']
     ])
-    def test(self, source_table, table_columns, primary_key, expected_tbl_name, expected_columns):
+    def test(self, source_table, primary_key, expected_tbl_name):
         mock_cursor = Mock()
 
         connection = Mock()
         connection.cursor.return_value = mock_cursor
 
-        import_data(connection, {}, source_table, table_columns, primary_key, [])
+        import_data(connection, {}, source_table, primary_key, [])
 
         assert connection.cursor.call_count == 2
         assert mock_cursor.close.call_count == 2
 
         mock_cursor.copy_from.assert_called_once()
-        expected = [call(ANY, expected_tbl_name, columns=expected_columns, null=ANY, sep=ANY)]
+        expected = [call(ANY, expected_tbl_name, null=ANY, sep=ANY)]
         assert mock_cursor.copy_from.call_args_list == expected
