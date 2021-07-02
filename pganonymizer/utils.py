@@ -38,9 +38,8 @@ def anonymize_tables(connection, definitions, verbose=False):
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
         chunk_size = table_definition.get('chunk_size', DEFAULT_CHUNK_SIZE)
-        data, table_columns = build_data(connection, table_name, columns, excludes, search, total_count, chunk_size,
-                                         verbose)
-        import_data(connection, column_dict, table_name, table_columns, primary_key, data)
+        data = build_data(connection, table_name, columns, excludes, search, total_count, chunk_size, verbose)
+        import_data(connection, column_dict, table_name, primary_key, data)
 
 
 def build_data(connection, table, columns, excludes, search, total_count, chunk_size, verbose=False):
@@ -55,8 +54,8 @@ def build_data(connection, table, columns, excludes, search, total_count, chunk_
     :param int total_count: The amount of rows for the current table
     :param int chunk_size: Number of data rows to fetch with the cursor
     :param bool verbose: Display logging information and a progress bar.
-    :return: A tuple containing the data list and a complete list of all table columns.
-    :rtype: (list, list)
+    :return: A list containing the data.
+    :rtype: list
     """
     if verbose:
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
@@ -68,7 +67,6 @@ def build_data(connection, table, columns, excludes, search, total_count, chunk_
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
     data = []
-    table_columns = None
     while True:
         records = cursor.fetchmany(size=chunk_size)
         if not records:
@@ -81,14 +79,13 @@ def build_data(connection, table, columns, excludes, search, total_count, chunk_
                     row[key] = value
             if verbose:
                 progress_bar.next()
-            table_columns = [column for column in row.keys()]
             if not row_column_dict:
                 continue
             data.append(row.values())
     if verbose:
         progress_bar.finish()
     cursor.close()
-    return data, table_columns
+    return data
 
 
 def row_matches_excludes(row, excludes=None):
@@ -115,27 +112,25 @@ def row_matches_excludes(row, excludes=None):
     return False
 
 
-def copy_from(connection, data, table, columns):
+def copy_from(connection, data, table):
     """
     Copy the data from a table to a temporary table.
 
     :param connection: A database connection instance.
     :param list data: The data of a table.
     :param str table: Name of the temporary table used for copying the data.
-    :param list columns: All columns of the current table.
     :raises BadDataFormat: If the data cannot be imported due to a invalid format.
     """
     new_data = data2csv(data)
     cursor = connection.cursor()
     try:
-        quoted_cols = ['"{}"'.format(column) for column in columns]
-        cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N', columns=quoted_cols)
+        cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N')
     except (BadCopyFileFormat, InvalidTextRepresentation) as exc:
         raise BadDataFormat(exc)
     cursor.close()
 
 
-def import_data(connection, column_dict, source_table, table_columns, primary_key, data):
+def import_data(connection, column_dict, source_table, primary_key, data):
     """
     Import the temporary and anonymized data to a temporary table and write the changes back.
 
@@ -143,7 +138,6 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
     :param dict column_dict: A dictionary with all columns (specified by the schema definition) and a default value of
       None.
     :param str source_table: Name of the table to be anonymized.
-    :param list table_columns: A list of all table columns.
     :param str primary_key: Name of the tables primary key.
     :param list data: The table data.
     """
@@ -151,7 +145,7 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
     temp_table = 'tmp_{table}'.format(table=source_table)
     cursor = connection.cursor()
     cursor.execute('CREATE TEMP TABLE "%s" (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
-    copy_from(connection, data, temp_table, table_columns)
+    copy_from(connection, data, temp_table)
     set_columns = ', '.join(['{column} = s.{column}'.format(column='"{}"'.format(key)) for key in column_dict.keys()])
     sql = (
         'UPDATE {table} t '
