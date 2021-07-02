@@ -67,6 +67,7 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
     temp_table = 'tmp_{table}'.format(table=table)
+    create_temporary_table(connection, columns, table, temp_table, primary_key)
     while True:
         data = []
         records = cursor.fetchmany(size=chunk_size)
@@ -83,7 +84,7 @@ def build_and_then_import_data(connection, table, primary_key, columns,
             if not row_column_dict:
                 continue
             data.append(row.values())
-        import_data(connection, columns, table, temp_table, primary_key, data)
+        import_data(connection, temp_table, data)
     if verbose:
         progress_bar.finish()
     apply_anonymised_data(connection, temp_table, table, primary_key, columns)
@@ -147,30 +148,34 @@ def copy_from(connection, data, table):
     cursor = connection.cursor()
     try:
         cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N')
-        new_data.close()
     except (BadCopyFileFormat, InvalidTextRepresentation) as exc:
         raise BadDataFormat(exc)
+    finally:
+        new_data.close()
+        cursor.close()
+
+
+def create_temporary_table(connection, definitions, source_table, temp_table, primary_key):
+    primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
+    column_names = get_column_names(definitions)
+    sql_columns = ', '.join(['"{}"'.format(column_name) for column_name in [primary_key] + column_names])
+    ctas_query = """CREATE TEMP TABLE "{temp_table}" AS SELECT {columns}
+                    FROM "{source_table}" WITH NO DATA ON COMMIT DROP"""
+    cursor = connection.cursor()
+    cursor.execute(ctas_query.format(temp_table=temp_table, source_table=source_table, columns=sql_columns))
     cursor.close()
 
 
-def import_data(connection, definitions, source_table, temp_table, primary_key, data):
+def import_data(connection, table_name, data):
     """
     Import the temporary and anonymized data to a temporary table and write the changes back.
-
     :param connection: A database connection instance.
-    :param list columns: A list of table fields
     :param str source_table: Name of the table to be anonymized.
-    :param str primary_key: Name of the tables primary key.
     :param list data: The table data.
     """
-    primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
 
     cursor = connection.cursor()
-    column_names = get_column_names(definitions)
-    sql_columns = ', '.join(['"{}"'.format(column_name) for column_name in [primary_key] + column_names])
-    ctas_query = 'CREATE TEMP TABLE IF NOT EXISTS "{temp_table}" AS SELECT {columns} FROM "{source_table}" WITH NO DATA'
-    cursor.execute(ctas_query.format(temp_table=temp_table, source_table=source_table, columns=sql_columns))
-    copy_from(connection, data, temp_table)
+    copy_from(connection, data, table_name)
     cursor.close()
 
 

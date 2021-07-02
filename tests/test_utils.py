@@ -43,16 +43,16 @@ class TestTruncateTables:
 
 class TestImportData:
 
-    @pytest.mark.parametrize('source_table, tmp_table, primary_key', [
-        ['src_tbl', 'tmp_src_tbl', 'id']
+    @pytest.mark.parametrize('tmp_table', [
+        ['src_tbl']
     ])
-    def test(self, source_table, tmp_table, primary_key):
+    def test(self, tmp_table):
         mock_cursor = Mock()
 
         connection = Mock()
         connection.cursor.return_value = mock_cursor
 
-        import_data(connection, {}, source_table, tmp_table, primary_key, [])
+        import_data(connection, tmp_table, [])
 
         assert connection.cursor.call_count == 2
         assert mock_cursor.close.call_count == 2
@@ -86,16 +86,12 @@ class TestBuildAndThenImport:
 
         build_and_then_import_data(connection, table, primary_key, columns, None, None, total_count, chunk_size)
 
-        assert connection.cursor.call_count == 10
-        assert mock_cursor.close.call_count == 10
+        assert connection.cursor.call_count == 11
+        assert mock_cursor.close.call_count == 11
         assert mock_cursor.copy_from.call_count == expected_callcount
-
         expected_execute_calls = [
             call('SELECT "id", "col1", "COL2" FROM "src_tbl";'),
-            call('CREATE TEMP TABLE IF NOT EXISTS "tmp_src_tbl" AS SELECT "id", "col1", "COL2" FROM "src_tbl" WITH NO DATA'),  # noqa: E501
-            call('CREATE TEMP TABLE IF NOT EXISTS "tmp_src_tbl" AS SELECT "id", "col1", "COL2" FROM "src_tbl" WITH NO DATA'),  # noqa: E501
-            call('CREATE TEMP TABLE IF NOT EXISTS "tmp_src_tbl" AS SELECT "id", "col1", "COL2" FROM "src_tbl" WITH NO DATA'),  # noqa: E501
-            call('CREATE TEMP TABLE IF NOT EXISTS "tmp_src_tbl" AS SELECT "id", "col1", "COL2" FROM "src_tbl" WITH NO DATA'),  # noqa: E501
+            call('CREATE TEMP TABLE "tmp_src_tbl" AS SELECT "id", "col1", "COL2"\n                    FROM "src_tbl" WITH NO DATA ON COMMIT DROP'),  # noqa: E501
             call('CREATE INDEX ON "tmp_src_tbl" ("id")'),
             call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s WHERE t."id" = s."id";'),  # noqa: E501
             call('DROP TABLE "tmp_src_tbl";')
