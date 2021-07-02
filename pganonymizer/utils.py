@@ -55,15 +55,18 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     :param int chunk_size: Number of data rows to fetch with the cursor
     :param bool verbose: Display logging information and a progress bar.
     """
+    column_names = get_column_names(columns)
+    sql_columns = ', '.join(['"{}"'.format(column_name) for column_name in [primary_key] + column_names])
     if verbose:
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
-    sql_select = "SELECT * FROM {table}".format(table=table)
+    sql_select = 'SELECT {columns} FROM "{table}"'.format(table=table, columns=sql_columns)
     if search:
         sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=search)
     else:
         sql = "{select};".format(select=sql_select)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
+    temp_table = 'tmp_{table}'.format(table=table)
     while True:
         data = []
         records = cursor.fetchmany(size=chunk_size)
@@ -80,10 +83,30 @@ def build_and_then_import_data(connection, table, primary_key, columns,
             if not row_column_dict:
                 continue
             data.append(row.values())
-        import_data(connection, columns, table, primary_key, data)
-
+        import_data(connection, columns, table, temp_table, primary_key, data)
     if verbose:
         progress_bar.finish()
+    apply_anonymised_data(connection, temp_table, table, primary_key, columns)
+
+    cursor.close()
+
+
+def apply_anonymised_data(connection, temp_table, source_table, primary_key, definitions):
+    logging.info('Applying changes on table {}'.format(source_table))
+    cursor = connection.cursor()
+    create_index_sql = 'CREATE INDEX ON "{temp_table}" ("{primary_key}")'
+    cursor.execute(create_index_sql.format(temp_table=temp_table, primary_key=primary_key))
+
+    column_names = ['"{}"'.format(list(definition.keys())[0]) for definition in definitions]
+    set_columns = ', '.join(['{column} = s.{column}'.format(column=column) for column in column_names])
+    sql = (
+        'UPDATE "{table}" t '
+        'SET {columns} '
+        'FROM "{source}" s '
+        'WHERE t."{primary_key}" = s."{primary_key}";'
+    ).format(table=source_table, columns=set_columns, source=temp_table, primary_key=primary_key)
+    cursor.execute(sql)
+    cursor.execute('DROP TABLE "%s";' % temp_table)
     cursor.close()
 
 
@@ -130,7 +153,7 @@ def copy_from(connection, data, table):
     cursor.close()
 
 
-def import_data(connection, definitions, source_table, primary_key, data):
+def import_data(connection, definitions, source_table, temp_table, primary_key, data):
     """
     Import the temporary and anonymized data to a temporary table and write the changes back.
 
@@ -141,21 +164,13 @@ def import_data(connection, definitions, source_table, primary_key, data):
     :param list data: The table data.
     """
     primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
-    temp_table = 'tmp_{table}'.format(table=source_table)
-    cursor = connection.cursor()
-    cursor.execute('CREATE TEMP TABLE "%s" (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
-    copy_from(connection, data, temp_table)
 
-    column_names = ['"{}"'.format(list(definition.keys())[0]) for definition in definitions]
-    set_columns = ', '.join(['{column} = s.{column}'.format(column=column) for column in column_names])
-    sql = (
-        'UPDATE {table} t '
-        'SET {columns} '
-        'FROM {source} s '
-        'WHERE t.{primary_key} = s.{primary_key};'
-    ).format(table=source_table, columns=set_columns, source=temp_table, primary_key=primary_key)
-    cursor.execute(sql)
-    cursor.execute('DROP TABLE %s;' % temp_table)
+    cursor = connection.cursor()
+    column_names = get_column_names(definitions)
+    sql_columns = ', '.join(['"{}"'.format(column_name) for column_name in [primary_key] + column_names])
+    ctas_query = 'CREATE TEMP TABLE IF NOT EXISTS "{temp_table}" AS SELECT {columns} FROM "{source_table}" WITH NO DATA'
+    cursor.execute(ctas_query.format(temp_table=temp_table, source_table=source_table, columns=sql_columns))
+    copy_from(connection, data, temp_table)
     cursor.close()
 
 
@@ -277,3 +292,7 @@ def create_database_dump(filename, db_args):
     )
     logging.info('Creating database dump file "%s"', filename)
     subprocess.run(cmd, shell=True)
+
+
+def get_column_names(definitions):
+    return [list(definition.keys())[0] for definition in definitions]

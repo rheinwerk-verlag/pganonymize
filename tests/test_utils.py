@@ -43,22 +43,22 @@ class TestTruncateTables:
 
 class TestImportData:
 
-    @pytest.mark.parametrize('source_table, primary_key, expected_tbl_name', [
-        ['src_tbl', 'id', 'tmp_src_tbl']
+    @pytest.mark.parametrize('source_table, tmp_table, primary_key', [
+        ['src_tbl', 'tmp_src_tbl', 'id']
     ])
-    def test(self, source_table, primary_key, expected_tbl_name):
+    def test(self, source_table, tmp_table, primary_key):
         mock_cursor = Mock()
 
         connection = Mock()
         connection.cursor.return_value = mock_cursor
 
-        import_data(connection, {}, source_table, primary_key, [])
+        import_data(connection, {}, source_table, tmp_table, primary_key, [])
 
         assert connection.cursor.call_count == 2
         assert mock_cursor.close.call_count == 2
 
         mock_cursor.copy_from.assert_called_once()
-        expected = [call(ANY, expected_tbl_name, null=ANY, sep=ANY)]
+        expected = [call(ANY, tmp_table, null=ANY, sep=ANY)]
         assert mock_cursor.copy_from.call_args_list == expected
 
 
@@ -86,6 +86,18 @@ class TestBuildAndThenImport:
 
         build_and_then_import_data(connection, table, primary_key, columns, None, None, total_count, chunk_size)
 
-        assert connection.cursor.call_count == 9
-        assert mock_cursor.close.call_count == 9
+        assert connection.cursor.call_count == 10
+        assert mock_cursor.close.call_count == 10
         assert mock_cursor.copy_from.call_count == expected_callcount
+
+        expected_execute_calls = [
+            call('SELECT "id", "col1", "COL2" FROM "src_tbl";'),
+            call('CREATE TEMP TABLE IF NOT EXISTS "tmp_src_tbl" AS SELECT "id", "col1", "COL2" FROM "src_tbl" WITH NO DATA'),  # noqa: E501
+            call('CREATE TEMP TABLE IF NOT EXISTS "tmp_src_tbl" AS SELECT "id", "col1", "COL2" FROM "src_tbl" WITH NO DATA'),  # noqa: E501
+            call('CREATE TEMP TABLE IF NOT EXISTS "tmp_src_tbl" AS SELECT "id", "col1", "COL2" FROM "src_tbl" WITH NO DATA'),  # noqa: E501
+            call('CREATE TEMP TABLE IF NOT EXISTS "tmp_src_tbl" AS SELECT "id", "col1", "COL2" FROM "src_tbl" WITH NO DATA'),  # noqa: E501
+            call('CREATE INDEX ON "tmp_src_tbl" ("id")'),
+            call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s WHERE t."id" = s."id";'),  # noqa: E501
+            call('DROP TABLE "tmp_src_tbl";')
+        ]
+        assert mock_cursor.execute.call_args_list == expected_execute_calls
