@@ -107,7 +107,6 @@ def apply_anonymised_data(connection, temp_table, source_table, primary_key, def
         'WHERE t."{primary_key}" = s."{primary_key}";'
     ).format(table=source_table, columns=set_columns, source=temp_table, primary_key=primary_key)
     cursor.execute(sql)
-    cursor.execute('DROP TABLE "%s";' % temp_table)
     cursor.close()
 
 
@@ -160,7 +159,7 @@ def create_temporary_table(connection, definitions, source_table, temp_table, pr
     column_names = get_column_names(definitions)
     sql_columns = ', '.join(['"{}"'.format(column_name) for column_name in [primary_key] + column_names])
     ctas_query = """CREATE TEMP TABLE "{temp_table}" AS SELECT {columns}
-                    FROM "{source_table}" WITH NO DATA ON COMMIT DROP"""
+                    FROM "{source_table}" WITH NO DATA"""
     cursor = connection.cursor()
     cursor.execute(ctas_query.format(temp_table=temp_table, source_table=source_table, columns=sql_columns))
     cursor.close()

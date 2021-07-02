@@ -91,9 +91,9 @@ class TestBuildAndThenImport:
         assert mock_cursor.copy_from.call_count == expected_callcount
         expected_execute_calls = [
             call('SELECT "id", "col1", "COL2" FROM "src_tbl";'),
-            call('CREATE TEMP TABLE "tmp_src_tbl" AS SELECT "id", "col1", "COL2"\n                    FROM "src_tbl" WITH NO DATA ON COMMIT DROP'),  # noqa: E501
+            call('CREATE TEMP TABLE "tmp_src_tbl" AS SELECT "id", "col1", "COL2"\n                    FROM "src_tbl" WITH NO DATA'),  # noqa: E501
             call('CREATE INDEX ON "tmp_src_tbl" ("id")'),
-            call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s WHERE t."id" = s."id";'),  # noqa: E501
-            call('DROP TABLE "tmp_src_tbl";')
+            call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s WHERE t."id" = s."id";')  # noqa: E501
+
         ]
         assert mock_cursor.execute.call_args_list == expected_execute_calls
