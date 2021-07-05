@@ -33,8 +33,7 @@ def list_provider_classes():
         print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
 
 
-def main():
-    """Main method"""
+def get_arg_parser():
     parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
     parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
     parser.add_argument('-l', '--list-providers', action='store_true', help='Show a list of all available providers',
@@ -49,8 +48,13 @@ def main():
     parser.add_argument('--dry-run', action='store_true', help='Don\'t commit changes made on the database',
                         default=False)
     parser.add_argument('--dump-file', help='Create a database dump file with the given name')
+    parser.add_argument('--init-sql', help='SQL to run before starting anonymization (handy fow set_workmem)', default=False)
 
-    args = parser.parse_args()
+    return parser
+
+
+def main(args):
+    """Main method"""
 
     loglevel = logging.WARNING
     if args.verbose:
@@ -65,6 +69,11 @@ def main():
 
     pg_args = get_pg_args(args)
     connection = get_connection(pg_args)
+    if args.init_sql:
+        cursor = connection.cursor()
+        logging.info('Executing initialisation sql {}'.format(args.init_sql))
+        cursor.execute(args.init_sql)
+        cursor.close()
 
     start_time = time.time()
     truncate_tables(connection, schema.get('truncate', []))
@@ -82,4 +91,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    args = get_arg_parser().parse_args()
+    main(args)

@@ -5,9 +5,11 @@ import sys
 
 
 def main():
-    from pganonymizer.cli import main
+    from pganonymizer.cli import get_arg_parser, main
+    
     try:
-        main()
+        args = get_arg_parser().parse_args()
+        main(args)
         exit_status = 0
     except KeyboardInterrupt:
         exit_status = 1
