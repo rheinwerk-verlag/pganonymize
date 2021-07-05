@@ -48,7 +48,7 @@ def get_arg_parser():
     parser.add_argument('--dry-run', action='store_true', help='Don\'t commit changes made on the database',
                         default=False)
     parser.add_argument('--dump-file', help='Create a database dump file with the given name')
-    parser.add_argument('--init-sql', help='SQL to run before starting anonymization (handy fow set_workmem)', default=False)
+    parser.add_argument('--init-sql', help='SQL to run before starting anonymization', default=False)
 
     return parser
 

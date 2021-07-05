@@ -8,9 +8,10 @@ import logging
 import re
 import subprocess
 
+import parmap
+
 import psycopg2
 import psycopg2.extras
-from progress.bar import IncrementalBar
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 from six import StringIO
 
@@ -41,6 +42,16 @@ def anonymize_tables(connection, definitions, verbose=False):
                                    search, total_count, chunk_size, verbose=verbose)
 
 
+def process_row(row, columns, excludes):
+    if row_matches_excludes(row, excludes):
+        return None
+    else:
+        row_column_dict = get_column_values(row, columns)
+        for key, value in row_column_dict.items():
+            row[key] = value
+        return row
+
+
 def build_and_then_import_data(connection, table, primary_key, columns,
                                excludes, search, total_count, chunk_size, verbose=False):
     """
@@ -57,8 +68,6 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     """
     column_names = get_column_names(columns)
     sql_columns = ', '.join(['"{}"'.format(column_name) for column_name in [primary_key] + column_names])
-    if verbose:
-        progress_bar = IncrementalBar('Anonymizing', max=total_count)
     sql_select = 'SELECT {columns} FROM "{table}"'.format(table=table, columns=sql_columns)
     if search:
         sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=search)
@@ -69,24 +78,11 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     temp_table = 'tmp_{table}'.format(table=table)
     create_temporary_table(connection, columns, table, temp_table, primary_key)
     while True:
-        data = []
         records = cursor.fetchmany(size=chunk_size)
         if not records:
             break
-        for row in records:
-            row_column_dict = {}
-            if not row_matches_excludes(row, excludes):
-                row_column_dict = get_column_values(row, columns)
-                for key, value in row_column_dict.items():
-                    row[key] = value
-            if verbose:
-                progress_bar.next()
-            if not row_column_dict:
-                continue
-            data.append(row.values())
-        import_data(connection, temp_table, data)
-    if verbose:
-        progress_bar.finish()
+        data = parmap.map(process_row, records, columns, excludes, pm_pbar=verbose)
+        import_data(connection, temp_table, filter(None, data))
     apply_anonymised_data(connection, temp_table, table, primary_key, columns)
 
     cursor.close()
