@@ -222,9 +222,9 @@ def data2csv(data):
             if x is None:
                 val = '\\N'
             elif type(x) == str:
-                val = x.strip()
+                val = escape_str_replace(x.strip())
             elif type(x) == dict:
-                val = json.dumps(x)
+                val = escape_str_replace(json.dumps(x))
             else:
                 val = x
             row_data.append(val)
@@ -300,3 +300,7 @@ def create_database_dump(filename, db_args):
 
 def get_column_names(definitions):
     return [list(definition.keys())[0] for definition in definitions]
+
+
+def escape_str_replace(text):
+    return text.replace('\\', '\\\\').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')

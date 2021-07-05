@@ -2,7 +2,7 @@ import math
 from mock import ANY, Mock, call, patch
 import pytest
 
-from pganonymizer.utils import build_and_then_import_data, get_connection, import_data, truncate_tables
+from pganonymizer.utils import build_and_then_import_data, data2csv, get_connection, import_data, truncate_tables
 
 
 class TestGetConnection:
@@ -97,3 +97,17 @@ class TestBuildAndThenImport:
 
         ]
         assert mock_cursor.execute.call_args_list == expected_execute_calls
+
+
+class TestCSVSerialization:
+    @pytest.mark.parametrize('input, expected', [
+        [
+            [
+                ["foo\nbar", None, 123, "tab \t tab", "cr\r cr"],
+                [None, None, None, "\n", ""]
+            ],
+            "foo\\nbar\x1f\\N\x1f123\x1ftab \\t tab\x1fcr\\r cr\n\\N\x1f\\N\x1f\\N\x1f\x1f\n"]
+    ])
+    def test(self, input, expected):
+        csv_data = data2csv(input)
+        assert csv_data.getvalue() == expected
