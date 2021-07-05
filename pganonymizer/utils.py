@@ -7,6 +7,7 @@ import json
 import logging
 import re
 import subprocess
+import math
 
 import parmap
 
@@ -14,6 +15,7 @@ import psycopg2
 import psycopg2.extras
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 from six import StringIO
+from tqdm import trange
 
 from pganonymizer.constants import COPY_DB_DELIMITER, DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import BadDataFormat
@@ -77,7 +79,8 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     cursor.execute(sql)
     temp_table = 'tmp_{table}'.format(table=table)
     create_temporary_table(connection, columns, table, temp_table, primary_key)
-    while True:
+    batches = int(math.ceil((1.0 * total_count) / (1.0 * chunk_size)))
+    for i in trange(batches, desc="Processing {} batches for {}".format(batches, table), disable=not verbose):
         records = cursor.fetchmany(size=chunk_size)
         if not records:
             break
