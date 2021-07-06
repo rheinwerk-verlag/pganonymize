@@ -1,5 +1,6 @@
 import math
 from mock import ANY, Mock, call, patch
+from psycopg2.sql import Composed, Identifier, SQL
 import pytest
 
 from pganonymizer.utils import build_and_then_import_data, data2csv, get_connection, import_data, truncate_tables
@@ -22,18 +23,19 @@ class TestGetConnection:
 
 class TestTruncateTables:
 
-    @pytest.mark.parametrize('tables, expected_sql', [
-        [('table_a', 'table_b'), 'TRUNCATE TABLE table_a, table_b;'],
+    @pytest.mark.parametrize('tables, expected', [
+        [('table_a', 'table_b', 'CAPS_TABLe'), Composed([SQL('TRUNCATE TABLE '), Composed(
+            [Identifier('table_a'), SQL(', '), Identifier('table_b'), SQL(', '), Identifier('CAPS_TABLe')])])],
         [(), None],
     ])
-    def test(self, tables, expected_sql):
+    def test(self, tables, expected):
         mock_cursor = Mock()
         connection = Mock()
         connection.cursor.return_value = mock_cursor
         truncate_tables(connection, tables)
         if tables:
             connection.cursor.assert_called_once()
-            assert mock_cursor.execute.call_args_list == [call(expected_sql)]
+            assert mock_cursor.execute.call_args_list == [call(expected)]
             mock_cursor.close.assert_called_once()
         else:
             connection.cursor.assert_not_called()
@@ -90,12 +92,19 @@ class TestBuildAndThenImport:
         assert mock_cursor.close.call_count == 11
         assert mock_cursor.copy_from.call_count == expected_callcount
         expected_execute_calls = [
-            call('SELECT "id", "col1", "COL2" FROM "src_tbl";'),
-            call('CREATE TEMP TABLE "tmp_src_tbl" AS SELECT "id", "col1", "COL2"\n                    FROM "src_tbl" WITH NO DATA'),  # noqa: E501
-            call('CREATE INDEX ON "tmp_src_tbl" ("id")'),
-            call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s WHERE t."id" = s."id";')  # noqa: E501
-
-        ]
+            call(Composed([SQL('SELECT '), Composed([Identifier('id'), SQL(', '), Identifier(
+                'col1'), SQL(', '), Identifier('COL2')]), SQL(' FROM '), Identifier('src_tbl')])),
+            call(Composed([SQL('CREATE TEMP TABLE '), Identifier('tmp_src_tbl'),
+                           SQL(' AS SELECT '),
+                           Composed([Identifier('id'), SQL(', '), Identifier(
+                               'col1'), SQL(', '), Identifier('COL2')]), SQL('\n                    FROM '),
+                           Identifier('src_tbl'), SQL(' WITH NO DATA')])),
+            call(Composed([SQL('CREATE INDEX ON '), Identifier('tmp_src_tbl'), SQL(' ('), Identifier('id'), SQL(')')])),
+            call(Composed([SQL('UPDATE '), Identifier('src_tbl'), SQL(' t SET '),
+                           Composed([Composed([Identifier('col1'), SQL(' = s.'), Identifier('col1')]), SQL(', '),
+                                     Composed([Identifier('COL2'), SQL(' = s.'), Identifier('COL2')])]),
+                           SQL(' FROM '), Identifier('tmp_src_tbl'),
+                           SQL(' s WHERE t.'), Identifier('id'), SQL(' = s.'), Identifier('id')]))]
         assert mock_cursor.execute.call_args_list == expected_execute_calls
 
 

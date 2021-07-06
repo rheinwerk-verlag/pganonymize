@@ -13,7 +13,9 @@ import subprocess
 import parmap
 import psycopg2
 import psycopg2.extras
+from psycopg2.sql import SQL, Identifier, Composed
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
+
 from six import StringIO
 from tqdm import trange
 
@@ -70,14 +72,13 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     :param bool verbose: Display logging information and a progress bar.
     """
     column_names = get_column_names(columns)
-    sql_columns = ', '.join(['"{}"'.format(column_name) for column_name in [primary_key] + column_names])
-    sql_select = 'SELECT {columns} FROM "{table}"'.format(table=table, columns=sql_columns)
+    sql_columns = SQL(', ').join([Identifier(column_name) for column_name in [primary_key] + column_names])
+    sql_select = SQL('SELECT {columns} FROM {table}').format(table=Identifier(table), columns=sql_columns)
     if search:
-        sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=search)
-    else:
-        sql = "{select};".format(select=sql_select)
+        sql_select = Composed([sql_select, SQL(" WHERE {search_condition}".format(search_condition=search))])
+
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
-    cursor.execute(sql)
+    cursor.execute(sql_select)
     temp_table = 'tmp_{table}'.format(table=table)
     create_temporary_table(connection, columns, table, temp_table, primary_key)
     batches = int(math.ceil((1.0 * total_count) / (1.0 * chunk_size)))
@@ -95,17 +96,23 @@ def build_and_then_import_data(connection, table, primary_key, columns,
 def apply_anonymized_data(connection, temp_table, source_table, primary_key, definitions):
     logging.info('Applying changes on table {}'.format(source_table))
     cursor = connection.cursor()
-    create_index_sql = 'CREATE INDEX ON "{temp_table}" ("{primary_key}")'
-    cursor.execute(create_index_sql.format(temp_table=temp_table, primary_key=primary_key))
+    create_index_sql = SQL('CREATE INDEX ON {temp_table} ({primary_key})')
+    cursor.execute(create_index_sql.format(temp_table=Identifier(temp_table), primary_key=Identifier(primary_key)))
 
-    column_names = ['"{}"'.format(list(definition.keys())[0]) for definition in definitions]
-    set_columns = ', '.join(['{column} = s.{column}'.format(column=column) for column in column_names])
-    sql = (
-        'UPDATE "{table}" t '
+    column_names = [Identifier(list(definition.keys())[0]) for definition in definitions]
+    set_columns = SQL(', ').join([SQL('{column} = s.{column}').format(column=column) for column in column_names])
+    sql_args = {
+        "table": Identifier(source_table),
+        "columns": set_columns,
+        "source": Identifier(temp_table),
+        "primary_key": Identifier(primary_key)
+    }
+    sql = SQL(
+        'UPDATE {table} t '
         'SET {columns} '
-        'FROM "{source}" s '
-        'WHERE t."{primary_key}" = s."{primary_key}";'
-    ).format(table=source_table, columns=set_columns, source=temp_table, primary_key=primary_key)
+        'FROM {source} s '
+        'WHERE t.{primary_key} = s.{primary_key}'
+    ).format(**sql_args)
     cursor.execute(sql)
     cursor.close()
 
@@ -157,11 +164,12 @@ def copy_from(connection, data, table):
 def create_temporary_table(connection, definitions, source_table, temp_table, primary_key):
     primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
     column_names = get_column_names(definitions)
-    sql_columns = ', '.join(['"{}"'.format(column_name) for column_name in [primary_key] + column_names])
-    ctas_query = """CREATE TEMP TABLE "{temp_table}" AS SELECT {columns}
-                    FROM "{source_table}" WITH NO DATA"""
+    sql_columns = SQL(', ').join([Identifier(column_name) for column_name in [primary_key] + column_names])
+    ctas_query = SQL("""CREATE TEMP TABLE {temp_table} AS SELECT {columns}
+                    FROM {source_table} WITH NO DATA""")
     cursor = connection.cursor()
-    cursor.execute(ctas_query.format(temp_table=temp_table, source_table=source_table, columns=sql_columns))
+    cursor.execute(ctas_query.format(temp_table=Identifier(temp_table),
+                   source_table=Identifier(source_table), columns=sql_columns))
     cursor.close()
 
 
@@ -198,7 +206,7 @@ def get_table_count(connection, table):
     :return: The number of table entries
     :rtype: int
     """
-    sql = 'SELECT COUNT(*) FROM {table};'.format(table=table)
+    sql = SQL('SELECT COUNT(*) FROM {table}').format(table=Identifier(table))
     cursor = connection.cursor()
     cursor.execute(sql)
     total_count = cursor.fetchone()[0]
@@ -276,9 +284,9 @@ def truncate_tables(connection, tables):
     if not tables:
         return
     cursor = connection.cursor()
-    table_names = ', '.join(tables)
+    table_names = SQL(', ').join([Identifier(table_name) for table_name in tables])
     logging.info('Truncating tables "%s"', table_names)
-    cursor.execute('TRUNCATE TABLE {tables};'.format(tables=table_names))
+    cursor.execute(SQL('TRUNCATE TABLE {tables}').format(tables=table_names))
     cursor.close()
 
 
