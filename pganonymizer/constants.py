@@ -11,4 +11,4 @@ COPY_DB_DELIMITER = '\x1f'
 DEFAULT_SCHEMA_FILE = 'schema.yml'
 
 # Default chunk size for data fetch
-DEFAULT_CHUNK_SIZE = 2000
+DEFAULT_CHUNK_SIZE = 100000

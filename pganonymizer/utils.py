@@ -51,8 +51,11 @@ def process_row(row, columns, excludes):
         return None
     else:
         row_column_dict = get_column_values(row, columns)
-        for key, value in row_column_dict.items():
-            row[key] = value
+        if row_column_dict:
+            for key, value in row_column_dict.items():
+                row[key] = value
+        else:
+            return None
         return row
 
 
@@ -99,8 +102,9 @@ def apply_anonymized_data(connection, temp_table, source_table, primary_key, def
     create_index_sql = SQL('CREATE INDEX ON {temp_table} ({primary_key})')
     cursor.execute(create_index_sql.format(temp_table=Identifier(temp_table), primary_key=Identifier(primary_key)))
 
-    column_names = [Identifier(list(definition.keys())[0]) for definition in definitions]
-    set_columns = SQL(', ').join([SQL('{column} = s.{column}').format(column=column) for column in column_names])
+    column_names = get_column_names(definitions)
+    columns_identifiers = [SQL('{column} = s.{column}').format(column=Identifier(column)) for column in column_names]
+    set_columns = SQL(', ').join(columns_identifiers)
     sql_args = {
         "table": Identifier(source_table),
         "columns": set_columns,
@@ -222,11 +226,12 @@ def data2csv(data):
     :return: A stream that contains tab delimited csv data
     :rtype: StringIO
     """
+
     buf = StringIO()
     writer = csv.writer(buf, delimiter=COPY_DB_DELIMITER, lineterminator='\n', quotechar='~')
     for row in data:
         row_data = []
-        for x in row:
+        for x in row.values():
             if x is None:
                 val = '\\N'
             elif type(x) == str:
@@ -236,6 +241,7 @@ def data2csv(data):
             else:
                 val = x
             row_data.append(val)
+
         writer.writerow(row_data)
     buf.seek(0)
     return buf
@@ -258,19 +264,20 @@ def get_column_values(row, columns):
     """
     column_dict = {}
     for definition in columns:
-        column_name = list(definition.keys())[0]
-        column_definition = definition[column_name]
+        full_column_name = get_column_name(definition, True)
+        column_name = get_column_name(definition, False)
+        column_definition = definition[full_column_name]
         provider_config = column_definition.get('provider')
-        orig_value = row.get(column_name)
-        if not orig_value:
-            # Skip the current column if there is no value to be altered
-            continue
-        provider = get_provider(provider_config)
-        value = provider.alter_value(orig_value)
-        append = column_definition.get('append')
-        if append:
-            value = value + append
-        column_dict[column_name] = value
+        orig_value = nested_get(row, full_column_name)
+        # Skip the current column if there is no value to be altered
+        if orig_value:
+            provider = get_provider(provider_config)
+            value = provider.alter_value(orig_value)
+            append = column_definition.get('append')
+            if append:
+                value = value + append
+            nested_set(row, full_column_name, value)
+            column_dict[column_name] = nested_get(row, column_name)
     return column_dict
 
 
@@ -306,9 +313,37 @@ def create_database_dump(filename, db_args):
     subprocess.run(cmd, shell=True)
 
 
+def get_column_name(definition, fully_qualified=False):
+    col_name = list(definition.keys())[0]
+    if fully_qualified:
+        return col_name
+    else:
+        return col_name.split('.', 2)[0]
+
+
 def get_column_names(definitions):
-    return [list(definition.keys())[0] for definition in definitions]
+    return [get_column_name(definition) for definition in definitions]
 
 
 def escape_str_replace(text):
     return text.replace('\\', '\\\\').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
+
+
+def nested_get(dic, path, delimiter='.'):
+    keys = path.split(delimiter)
+    for key in keys[:-1]:
+        if key in dic:
+            dic = dic.get(key, {})
+        else:
+            return None
+    if keys[-1] in dic:
+        return dic[keys[-1]]
+    else:
+        return None
+
+
+def nested_set(dic, path, value, delimiter='.'):
+    keys = path.split(delimiter)
+    for key in keys[:-1]:
+        dic = dic.get(key, {})
+    dic[keys[-1]] = value

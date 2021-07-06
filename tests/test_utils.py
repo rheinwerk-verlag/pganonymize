@@ -1,9 +1,12 @@
+from collections import OrderedDict
+from io import StringIO
 import math
 from mock import ANY, Mock, call, patch
 from psycopg2.sql import Composed, Identifier, SQL
 import pytest
 
-from pganonymizer.utils import build_and_then_import_data, data2csv, get_connection, import_data, truncate_tables
+from pganonymizer.utils import anonymize_tables, build_and_then_import_data, data2csv, \
+    get_connection, import_data, truncate_tables
 
 
 class TestGetConnection:
@@ -63,6 +66,76 @@ class TestImportData:
         expected = [call(ANY, tmp_table, null=ANY, sep=ANY)]
         assert mock_cursor.copy_from.call_args_list == expected
 
+    @patch('pganonymizer.utils.StringIO')
+    def test_anonymize_tables(self, mock_stringid):
+        siobuff = StringIO()
+        sio_mock = Mock(wraps=siobuff)
+        mock_stringid.return_value = sio_mock
+        sio_mock.close.return_value = True
+
+        mock_cursor = Mock()
+        mock_cursor.fetchone.return_value = [2]
+        mock_cursor.fetchmany.side_effect = [
+            [
+                OrderedDict([("first_name", "John Doe"),
+                             ("json_column", {"field1": "foo"})
+                             ]),
+                OrderedDict([("first_name", "John Doe"),
+                             ("json_column", {"field2": "bar"})
+                             ])
+            ]
+        ]
+
+        connection = Mock()
+        connection.cursor.return_value = mock_cursor
+        definitions = []
+        anonymize_tables(connection, definitions, verbose=True)
+
+        assert connection.cursor.call_count == 0
+        assert mock_cursor.close.call_count == 0
+
+        definitions = [
+            {
+                "auth_user": {
+                    "primary_key": "id",
+                    "chunk_size": 5000,
+                    "fields": [
+                        {
+                            "first_name": {
+                                "provider": {
+                                    "name": "set",
+                                    "value": "dummy name"
+                                }
+                            }
+                        },
+                        {
+                            "json_column.field1": {
+                                "provider": {
+                                    "name": "set",
+                                    "value": "dummy json field1"
+                                }
+                            }
+                        },
+                        {
+                            "json_column.field2": {
+                                "provider": {
+                                    "name": "set",
+                                    "value": "dummy json field2"
+                                }
+                            }
+                        },
+                    ]
+                }
+            }
+        ]
+        anonymize_tables(connection, definitions, verbose=True)
+        assert connection.cursor.call_count == 6
+        assert mock_cursor.close.call_count == 6
+
+        assert mock_cursor.copy_from.call_args_list == [call(sio_mock, ANY, null=ANY, sep=ANY)]
+        assert siobuff.getvalue(
+        ) == """dummy name\x1f{"field1": "dummy json field1"}\ndummy name\x1f{"field2": "dummy json field2"}\n"""
+
 
 class TestBuildAndThenImport:
     @pytest.mark.parametrize('table, primary_key, columns, total_count, chunk_size, expected_callcount', [
@@ -112,8 +185,8 @@ class TestCSVSerialization:
     @pytest.mark.parametrize('input, expected', [
         [
             [
-                ["foo\nbar", None, 123, "tab \t tab", "cr\r cr"],
-                [None, None, None, "\n", ""]
+                OrderedDict([("c1", "foo\nbar"), ("c2", None), ("c3", 123), ("c4", "tab \t tab"), ("c5", "cr\r cr")]),
+                OrderedDict([("c1", None), ("c2", None), ("c3", None), ("c4", "\n"), ("c5", "")])
             ],
             "foo\\nbar\x1f\\N\x1f123\x1ftab \\t tab\x1fcr\\r cr\n\\N\x1f\\N\x1f\\N\x1f\x1f\n"]
     ])
