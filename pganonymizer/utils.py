@@ -5,12 +5,12 @@ from __future__ import absolute_import
 import csv
 import json
 import logging
+import math
 import re
 import subprocess
-import math
+
 
 import parmap
-
 import psycopg2
 import psycopg2.extras
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
@@ -61,6 +61,7 @@ def build_and_then_import_data(connection, table, primary_key, columns,
 
     :param connection: A database connection instance.
     :param str table: Name of the table to retrieve the data.
+    :param str primary_key: Table primary key
     :param list columns: A list of table fields
     :param list[dict] excludes: A list of exclude definitions.
     :param str search: A SQL WHERE (search_condition) to filter and keep only the searched rows.
@@ -86,12 +87,12 @@ def build_and_then_import_data(connection, table, primary_key, columns,
             break
         data = parmap.map(process_row, records, columns, excludes, pm_pbar=verbose)
         import_data(connection, temp_table, filter(None, data))
-    apply_anonymised_data(connection, temp_table, table, primary_key, columns)
+    apply_anonymized_data(connection, temp_table, table, primary_key, columns)
 
     cursor.close()
 
 
-def apply_anonymised_data(connection, temp_table, source_table, primary_key, definitions):
+def apply_anonymized_data(connection, temp_table, source_table, primary_key, definitions):
     logging.info('Applying changes on table {}'.format(source_table))
     cursor = connection.cursor()
     create_index_sql = 'CREATE INDEX ON "{temp_table}" ("{primary_key}")'
@@ -168,7 +169,7 @@ def import_data(connection, table_name, data):
     """
     Import the temporary and anonymized data to a temporary table and write the changes back.
     :param connection: A database connection instance.
-    :param str source_table: Name of the table to be anonymized.
+    :param str table_name: Name of the table to be populated with data.
     :param list data: The table data.
     """
 
