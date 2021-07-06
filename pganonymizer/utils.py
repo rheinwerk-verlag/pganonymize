@@ -5,14 +5,17 @@ from __future__ import absolute_import
 import csv
 import json
 import logging
+import math
 import re
 import subprocess
 
+
+import parmap
 import psycopg2
 import psycopg2.extras
-from progress.bar import IncrementalBar
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 from six import StringIO
+from tqdm import trange
 
 from pganonymizer.constants import COPY_DB_DELIMITER, DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import BadDataFormat
@@ -34,58 +37,77 @@ def anonymize_tables(connection, definitions, verbose=False):
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
         search = table_definition.get('search')
-        column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
         chunk_size = table_definition.get('chunk_size', DEFAULT_CHUNK_SIZE)
-        data = build_data(connection, table_name, columns, excludes, search, total_count, chunk_size, verbose)
-        import_data(connection, column_dict, table_name, primary_key, data)
+        build_and_then_import_data(connection, table_name, primary_key, columns, excludes,
+                                   search, total_count, chunk_size, verbose=verbose)
 
 
-def build_data(connection, table, columns, excludes, search, total_count, chunk_size, verbose=False):
+def process_row(row, columns, excludes):
+    if row_matches_excludes(row, excludes):
+        return None
+    else:
+        row_column_dict = get_column_values(row, columns)
+        for key, value in row_column_dict.items():
+            row[key] = value
+        return row
+
+
+def build_and_then_import_data(connection, table, primary_key, columns,
+                               excludes, search, total_count, chunk_size, verbose=False):
     """
     Select all data from a table and return it together with a list of table columns.
 
     :param connection: A database connection instance.
     :param str table: Name of the table to retrieve the data.
+    :param str primary_key: Table primary key
     :param list columns: A list of table fields
     :param list[dict] excludes: A list of exclude definitions.
     :param str search: A SQL WHERE (search_condition) to filter and keep only the searched rows.
     :param int total_count: The amount of rows for the current table
     :param int chunk_size: Number of data rows to fetch with the cursor
     :param bool verbose: Display logging information and a progress bar.
-    :return: A list containing the data.
-    :rtype: list
     """
-    if verbose:
-        progress_bar = IncrementalBar('Anonymizing', max=total_count)
-    sql_select = "SELECT * FROM {table}".format(table=table)
+    column_names = get_column_names(columns)
+    sql_columns = ', '.join(['"{}"'.format(column_name) for column_name in [primary_key] + column_names])
+    sql_select = 'SELECT {columns} FROM "{table}"'.format(table=table, columns=sql_columns)
     if search:
         sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=search)
     else:
         sql = "{select};".format(select=sql_select)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
-    data = []
-    while True:
+    temp_table = 'tmp_{table}'.format(table=table)
+    create_temporary_table(connection, columns, table, temp_table, primary_key)
+    batches = int(math.ceil((1.0 * total_count) / (1.0 * chunk_size)))
+    for i in trange(batches, desc="Processing {} batches for {}".format(batches, table), disable=not verbose):
         records = cursor.fetchmany(size=chunk_size)
         if not records:
             break
-        for row in records:
-            row_column_dict = {}
-            if not row_matches_excludes(row, excludes):
-                row_column_dict = get_column_values(row, columns)
-                for key, value in row_column_dict.items():
-                    row[key] = value
-            if verbose:
-                progress_bar.next()
-            if not row_column_dict:
-                continue
-            data.append(row.values())
-    if verbose:
-        progress_bar.finish()
+        data = parmap.map(process_row, records, columns, excludes, pm_pbar=verbose)
+        import_data(connection, temp_table, filter(None, data))
+    apply_anonymized_data(connection, temp_table, table, primary_key, columns)
+
     cursor.close()
-    return data
+
+
+def apply_anonymized_data(connection, temp_table, source_table, primary_key, definitions):
+    logging.info('Applying changes on table {}'.format(source_table))
+    cursor = connection.cursor()
+    create_index_sql = 'CREATE INDEX ON "{temp_table}" ("{primary_key}")'
+    cursor.execute(create_index_sql.format(temp_table=temp_table, primary_key=primary_key))
+
+    column_names = ['"{}"'.format(list(definition.keys())[0]) for definition in definitions]
+    set_columns = ', '.join(['{column} = s.{column}'.format(column=column) for column in column_names])
+    sql = (
+        'UPDATE "{table}" t '
+        'SET {columns} '
+        'FROM "{source}" s '
+        'WHERE t."{primary_key}" = s."{primary_key}";'
+    ).format(table=source_table, columns=set_columns, source=temp_table, primary_key=primary_key)
+    cursor.execute(sql)
+    cursor.close()
 
 
 def row_matches_excludes(row, excludes=None):
@@ -127,34 +149,32 @@ def copy_from(connection, data, table):
         cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N')
     except (BadCopyFileFormat, InvalidTextRepresentation) as exc:
         raise BadDataFormat(exc)
+    finally:
+        new_data.close()
+        cursor.close()
+
+
+def create_temporary_table(connection, definitions, source_table, temp_table, primary_key):
+    primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
+    column_names = get_column_names(definitions)
+    sql_columns = ', '.join(['"{}"'.format(column_name) for column_name in [primary_key] + column_names])
+    ctas_query = """CREATE TEMP TABLE "{temp_table}" AS SELECT {columns}
+                    FROM "{source_table}" WITH NO DATA"""
+    cursor = connection.cursor()
+    cursor.execute(ctas_query.format(temp_table=temp_table, source_table=source_table, columns=sql_columns))
     cursor.close()
 
 
-def import_data(connection, column_dict, source_table, primary_key, data):
+def import_data(connection, table_name, data):
     """
     Import the temporary and anonymized data to a temporary table and write the changes back.
-
     :param connection: A database connection instance.
-    :param dict column_dict: A dictionary with all columns (specified by the schema definition) and a default value of
-      None.
-    :param str source_table: Name of the table to be anonymized.
-    :param str primary_key: Name of the tables primary key.
+    :param str table_name: Name of the table to be populated with data.
     :param list data: The table data.
     """
-    primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
-    temp_table = 'tmp_{table}'.format(table=source_table)
+
     cursor = connection.cursor()
-    cursor.execute('CREATE TEMP TABLE "%s" (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
-    copy_from(connection, data, temp_table)
-    set_columns = ', '.join(['{column} = s.{column}'.format(column='"{}"'.format(key)) for key in column_dict.keys()])
-    sql = (
-        'UPDATE {table} t '
-        'SET {columns} '
-        'FROM {source} s '
-        'WHERE t.{primary_key} = s.{primary_key};'
-    ).format(table=source_table, columns=set_columns, source=temp_table, primary_key=primary_key)
-    cursor.execute(sql)
-    cursor.execute('DROP TABLE %s;' % temp_table)
+    copy_from(connection, data, table_name)
     cursor.close()
 
 
@@ -202,37 +222,15 @@ def data2csv(data):
             if x is None:
                 val = '\\N'
             elif type(x) == str:
-                val = x.strip()
+                val = escape_str_replace(x.strip())
             elif type(x) == dict:
-                val = json.dumps(x)
+                val = escape_str_replace(json.dumps(x))
             else:
                 val = x
             row_data.append(val)
         writer.writerow(row_data)
     buf.seek(0)
     return buf
-
-
-def get_column_dict(columns):
-    """
-    Return a dictionary with all fields from the table definition and None as value.
-
-    :param list columns: A list of field definitions from the YAML schema, e.g.:
-
-    >>> [
-    >>>     {'first_name': {'provider': 'set', 'value': 'Foo'}},
-    >>>     {'guest_email': {'append': '@localhost', 'provider': 'md5'}},
-    >>> ]
-
-    :return: A dictionary containing all fields to be altered with a default value of None, e.g.::
-        {'guest_email': None}
-    :rtype: dict
-    """
-    column_dict = {}
-    for definition in columns:
-        column_name = list(definition.keys())[0]
-        column_dict[column_name] = None
-    return column_dict
 
 
 def get_column_values(row, columns):
@@ -298,3 +296,11 @@ def create_database_dump(filename, db_args):
     )
     logging.info('Creating database dump file "%s"', filename)
     subprocess.run(cmd, shell=True)
+
+
+def get_column_names(definitions):
+    return [list(definition.keys())[0] for definition in definitions]
+
+
+def escape_str_replace(text):
+    return text.replace('\\', '\\\\').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')

@@ -16,10 +16,11 @@ Faker = [
     { version = "^3.0.0", python = "~2.7"},
     { version = "^4.9.0", python = "^3.5"}
 ]
-progress = "^1.5"
 psycopg2-binary = "^2.8.4"
 pyyaml = "^5.2"
 six = "^1.13.0"
+parmap = "^1.5.2"
+tqdm = "^4.61.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7.9"

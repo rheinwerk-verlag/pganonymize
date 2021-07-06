@@ -75,6 +75,7 @@ Usage
     --dry-run             Don't commit changes made on the database
     --dump-file DUMP_FILE
                             Create a database dump file with the given name
+    --init-sql INIT_SQL   SQL to run before starting anonymization
 
 Despite the database connection values, you will have to define a YAML schema file, that includes
 all anonymization rules for that database. Take a look at the `schema documentation`_ or the
@@ -87,6 +88,14 @@ Example call::
         --user=username \
         --password=mysecret \
         --host=db.host.example.com \
+        -v
+
+    $ pganonymize --schema=myschema.yml \
+        --dbname=test_database \
+        --user=username \
+        --password=mysecret \
+        --host=db.host.example.com \
+        --init-sql "set search_path to non_public_search_path; set work_mem to '1GB';" \
         -v
 
 Database dump
