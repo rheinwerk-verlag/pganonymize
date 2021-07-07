@@ -8,7 +8,7 @@ import logging
 import math
 import re
 import subprocess
-
+import time
 
 import parmap
 import psycopg2
@@ -33,6 +33,7 @@ def anonymize_tables(connection, definitions, verbose=False):
     :param bool verbose: Display logging information and a progress bar.
     """
     for definition in definitions:
+        start_time = time.time()
         table_name = list(definition.keys())[0]
         logging.info('Found table definition "%s"', table_name)
         table_definition = definition[table_name]
@@ -44,6 +45,8 @@ def anonymize_tables(connection, definitions, verbose=False):
         chunk_size = table_definition.get('chunk_size', DEFAULT_CHUNK_SIZE)
         build_and_then_import_data(connection, table_name, primary_key, columns, excludes,
                                    search, total_count, chunk_size, verbose=verbose)
+        end_time = time.time()
+        logging.info('{} anonymization took {:.2f}s'.format(table_name, end_time - start_time))
 
 
 def process_row(row, columns, excludes):
