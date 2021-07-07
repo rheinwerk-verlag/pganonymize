@@ -149,15 +149,9 @@ class TestBuildAndThenImport:
         records = [
             [fake_record for row in range(0, chunk_size)] for x in range(0, int(math.ceil(total_count / chunk_size)))
         ]
-
-        def side_effect(size=None):
-            if len(records) >= 1:
-                return records.pop()
-            else:
-                return None
-
+ 
         mock_cursor = Mock()
-        mock_cursor.fetchmany.side_effect = side_effect
+        mock_cursor.fetchmany.side_effect = records
 
         connection = Mock()
         connection.cursor.return_value = mock_cursor
