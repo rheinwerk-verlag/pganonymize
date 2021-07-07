@@ -111,9 +111,16 @@ class MD5Provider(with_metaclass(ProviderMeta, Provider)):
     """Provider to hash a value with the md5 algorithm."""
 
     id = 'md5'
+    default_max_length = 8
 
     def alter_value(self, value):
-        return md5(value.encode('utf-8')).hexdigest()
+        as_number = self.kwargs.get('as_number', False)
+        as_number_length = self.kwargs.get('as_number_length', self.default_max_length)
+        hashed = md5(value.encode('utf-8')).hexdigest()
+        if as_number:
+            return int(hashed, 16) % (10 ** as_number_length)
+        else:
+            return hashed
 
 
 class SetProvider(with_metaclass(ProviderMeta, Provider)):

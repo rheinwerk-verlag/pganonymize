@@ -6,7 +6,7 @@ from mock import ANY, Mock, call, patch
 
 import pytest
 
-from pganonymizer.utils import anonymize_tables, build_and_then_import_data, data2csv, \
+from pganonymizer.utils import anonymize_tables, build_and_then_import_data, data2csv, get_column_values, \
     get_connection, import_data, truncate_tables
 
 
@@ -141,7 +141,8 @@ class TestImportData:
 class TestBuildAndThenImport:
     @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
     @pytest.mark.parametrize('table, primary_key, columns, total_count, chunk_size, expected_callcount', [
-        ['src_tbl', 'id', [{'col1': {'provider': None}}, {'COL2': {'provider': None}}], 10, 3, 4]
+        ['src_tbl', 'id', [{'col1': {'provider': {'name': 'md5'}}},
+                           {'COL2': {'provider': {'name': 'md5'}}}], 10, 3, 4]
     ])
     def test(self, quote_ident, table, primary_key, columns, total_count, chunk_size, expected_callcount):
         fake_record = dict.fromkeys([list(definition.keys())[0] for definition in columns], "")
@@ -169,10 +170,35 @@ class TestBuildAndThenImport:
 
         expected_execute_calls = [call('SELECT "id", "col1", "COL2" FROM "src_tbl"'),
                                   call(
-                                      'CREATE TEMP TABLE "tmp_src_tbl" AS SELECT "id", "col1", "COL2"\n                    FROM "src_tbl" WITH NO DATA'),# noqa
+                                      'CREATE TEMP TABLE "tmp_src_tbl" AS SELECT "id", "col1", "COL2"\n                    FROM "src_tbl" WITH NO DATA'),  # noqa
                                   call('CREATE INDEX ON "tmp_src_tbl" ("id")'),
-                                  call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s WHERE t."id" = s."id"')] # noqa
+                                  call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s WHERE t."id" = s."id"')]  # noqa
         assert mock_cursor.execute.call_args_list == expected_execute_calls
+
+    def test_column_format(self):
+        columns = [
+            {
+                "first_name": {
+                    "format": "hello-{value}-world",
+                    "provider": {
+                        "name": "set",
+                        "value": "dummy name"
+                    }
+                }
+            },
+            {
+                "phone": {
+                    "format": "+65-{value}",
+                    "provider": {
+                        "name": "md5",
+                        "as_number": True
+                    }
+                }
+            }
+        ]
+        row = OrderedDict([("first_name", "John Doe"), ("phone", "2354223432")])
+        result = get_column_values(row, columns)
+        assert result == {'first_name': 'hello-dummy name-world', 'phone': '+65-91042872'}
 
 
 class TestCSVSerialization:

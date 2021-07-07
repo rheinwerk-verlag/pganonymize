@@ -63,6 +63,17 @@ class TestMD5Provider:
         assert isinstance(value, six.string_types)
         assert len(value) == 32
 
+    def test_as_number(self):
+        provider = providers.MD5Provider(as_number=True)
+        value = provider.alter_value('foo')
+        assert isinstance(value, six.integer_types)
+        assert value == 985560
+
+        provider = providers.MD5Provider(as_number=True, as_number_length=8)
+        value = provider.alter_value('foobarbazadasd')
+        assert isinstance(value, six.integer_types)
+        assert value == 45684001
+
 
 class TestSetProvider:
 

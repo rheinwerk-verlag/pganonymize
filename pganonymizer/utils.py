@@ -87,10 +87,9 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     batches = int(math.ceil((1.0 * total_count) / (1.0 * chunk_size)))
     for i in trange(batches, desc="Processing {} batches for {}".format(batches, table), disable=not verbose):
         records = cursor.fetchmany(size=chunk_size)
-        if not records:
-            break
-        data = parmap.map(process_row, records, columns, excludes, pm_pbar=verbose)
-        import_data(connection, temp_table, filter(None, data))
+        if records:
+            data = parmap.map(process_row, records, columns, excludes, pm_pbar=verbose)
+            import_data(connection, temp_table, filter(None, data))
     apply_anonymized_data(connection, temp_table, table, primary_key, columns)
 
     cursor.close()
@@ -273,12 +272,15 @@ def get_column_values(row, columns):
         provider_config = column_definition.get('provider')
         orig_value = nested_get(row, full_column_name)
         # Skip the current column if there is no value to be altered
-        if orig_value:
+        if orig_value is not None:
             provider = get_provider(provider_config)
             value = provider.alter_value(orig_value)
             append = column_definition.get('append')
             if append:
                 value = value + append
+            format = column_definition.get('format')
+            if format:
+                value = format.format(value=value)
             nested_set(row, full_column_name, value)
             column_dict[column_name] = nested_get(row, column_name)
     return column_dict
@@ -338,15 +340,12 @@ def escape_str_replace(text):
 
 
 def nested_get(dic, path, delimiter='.'):
-    keys = path.split(delimiter)
-    for key in keys[:-1]:
-        if key in dic:
+    try:
+        keys = path.split(delimiter)
+        for key in keys[:-1]:
             dic = dic.get(key, {})
-        else:
-            return None
-    if keys[-1] in dic:
         return dic[keys[-1]]
-    else:
+    except (AttributeError, KeyError):
         return None
 
 
