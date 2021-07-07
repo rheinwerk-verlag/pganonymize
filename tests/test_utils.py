@@ -1,8 +1,9 @@
 from collections import OrderedDict
 from io import StringIO
 import math
+from tests.utils import quote_ident
 from mock import ANY, Mock, call, patch
-from psycopg2.sql import Composed, Identifier, SQL
+
 import pytest
 
 from pganonymizer.utils import anonymize_tables, build_and_then_import_data, data2csv, \
@@ -25,13 +26,12 @@ class TestGetConnection:
 
 
 class TestTruncateTables:
-
+    @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
     @pytest.mark.parametrize('tables, expected', [
-        [('table_a', 'table_b', 'CAPS_TABLe'), Composed([SQL('TRUNCATE TABLE '), Composed(
-            [Identifier('table_a'), SQL(', '), Identifier('table_b'), SQL(', '), Identifier('CAPS_TABLe')])])],
+        [('table_a', 'table_b', 'CAPS_TABLe'), 'TRUNCATE TABLE "table_a", "table_b", "CAPS_TABLe"'],
         [(), None],
     ])
-    def test(self, tables, expected):
+    def test(self, quote_ident, tables, expected):
         mock_cursor = Mock()
         connection = Mock()
         connection.cursor.return_value = mock_cursor
@@ -47,11 +47,11 @@ class TestTruncateTables:
 
 
 class TestImportData:
-
+    @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
     @pytest.mark.parametrize('tmp_table', [
         ['src_tbl']
     ])
-    def test(self, tmp_table):
+    def test(self, quote_ident, tmp_table):
         mock_cursor = Mock()
 
         connection = Mock()
@@ -67,7 +67,8 @@ class TestImportData:
         assert mock_cursor.copy_from.call_args_list == expected
 
     @patch('pganonymizer.utils.StringIO')
-    def test_anonymize_tables(self, mock_stringid):
+    @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
+    def test_anonymize_tables(self, quote_ident, mock_stringid):
         siobuff = StringIO()
         sio_mock = Mock(wraps=siobuff)
         mock_stringid.return_value = sio_mock
@@ -138,10 +139,11 @@ class TestImportData:
 
 
 class TestBuildAndThenImport:
+    @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
     @pytest.mark.parametrize('table, primary_key, columns, total_count, chunk_size, expected_callcount', [
         ['src_tbl', 'id', [{'col1': {'provider': None}}, {'COL2': {'provider': None}}], 10, 3, 4]
     ])
-    def test(self, table, primary_key, columns, total_count, chunk_size, expected_callcount):
+    def test(self, quote_ident, table, primary_key, columns, total_count, chunk_size, expected_callcount):
         fake_record = dict.fromkeys([list(definition.keys())[0] for definition in columns], "")
         records = [
             [fake_record for row in range(0, chunk_size)] for x in range(0, int(math.ceil(total_count / chunk_size)))
@@ -164,20 +166,12 @@ class TestBuildAndThenImport:
         assert connection.cursor.call_count == 11
         assert mock_cursor.close.call_count == 11
         assert mock_cursor.copy_from.call_count == expected_callcount
-        expected_execute_calls = [
-            call(Composed([SQL('SELECT '), Composed([Identifier('id'), SQL(', '), Identifier(
-                'col1'), SQL(', '), Identifier('COL2')]), SQL(' FROM '), Identifier('src_tbl')])),
-            call(Composed([SQL('CREATE TEMP TABLE '), Identifier('tmp_src_tbl'),
-                           SQL(' AS SELECT '),
-                           Composed([Identifier('id'), SQL(', '), Identifier(
-                               'col1'), SQL(', '), Identifier('COL2')]), SQL('\n                    FROM '),
-                           Identifier('src_tbl'), SQL(' WITH NO DATA')])),
-            call(Composed([SQL('CREATE INDEX ON '), Identifier('tmp_src_tbl'), SQL(' ('), Identifier('id'), SQL(')')])),
-            call(Composed([SQL('UPDATE '), Identifier('src_tbl'), SQL(' t SET '),
-                           Composed([Composed([Identifier('col1'), SQL(' = s.'), Identifier('col1')]), SQL(', '),
-                                     Composed([Identifier('COL2'), SQL(' = s.'), Identifier('COL2')])]),
-                           SQL(' FROM '), Identifier('tmp_src_tbl'),
-                           SQL(' s WHERE t.'), Identifier('id'), SQL(' = s.'), Identifier('id')]))]
+
+        expected_execute_calls = [call('SELECT "id", "col1", "COL2" FROM "src_tbl"'),
+                                  call(
+                                      'CREATE TEMP TABLE "tmp_src_tbl" AS SELECT "id", "col1", "COL2"\n                    FROM "src_tbl" WITH NO DATA'),# noqa
+                                  call('CREATE INDEX ON "tmp_src_tbl" ("id")'),
+                                  call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s WHERE t."id" = s."id"')] # noqa
         assert mock_cursor.execute.call_args_list == expected_execute_calls
 
 

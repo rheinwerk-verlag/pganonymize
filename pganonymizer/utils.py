@@ -81,7 +81,7 @@ def build_and_then_import_data(connection, table, primary_key, columns,
         sql_select = Composed([sql_select, SQL(" WHERE {search_condition}".format(search_condition=search))])
 
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
-    cursor.execute(sql_select)
+    cursor.execute(sql_select.as_string(connection))
     temp_table = 'tmp_{table}'.format(table=table)
     create_temporary_table(connection, columns, table, temp_table, primary_key)
     batches = int(math.ceil((1.0 * total_count) / (1.0 * chunk_size)))
@@ -100,7 +100,8 @@ def apply_anonymized_data(connection, temp_table, source_table, primary_key, def
     logging.info('Applying changes on table {}'.format(source_table))
     cursor = connection.cursor()
     create_index_sql = SQL('CREATE INDEX ON {temp_table} ({primary_key})')
-    cursor.execute(create_index_sql.format(temp_table=Identifier(temp_table), primary_key=Identifier(primary_key)))
+    sql = create_index_sql.format(temp_table=Identifier(temp_table), primary_key=Identifier(primary_key))
+    cursor.execute(sql.as_string(connection))
 
     column_names = get_column_names(definitions)
     columns_identifiers = [SQL('{column} = s.{column}').format(column=Identifier(column)) for column in column_names]
@@ -117,7 +118,7 @@ def apply_anonymized_data(connection, temp_table, source_table, primary_key, def
         'FROM {source} s '
         'WHERE t.{primary_key} = s.{primary_key}'
     ).format(**sql_args)
-    cursor.execute(sql)
+    cursor.execute(sql.as_string(connection))
     cursor.close()
 
 
@@ -173,7 +174,9 @@ def create_temporary_table(connection, definitions, source_table, temp_table, pr
                     FROM {source_table} WITH NO DATA""")
     cursor = connection.cursor()
     cursor.execute(ctas_query.format(temp_table=Identifier(temp_table),
-                   source_table=Identifier(source_table), columns=sql_columns))
+                   source_table=Identifier(source_table), columns=sql_columns)
+                   .as_string(connection)
+                   )
     cursor.close()
 
 
@@ -212,7 +215,7 @@ def get_table_count(connection, table):
     """
     sql = SQL('SELECT COUNT(*) FROM {table}').format(table=Identifier(table))
     cursor = connection.cursor()
-    cursor.execute(sql)
+    cursor.execute(sql.as_string(connection))
     total_count = cursor.fetchone()[0]
     cursor.close()
     return total_count
@@ -293,7 +296,7 @@ def truncate_tables(connection, tables):
     cursor = connection.cursor()
     table_names = SQL(', ').join([Identifier(table_name) for table_name in tables])
     logging.info('Truncating tables "%s"', table_names)
-    cursor.execute(SQL('TRUNCATE TABLE {tables}').format(tables=table_names))
+    cursor.execute(SQL('TRUNCATE TABLE {tables}').format(tables=table_names).as_string(connection))
     cursor.close()
 
 
@@ -322,7 +325,12 @@ def get_column_name(definition, fully_qualified=False):
 
 
 def get_column_names(definitions):
-    return [get_column_name(definition) for definition in definitions]
+    names = []
+    for definition in definitions:
+        name = get_column_name(definition)
+        if name not in names:
+            names.append(name)
+    return names
 
 
 def escape_str_replace(text):
