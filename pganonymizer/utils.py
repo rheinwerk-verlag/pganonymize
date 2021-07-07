@@ -280,7 +280,7 @@ def get_column_values(row, columns):
                 value = value + append
             format = column_definition.get('format')
             if format:
-                value = format.format(value=value)
+                value = format.format(pga_value=value, **row)
             nested_set(row, full_column_name, value)
             column_dict[column_name] = nested_get(row, column_name)
     return column_dict

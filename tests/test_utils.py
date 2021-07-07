@@ -149,7 +149,7 @@ class TestBuildAndThenImport:
         records = [
             [fake_record for row in range(0, chunk_size)] for x in range(0, int(math.ceil(total_count / chunk_size)))
         ]
- 
+
         mock_cursor = Mock()
         mock_cursor.fetchmany.side_effect = records
 
@@ -173,7 +173,7 @@ class TestBuildAndThenImport:
         columns = [
             {
                 "first_name": {
-                    "format": "hello-{value}-world",
+                    "format": "hello-{pga_value}-world",
                     "provider": {
                         "name": "set",
                         "value": "dummy name"
@@ -182,17 +182,29 @@ class TestBuildAndThenImport:
             },
             {
                 "phone": {
-                    "format": "+65-{value}",
+                    "format": "+65-{pga_value}",
                     "provider": {
                         "name": "md5",
                         "as_number": True
                     }
                 }
+            },
+            {
+                "templated": {
+                    "format": "{pga_value}-{phone}-{first_name}",
+                    "provider": {
+                        "name": "set",
+                        "value": "hello"
+                    }
+                }
             }
         ]
-        row = OrderedDict([("first_name", "John Doe"), ("phone", "2354223432")])
+        row = OrderedDict([("first_name", "John Doe"), ("phone", "2354223432"), ("templated", "")])
         result = get_column_values(row, columns)
-        assert result == {'first_name': 'hello-dummy name-world', 'phone': '+65-91042872'}
+        expected = {'first_name': 'hello-dummy name-world',
+                    'phone': '+65-91042872',
+                    'templated': "hello-+65-91042872-hello-dummy name-world"}
+        assert result == expected
 
 
 class TestCSVSerialization:
