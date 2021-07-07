@@ -345,7 +345,7 @@ def nested_get(dic, path, delimiter='.'):
         for key in keys[:-1]:
             dic = dic.get(key, {})
         return dic[keys[-1]]
-    except (AttributeError, KeyError):
+    except (AttributeError, KeyError, TypeError):
         return None
 
 
