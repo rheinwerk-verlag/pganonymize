@@ -1,6 +1,7 @@
 import operator
 import random
 from hashlib import md5
+from uuid import uuid4
 
 from faker import Faker
 from six import with_metaclass
@@ -130,3 +131,12 @@ class SetProvider(with_metaclass(ProviderMeta, Provider)):
 
     def alter_value(self, value):
         return self.kwargs.get('value')
+
+
+class UUID4Provider(with_metaclass(ProviderMeta, Provider)):
+    """Provider to set a random uuid value."""
+
+    id = 'uuid4'
+
+    def alter_value(self, value):
+        return uuid4()

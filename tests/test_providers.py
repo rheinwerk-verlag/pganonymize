@@ -1,4 +1,5 @@
 import operator
+import uuid
 
 import pytest
 import six
@@ -84,3 +85,21 @@ class TestSetProvider:
     def test_alter_value(self, kwargs, expected):
         provider = providers.SetProvider(**kwargs)
         assert provider.alter_value('Foo') == expected
+
+
+class TestUUID4Provider:
+    @pytest.mark.parametrize('kwargs, expected', [
+        ({'value': None}, None),
+        ({'value': 'Bar'}, 'Bar')
+    ])
+    def test_alter_value(self, kwargs, expected):
+        provider = providers.UUID4Provider(**kwargs)
+        assert type(provider.alter_value('Foo')) == uuid.UUID
+
+
+class TestInvalidProvider:
+    def test(self):
+        with pytest.raises(exceptions.InvalidProvider,
+                           match="Could not find provider with id asdfnassdladladjasldasdklj"):
+            provider = providers.get_provider({'name': 'asdfnassdladladjasldasdklj', 'value': 'Foo'})
+            provider.alter_value('Foo')

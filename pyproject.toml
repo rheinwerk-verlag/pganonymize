@@ -18,9 +18,9 @@ Faker = [
 ]
 psycopg2-binary = "^2.8.4"
 pyyaml = "^5.2"
-six = "^1.13.0"
 parmap = "^1.5.2"
 tqdm = "^4.61.1"
+pgcopy = "^1.5.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7.9"

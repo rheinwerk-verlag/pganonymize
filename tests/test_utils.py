@@ -1,12 +1,11 @@
-from collections import OrderedDict
-from io import StringIO
+from collections import OrderedDict, namedtuple
 import math
 from tests.utils import quote_ident
 from mock import ANY, Mock, call, patch
 
 import pytest
 
-from pganonymizer.utils import anonymize_tables, build_and_then_import_data, data2csv, get_column_values, \
+from pganonymizer.utils import anonymize_tables, build_and_then_import_data, get_column_values, \
     get_connection, import_data, truncate_tables
 
 
@@ -48,36 +47,50 @@ class TestTruncateTables:
 
 class TestImportData:
     @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
-    @pytest.mark.parametrize('tmp_table', [
-        ['src_tbl']
+    @patch('pgcopy.copy.util')
+    @patch('pgcopy.copy.inspect')
+    @pytest.mark.parametrize('tmp_table, cols, data', [
+        ['public.src_tbl', ('id', 'location'), [
+            OrderedDict([("id", 0), ('location', 'Jerusalem')]),
+            OrderedDict([("id", 1), ('location', 'New York')]),
+            OrderedDict([("id", 2), ('location', 'Moscow')]),
+        ]]
     ])
-    def test(self, quote_ident, tmp_table):
+    def test(self, inspect, util, quote_ident, tmp_table, cols, data):
         mock_cursor = Mock()
 
         connection = Mock()
         connection.cursor.return_value = mock_cursor
+        connection.encoding = 'UTF8'
+        Record = namedtuple("Record", "attname,type_category,type_name,type_mod,not_null,typelem")
 
-        import_data(connection, tmp_table, [])
+        inspect.get_types.return_value = {
+            'id': Record(attname='id', type_category='N', type_name='int8', type_mod=-1, not_null=False, typelem=0),
+            'location': Record(attname='location', type_category='S', type_name='varchar', type_mod=259,
+                               not_null=False, typelem=0)
+        }
 
-        assert connection.cursor.call_count == 2
-        assert mock_cursor.close.call_count == 2
+        import_data(connection, tmp_table, cols, data)
 
-        mock_cursor.copy_from.assert_called_once()
-        expected = [call(ANY, tmp_table, null=ANY, sep=ANY)]
-        assert mock_cursor.copy_from.call_args_list == expected
+        # assert connection.cursor.call_count == mock_cursor.close.call_count
 
-    @patch('pganonymizer.utils.StringIO')
-    @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
-    def test_anonymize_tables(self, quote_ident, mock_stringid):
-        siobuff = StringIO()
-        sio_mock = Mock(wraps=siobuff)
-        mock_stringid.return_value = sio_mock
-        sio_mock.close.return_value = True
+        mock_cursor.copy_expert.assert_called_once()
+        expected = [call('COPY "public"."src_tbl" ("id", "location") FROM STDIN WITH BINARY', ANY)]
+        assert mock_cursor.copy_expert.call_args_list == expected
 
+    @ patch('pganonymizer.utils.CopyManager')
+    @ patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
+    def test_anonymize_tables(self, quote_ident, copy_manager):
         mock_cursor = Mock()
         mock_cursor.fetchone.return_value = [2]
         mock_cursor.fetchmany.side_effect = [
             [
+                OrderedDict([("first_name", None),
+                             ("json_column", None)
+                             ]),
+                OrderedDict([("first_name", "exclude me"),
+                             ("json_column", {"field1": "foo"})
+                             ]),
                 OrderedDict([("first_name", "John Doe"),
                              ("json_column", {"field1": "foo"})
                              ]),
@@ -86,6 +99,9 @@ class TestImportData:
                              ])
             ]
         ]
+        cmm = Mock()
+        copy_manager.return_value = cmm
+        copy_manager.copy.return_value = []
 
         connection = Mock()
         connection.cursor.return_value = mock_cursor
@@ -94,19 +110,24 @@ class TestImportData:
 
         assert connection.cursor.call_count == 0
         assert mock_cursor.close.call_count == 0
+        assert copy_manager.copy.call_count == 0
 
         definitions = [
             {
                 "auth_user": {
                     "primary_key": "id",
                     "chunk_size": 5000,
+                    "excludes": [
+                        {'first_name': ['exclude']}
+                    ],
                     "fields": [
                         {
                             "first_name": {
                                 "provider": {
                                     "name": "set",
                                     "value": "dummy name"
-                                }
+                                },
+                                "append": "append-me"
                             }
                         },
                         {
@@ -125,26 +146,28 @@ class TestImportData:
                                 }
                             }
                         },
-                    ]
+                    ],
+                    'search': 'first_name == "John"'
                 }
             }
         ]
-        anonymize_tables(connection, definitions, verbose=True)
-        assert connection.cursor.call_count == 6
-        assert mock_cursor.close.call_count == 6
 
-        assert mock_cursor.copy_from.call_args_list == [call(sio_mock, ANY, null=ANY, sep=ANY)]
-        assert siobuff.getvalue(
-        ) == """dummy name\x1f{"field1": "dummy json field1"}\ndummy name\x1f{"field2": "dummy json field2"}\n"""
+        anonymize_tables(connection, definitions, verbose=True)
+        assert connection.cursor.call_count == mock_cursor.close.call_count
+        assert copy_manager.call_args_list == [call(connection, 'tmp_auth_user', ['id', 'first_name', 'json_column'])]
+        assert cmm.copy.call_count == 1
+        assert cmm.copy.call_args_list == [call([['dummy nameappend-me', b'{"field1": "dummy json field1"}'],
+                                                 ['dummy nameappend-me', b'{"field2": "dummy json field2"}']])]
 
 
 class TestBuildAndThenImport:
-    @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
-    @pytest.mark.parametrize('table, primary_key, columns, total_count, chunk_size, expected_callcount', [
+    @ patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
+    @ patch('pganonymizer.utils.CopyManager')
+    @ pytest.mark.parametrize('table, primary_key, columns, total_count, chunk_size', [
         ['src_tbl', 'id', [{'col1': {'provider': {'name': 'md5'}}},
-                           {'COL2': {'provider': {'name': 'md5'}}}], 10, 3, 4]
+                           {'COL2': {'provider': {'name': 'md5'}}}], 10, 3]
     ])
-    def test(self, quote_ident, table, primary_key, columns, total_count, chunk_size, expected_callcount):
+    def test(self, quote_ident, copy_manager, table, primary_key, columns, total_count, chunk_size):
         fake_record = dict.fromkeys([list(definition.keys())[0] for definition in columns], "")
         records = [
             [fake_record for row in range(0, chunk_size)] for x in range(0, int(math.ceil(total_count / chunk_size)))
@@ -152,15 +175,12 @@ class TestBuildAndThenImport:
 
         mock_cursor = Mock()
         mock_cursor.fetchmany.side_effect = records
+        mock_cursor.fetchone.return_value = [{}]
 
         connection = Mock()
         connection.cursor.return_value = mock_cursor
 
         build_and_then_import_data(connection, table, primary_key, columns, None, None, total_count, chunk_size)
-
-        assert connection.cursor.call_count == 11
-        assert mock_cursor.close.call_count == 11
-        assert mock_cursor.copy_from.call_count == expected_callcount
 
         expected_execute_calls = [call('SELECT "id", "col1", "COL2" FROM "src_tbl"'),
                                   call(
@@ -169,7 +189,8 @@ class TestBuildAndThenImport:
                                   call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s WHERE t."id" = s."id"')]  # noqa
         assert mock_cursor.execute.call_args_list == expected_execute_calls
 
-    def test_column_format(self):
+    @patch('pganonymizer.utils.CopyManager')
+    def test_column_format(self, copy_manager):
         columns = [
             {
                 "first_name": {
@@ -205,17 +226,3 @@ class TestBuildAndThenImport:
                     'phone': '+65-91042872',
                     'templated': "hello-+65-91042872-hello-dummy name-world"}
         assert result == expected
-
-
-class TestCSVSerialization:
-    @pytest.mark.parametrize('input, expected', [
-        [
-            [
-                OrderedDict([("c1", "foo\nbar"), ("c2", None), ("c3", 123), ("c4", "tab \t tab"), ("c5", "cr\r cr")]),
-                OrderedDict([("c1", None), ("c2", None), ("c3", None), ("c4", "\n"), ("c5", "")])
-            ],
-            "foo\\nbar\x1f\\N\x1f123\x1ftab \\t tab\x1fcr\\r cr\n\\N\x1f\\N\x1f\\N\x1f\x1f\n"]
-    ])
-    def test(self, input, expected):
-        csv_data = data2csv(input)
-        assert csv_data.getvalue() == expected

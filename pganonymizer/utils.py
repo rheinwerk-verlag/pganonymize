@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-import csv
 import json
 import logging
 import math
@@ -14,17 +13,15 @@ import parmap
 import psycopg2
 import psycopg2.extras
 from psycopg2.sql import SQL, Identifier, Composed
-from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
+from pgcopy import CopyManager
 
-from six import StringIO
 from tqdm import trange
 
-from pganonymizer.constants import COPY_DB_DELIMITER, DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
-from pganonymizer.exceptions import BadDataFormat
+from pganonymizer.constants import DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
 from pganonymizer.providers import get_provider
 
 
-def anonymize_tables(connection, definitions, verbose=False):
+def anonymize_tables(connection, definitions, verbose=False, dry_run=False):
     """
     Anonymize a list of tables according to the schema definition.
 
@@ -41,10 +38,10 @@ def anonymize_tables(connection, definitions, verbose=False):
         excludes = table_definition.get('excludes', [])
         search = table_definition.get('search')
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
-        total_count = get_table_count(connection, table_name)
+        total_count = get_table_count(connection, table_name, dry_run)
         chunk_size = table_definition.get('chunk_size', DEFAULT_CHUNK_SIZE)
         build_and_then_import_data(connection, table_name, primary_key, columns, excludes,
-                                   search, total_count, chunk_size, verbose=verbose)
+                                   search, total_count, chunk_size, verbose=verbose, dry_run=dry_run)
         end_time = time.time()
         logging.info('{} anonymization took {:.2f}s'.format(table_name, end_time - start_time))
 
@@ -63,7 +60,7 @@ def process_row(row, columns, excludes):
 
 
 def build_and_then_import_data(connection, table, primary_key, columns,
-                               excludes, search, total_count, chunk_size, verbose=False):
+                               excludes, search, total_count, chunk_size, verbose=False, dry_run=False):
     """
     Select all data from a table and return it together with a list of table columns.
 
@@ -82,7 +79,8 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     sql_select = SQL('SELECT {columns} FROM {table}').format(table=Identifier(table), columns=sql_columns)
     if search:
         sql_select = Composed([sql_select, SQL(" WHERE {search_condition}".format(search_condition=search))])
-
+    if dry_run:
+        sql_select = Composed([sql_select, SQL(" LIMIT 100")])
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql_select.as_string(connection))
     temp_table = 'tmp_{table}'.format(table=table)
@@ -92,7 +90,7 @@ def build_and_then_import_data(connection, table, primary_key, columns,
         records = cursor.fetchmany(size=chunk_size)
         if records:
             data = parmap.map(process_row, records, columns, excludes, pm_pbar=verbose)
-            import_data(connection, temp_table, filter(None, data))
+            import_data(connection, temp_table, [primary_key] + column_names, filter(None, data))
     apply_anonymized_data(connection, temp_table, table, primary_key, columns)
 
     cursor.close()
@@ -148,26 +146,6 @@ def row_matches_excludes(row, excludes=None):
     return False
 
 
-def copy_from(connection, data, table):
-    """
-    Copy the data from a table to a temporary table.
-
-    :param connection: A database connection instance.
-    :param list data: The data of a table.
-    :param str table: Name of the temporary table used for copying the data.
-    :raises BadDataFormat: If the data cannot be imported due to a invalid format.
-    """
-    new_data = data2csv(data)
-    cursor = connection.cursor()
-    try:
-        cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N')
-    except (BadCopyFileFormat, InvalidTextRepresentation) as exc:
-        raise BadDataFormat(exc)
-    finally:
-        new_data.close()
-        cursor.close()
-
-
 def create_temporary_table(connection, definitions, source_table, temp_table, primary_key):
     primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
     column_names = get_column_names(definitions)
@@ -182,17 +160,16 @@ def create_temporary_table(connection, definitions, source_table, temp_table, pr
     cursor.close()
 
 
-def import_data(connection, table_name, data):
+def import_data(connection, table_name, column_names, data):
     """
     Import the temporary and anonymized data to a temporary table and write the changes back.
     :param connection: A database connection instance.
     :param str table_name: Name of the table to be populated with data.
+    :param list columns: A list of table fields
     :param list data: The table data.
     """
-
-    cursor = connection.cursor()
-    copy_from(connection, data, table_name)
-    cursor.close()
+    mgr = CopyManager(connection, table_name, column_names)
+    mgr.copy([[escape_str_replace(val) for col, val in row.items()] for row in data])
 
 
 def get_connection(pg_args):
@@ -206,7 +183,7 @@ def get_connection(pg_args):
     return psycopg2.connect(**pg_args)
 
 
-def get_table_count(connection, table):
+def get_table_count(connection, table, dry_run):
     """
     Return the number of table entries.
 
@@ -215,41 +192,15 @@ def get_table_count(connection, table):
     :return: The number of table entries
     :rtype: int
     """
-    sql = SQL('SELECT COUNT(*) FROM {table}').format(table=Identifier(table))
-    cursor = connection.cursor()
-    cursor.execute(sql.as_string(connection))
-    total_count = cursor.fetchone()[0]
-    cursor.close()
-    return total_count
-
-
-def data2csv(data):
-    """
-    Return a string buffer, that contains delimited data.
-
-    :param list data: A list of values
-    :return: A stream that contains tab delimited csv data
-    :rtype: StringIO
-    """
-
-    buf = StringIO()
-    writer = csv.writer(buf, delimiter=COPY_DB_DELIMITER, lineterminator='\n', quotechar='~')
-    for row in data:
-        row_data = []
-        for x in row.values():
-            if x is None:
-                val = '\\N'
-            elif type(x) == str:
-                val = escape_str_replace(x.strip())
-            elif type(x) == dict:
-                val = escape_str_replace(json.dumps(x))
-            else:
-                val = x
-            row_data.append(val)
-
-        writer.writerow(row_data)
-    buf.seek(0)
-    return buf
+    if dry_run:
+        return 100
+    else:
+        sql = SQL('SELECT COUNT(*) FROM {table}').format(table=Identifier(table))
+        cursor = connection.cursor()
+        cursor.execute(sql.as_string(connection))
+        total_count = cursor.fetchone()[0]
+        cursor.close()
+        return total_count
 
 
 def get_column_values(row, columns):
@@ -338,8 +289,11 @@ def get_column_names(definitions):
     return names
 
 
-def escape_str_replace(text):
-    return text.replace('\\', '\\\\').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
+def escape_str_replace(x):
+    if type(x) == dict:
+        return json.dumps(x).encode()
+    else:
+        return x
 
 
 def nested_get(dic, path, delimiter='.'):
