@@ -14,3 +14,6 @@ def main():
     except KeyboardInterrupt:
         exit_status = 1
     sys.exit(exit_status)
+
+if __name__ == '__main__':
+    main()
