@@ -4,7 +4,6 @@ from __future__ import absolute_import, print_function
 
 import argparse
 import logging
-import sys
 import time
 
 import yaml
@@ -63,7 +62,7 @@ def main(args):
 
     if args.list_providers:
         list_provider_classes()
-        sys.exit(0)
+        return 0
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
 
@@ -77,7 +76,7 @@ def main(args):
 
     start_time = time.time()
     truncate_tables(connection, schema.get('truncate', []))
-    anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
+    anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose, dry_run=args.dry_run)
 
     if not args.dry_run:
         connection.commit()
@@ -88,8 +87,3 @@ def main(args):
 
     if args.dump_file:
         create_database_dump(args.dump_file, pg_args)
-
-
-if __name__ == '__main__':
-    args = get_arg_parser().parse_args()
-    main(args)
