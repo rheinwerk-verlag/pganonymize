@@ -18,7 +18,7 @@ from pgcopy import CopyManager
 from tqdm import trange
 
 from pganonymizer.constants import DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
-from pganonymizer.providers import get_provider
+from pganonymizer.providers import provider_registry
 
 
 def anonymize_tables(connection, definitions, verbose=False, dry_run=False):
@@ -227,7 +227,7 @@ def get_column_values(row, columns):
         orig_value = nested_get(row, full_column_name)
         # Skip the current column if there is no value to be altered
         if orig_value is not None:
-            provider = get_provider(provider_config)
+            provider = provider_registry.get_provider(provider_config['name'])(**provider_config)
             value = provider.alter_value(orig_value)
             append = column_definition.get('append')
             if append:
