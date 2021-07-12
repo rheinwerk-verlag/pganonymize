@@ -3,11 +3,11 @@
 ## Development
 
 * [#27](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Better anonymisation #27 ([nurikk](https://github.com/nurikk))
-* [#25](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Remove column specification for cursor.copy_from call #25 ([nurikk](https://github.com/nurikk))
+* [#25](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Remove column specification for `cursor.copy_from` call #25 ([nurikk](https://github.com/nurikk))
 
 ## 0.5.0 (2021-06-30)
 
-* [#22](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/22): Fix table and column name quotes in cursor.copy_from call ([nurikk](https://github.com/nurikk))
+* [#22](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/22): Fix table and column name quotes in `cursor.copy_from` call ([nurikk](https://github.com/nurikk))
 * [#23](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/23): Allow uniq faker ([nurikk](https://github.com/nurikk))
 
 ## 0.4.1 (2021-05-27)
