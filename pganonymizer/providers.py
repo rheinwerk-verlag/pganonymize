@@ -1,6 +1,6 @@
 import operator
 import random
-from collections import defaultdict
+import re
 from hashlib import md5
 from uuid import uuid4
 
@@ -12,21 +12,43 @@ fake_data = Faker()
 
 
 class ProviderRegistry(object):
+    """A registry for provider classes."""
 
     def __init__(self):
         self._registry = {}
 
     def register(self, provider_class, provider_id):
+        """
+        Register a provider.
+
+        :param provider_class:
+        :param provider_id:
+        """
         self._registry[provider_id] = provider_class
 
     def get_provider(self, provider_id):
-        try:
-            return self._registry[provider_id]
-        except KeyError:
-            raise InvalidProvider('Could not find provider with id {}'.format(provider_id))
+        """
+        Return a provider by it's provider id.
+
+        :param str provider_id:
+        :raises InvalidProvider: If no provider can be found with the given id.
+        """
+        provider = None
+        for key, cls in self._registry.items():
+            if re.compile(key).match(provider_id) is not None:
+                provider = cls
+                break
+        if provider is None:
+            raise InvalidProvider('Could not find provider with id "{}"'.format(provider_id))
+        return provider
 
     @property
     def providers(self):
+        """
+        Return the registered providers.
+
+        :rtype: dict
+        """
         return self._registry
 
 
@@ -34,6 +56,11 @@ provider_registry = ProviderRegistry()
 
 
 def register(provider_id, **kwargs):
+    """
+    A wrapper that registers a provider class to the provider registry.
+
+    :param str provider_id:
+    """
     def wrapper(provider_class):
         registry = kwargs.get('registry', provider_registry)
         registry.register(provider_class, provider_id)
