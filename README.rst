@@ -40,8 +40,11 @@ Features
 +----------------+----------------------+------------------------+----------------------------------+
 | ``ip``         | 157.50.1.20          | ``set``                | 127.0.0.1                        |
 +----------------+----------------------+------------------------+----------------------------------+
+| ``uuid_col``   | 00010203-0405-...... | ``uuid4``              | f7c1bd87-4d....                  |
++----------------+----------------------+------------------------+----------------------------------+
 
 Note: `faker.unique.[provider]` only supported on python3.5+ (Faker library min supported python version)
+Note: `uuid4` - only for (native `uuid4<https://www.postgresql.org/docs/current/datatype-uuid.html>`) columns 
 
 See the `documentation`_ for a more detailed description of the provided anonymization methods.
 
