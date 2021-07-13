@@ -2,6 +2,10 @@
 
 ## Development
 
+## 0.6.1 (2021-07-13)
+
+* Added missing dependencies for the `setup.py`
+
 ## 0.6.0 (2021-07-13)
 
 * [#28](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Add json support ([nurikk](https://github.com/nurikk))

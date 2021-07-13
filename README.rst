@@ -43,8 +43,8 @@ Features
 | ``uuid_col``   | 00010203-0405-...... | ``uuid4``               | f7c1bd87-4d....                  |
 +----------------+----------------------+-------------------------+----------------------------------+
 
-Note: `faker.unique.[provider]` only supported on python3.5+ (Faker library min supported python version)
-Note: `uuid4` - only for (native `uuid4<https://www.postgresql.org/docs/current/datatype-uuid.html>`) columns
+* Note: ``faker.unique.[provider]`` only supported on Python 3.5+ (Faker library min. supported python version)
+* Note: ``uuid4`` - only for (native `uuid4`_) columns
 
 See the `documentation`_ for a more detailed description of the provided anonymization methods.
 
@@ -161,6 +161,7 @@ After that you can pass a schema file to the container, using Docker volumes, an
         -v
 
 
+.. _uuid4: https://www.postgresql.org/docs/current/datatype-uuid.html
 .. _documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/
 .. _schema documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/schema.html
 .. _YAML sample schema: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/sample_schema.yml

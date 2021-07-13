@@ -42,10 +42,11 @@ exec(read('pganonymizer', 'version.py'))
 
 install_requires = [
     'faker',
-    'six',
-    'progress',
+    'parmap',
+    'pgcopy',
     'psycopg2',
-    'pyyaml'
+    'pyyaml',
+    'tqdm'
 ]
 
 tests_require = [
@@ -71,7 +72,7 @@ setup(
     url='https://github.com/rheinwerk-verlag/postgresql-anonymizer',
     license='MIT license',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: POSIX',
