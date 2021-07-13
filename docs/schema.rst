@@ -260,7 +260,10 @@ This provider will replace each character with a static sign.
 ``md5``
 ~~~~~~~
 
-**Arguments:** none
+**Arguments:**
+
+* ``as_number`` (default ``False``): Return the MD5 hash as an integer.
+* ``as_number_length`` (default 8): The length of the integer representation.
 
 This provider will hash the given field value with the MD5 algorithm.
 
@@ -272,6 +275,7 @@ This provider will hash the given field value with the MD5 algorithm.
          - password:
             provider:
               name: md5
+              as_number: True
 
 
 ``set``
@@ -301,5 +305,27 @@ The value can also be a dictionary for JSONB columns::
               name: set
               value: '{"foo": "bar", "baz": 1}'
 
+
+``uuid4``
+~~~~~~~~~
+
+**Arguments:** none
+
+This provider will replace values with a unique UUID4.
+
+.. note::
+   The provider will only generate `native UUIDs`_. If you want to use UUIDs for character based columns, use
+   ``fake.uuid4`` instead.
+
+**Example usage**::
+
+    tables:
+     - auth_user:
+        fields:
+         - first_name:
+            provider:
+              name: uuid4
+
 .. _Faker: https://github.com/joke2k/faker
 .. _Faker documentation: http://faker.rtfd.org/
+.. _native UUIDs: https://www.postgresql.org/docs/current/datatype-uuid.html
