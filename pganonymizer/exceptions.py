@@ -14,5 +14,9 @@ class InvalidProviderArgument(PgAnonymizeException):
     """Raised if an argument is unknown or invalid for a provider."""
 
 
+class ProviderAlreadyRegistered(PgAnonymizeException):
+    """Raised if another provider with the same id has already been registered."""
+
+
 class BadDataFormat(PgAnonymizeException):
     """Raised if the anonymized data cannot be copied."""

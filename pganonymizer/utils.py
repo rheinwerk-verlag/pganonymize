@@ -73,7 +73,7 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     :param int total_count: The amount of rows for the current table
     :param int chunk_size: Number of data rows to fetch with the cursor
     :param bool verbose: Display logging information and a progress bar.
-    :param bool dry_run: Script is runnin in dry-run mode, no commit expected.
+    :param bool dry_run: Script is running in dry-run mode, no commit expected.
     """
     column_names = get_column_names(columns)
     sql_columns = SQL(', ').join([Identifier(column_name) for column_name in [primary_key] + column_names])
@@ -190,7 +190,7 @@ def get_table_count(connection, table, dry_run):
 
     :param connection: A database connection instance
     :param str table: Name of the database table
-    :param bool dry_run: Script is runnin in dry-run mode, no commit expected.
+    :param bool dry_run: Script is running in dry-run mode, no commit expected.
     :return: The number of table entries
     :rtype: int
     """
@@ -294,7 +294,7 @@ def get_column_name(definition, fully_qualified=False):
 
 
 def get_column_names(definitions):
-    """Get disctinct column names from definitions
+    """Get distinct column names from definitions
 
     :param list definitions: A list of table definitions from the YAML schema.
     :return: A list of column names
