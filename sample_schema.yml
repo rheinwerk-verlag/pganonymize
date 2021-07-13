@@ -14,6 +14,11 @@ tables:
         provider:
           name: md5
         append: "@localhost"
+     - phone:
+          format: '+65-{pga_value}-55'
+          provider:
+            name: md5
+            as_number: True
     excludes:
       - email:
         - "\\S[^@]*@example\\.com"

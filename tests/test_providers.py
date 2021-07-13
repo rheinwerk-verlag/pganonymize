@@ -1,4 +1,5 @@
 import operator
+import uuid
 
 import pytest
 import six
@@ -63,6 +64,17 @@ class TestMD5Provider:
         assert isinstance(value, six.string_types)
         assert len(value) == 32
 
+    def test_as_number(self):
+        provider = providers.MD5Provider(as_number=True)
+        value = provider.alter_value('foo')
+        assert isinstance(value, six.integer_types)
+        assert value == 985560
+
+        provider = providers.MD5Provider(as_number=True, as_number_length=8)
+        value = provider.alter_value('foobarbazadasd')
+        assert isinstance(value, six.integer_types)
+        assert value == 45684001
+
 
 class TestSetProvider:
 
@@ -73,3 +85,21 @@ class TestSetProvider:
     def test_alter_value(self, kwargs, expected):
         provider = providers.SetProvider(**kwargs)
         assert provider.alter_value('Foo') == expected
+
+
+class TestUUID4Provider:
+    @pytest.mark.parametrize('kwargs, expected', [
+        ({'value': None}, None),
+        ({'value': 'Bar'}, 'Bar')
+    ])
+    def test_alter_value(self, kwargs, expected):
+        provider = providers.UUID4Provider(**kwargs)
+        assert type(provider.alter_value('Foo')) == uuid.UUID
+
+
+class TestInvalidProvider:
+    def test(self):
+        with pytest.raises(exceptions.InvalidProvider,
+                           match="Could not find provider with id asdfnassdladladjasldasdklj"):
+            provider = providers.get_provider({'name': 'asdfnassdladladjasldasdklj', 'value': 'Foo'})
+            provider.alter_value('Foo')
