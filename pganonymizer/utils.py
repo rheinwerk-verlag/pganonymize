@@ -10,11 +10,10 @@ import subprocess
 import time
 
 import parmap
+from pgcopy import CopyManager
 import psycopg2
 import psycopg2.extras
 from psycopg2.sql import SQL, Identifier, Composed
-from pgcopy import CopyManager
-
 from tqdm import trange
 
 from pganonymizer.constants import DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
@@ -28,6 +27,7 @@ def anonymize_tables(connection, definitions, verbose=False, dry_run=False):
     :param connection: A database connection instance.
     :param list definitions: A list of table definitions from the YAML schema.
     :param bool verbose: Display logging information and a progress bar.
+    :param bool dry_run: Script is runnin in dry-run mode, no commit expected.
     """
     for definition in definitions:
         start_time = time.time()
@@ -73,6 +73,7 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     :param int total_count: The amount of rows for the current table
     :param int chunk_size: Number of data rows to fetch with the cursor
     :param bool verbose: Display logging information and a progress bar.
+    :param bool dry_run: Script is runnin in dry-run mode, no commit expected.
     """
     column_names = get_column_names(columns)
     sql_columns = SQL(', ').join([Identifier(column_name) for column_name in [primary_key] + column_names])
@@ -165,7 +166,7 @@ def import_data(connection, table_name, column_names, data):
     Import the temporary and anonymized data to a temporary table and write the changes back.
     :param connection: A database connection instance.
     :param str table_name: Name of the table to be populated with data.
-    :param list columns: A list of table fields
+    :param list column_names: A list of table fields
     :param list data: The table data.
     """
     mgr = CopyManager(connection, table_name, column_names)
@@ -189,6 +190,7 @@ def get_table_count(connection, table, dry_run):
 
     :param connection: A database connection instance
     :param str table: Name of the database table
+    :param bool dry_run: Script is runnin in dry-run mode, no commit expected.
     :return: The number of table entries
     :rtype: int
     """
@@ -273,6 +275,17 @@ def create_database_dump(filename, db_args):
 
 
 def get_column_name(definition, fully_qualified=False):
+    """
+    Get column name by definition.
+
+    :param dict definition: Column definition
+    :param bool fully_qualified: Get complete column name with path (json objects)
+    :return: A string, containing column name. ex:
+        id
+        name
+        metadata.col1
+    :rtype: string
+    """
     col_name = list(definition.keys())[0]
     if fully_qualified:
         return col_name
@@ -281,6 +294,12 @@ def get_column_name(definition, fully_qualified=False):
 
 
 def get_column_names(definitions):
+    """Get disctinct column names from definitions
+
+    :param list definitions: A list of table definitions from the YAML schema.
+    :return: A list of column names
+    :rtype: list
+    """
     names = []
     for definition in definitions:
         name = get_column_name(definition)
@@ -289,14 +308,27 @@ def get_column_names(definitions):
     return names
 
 
-def escape_str_replace(x):
-    if type(x) == dict:
-        return json.dumps(x).encode()
-    else:
-        return x
+def escape_str_replace(value):
+    """Get escaped value
+
+    :param Value to be encoded.
+    :return: Escaped value
+    :rtype: unknown
+    """
+    if isinstance(value, dict):
+        return json.dumps(value).encode()
+    return value
 
 
 def nested_get(dic, path, delimiter='.'):
+    """Get from dictionary by path
+
+    :dic dict Source dictionaly.
+    :path string Path withing dictionary
+    :delimiter string Path delimiter
+    :return: Value at path
+    :rtype: unknown
+    """
     try:
         keys = path.split(delimiter)
         for key in keys[:-1]:
@@ -307,6 +339,13 @@ def nested_get(dic, path, delimiter='.'):
 
 
 def nested_set(dic, path, value, delimiter='.'):
+    """Set dictionary value by path
+
+    :dic dict Source dictionaly.
+    :path string Path withing dictionary
+    :value unknow Value to be set
+    :delimiter string Path delimiter
+    """
     keys = path.split(delimiter)
     for key in keys[:-1]:
         dic = dic.get(key, {})

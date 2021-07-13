@@ -2,8 +2,11 @@
 
 ## Development
 
-* [#27](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Better anonymisation #27 ([nurikk](https://github.com/nurikk))
-* [#25](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Remove column specification for `cursor.copy_from` call #25 ([nurikk](https://github.com/nurikk))
+## 0.6.0 (2021-07-13)
+
+* [#28](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Add json support ([nurikk](https://github.com/nurikk))
+* [#27](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Better anonymisation ([nurikk](https://github.com/nurikk))
+* [#25](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Remove column specification for `cursor.copy_from` call ([nurikk](https://github.com/nurikk))
 
 ## 0.5.0 (2021-06-30)
 
