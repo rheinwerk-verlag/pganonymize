@@ -95,11 +95,3 @@ class TestUUID4Provider:
     def test_alter_value(self, kwargs, expected):
         provider = providers.UUID4Provider(**kwargs)
         assert type(provider.alter_value('Foo')) == uuid.UUID
-
-
-class TestInvalidProvider:
-    def test(self):
-        with pytest.raises(exceptions.InvalidProvider,
-                           match="Could not find provider with id asdfnassdladladjasldasdklj"):
-            provider = providers.get_provider({'name': 'asdfnassdladladjasldasdklj', 'value': 'Foo'})
-            provider.alter_value('Foo')

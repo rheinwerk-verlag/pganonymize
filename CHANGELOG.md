@@ -2,6 +2,8 @@
 
 ## Development
 
+* Simplified provider registration (no metaclass usage anymore)
+
 ## 0.6.1 (2021-07-13)
 
 * Added missing dependencies for the `setup.py`
