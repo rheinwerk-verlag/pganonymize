@@ -11,14 +11,14 @@ It uses a YAML file to define which tables and fields should be anonymized and p
 
 .. contents::
 
-.. section-numbering::
-
 Features
 --------
 
 * Intentionally compatible with Python 2.7 (for old, productive platforms)
-* Anonymize PostgreSQL tables on data level entry with various methods (s. table below)
-* Exclude data for anonymization depending on regular expressions
+* Anonymize PostgreSQL tables on data level entry with various providers (some examples in the table below)
+* Exclude data for anonymization depending on
+  * regular expressions
+  * SQL ``WHERE`` clauses
 * Truncate entire tables for unwanted data
 
 +----------------+----------------------+-------------------------+----------------------------------+
@@ -51,14 +51,16 @@ See the `documentation`_ for a more detailed description of the provided anonymi
 Installation
 ------------
 
-The default installation method is to use ``pip``::
+The default installation method is to use ``pip``:
+
+.. code-block:: sh
 
     $ pip install pganonymize
 
 Usage
 -----
 
-::
+.. code-block:: sh
 
     usage: pganonymize [-h] [-v] [-l] [--schema SCHEMA] [--dbname DBNAME]
                    [--user USER] [--password PASSWORD] [--host HOST]
@@ -87,7 +89,9 @@ all anonymization rules for that database. Take a look at the `schema documentat
 `YAML sample schema`_.
 
 
-Example call::
+Example calls:
+
+.. code-block:: sh
 
     $ pganonymize --schema=myschema.yml \
         --dbname=test_database \
@@ -109,11 +113,15 @@ Database dump
 
 With the ``--dump-file`` argument it is possible to create a dump file after anonymizing the database. Please note,
 that the ``pg_dump`` command from the ``postgresql-client-common`` library is necessary to create the dump file for the
-database, e.g. under Linux::
+database, e.g. under Linux:
+
+.. code-block:: sh
 
     sudo apt-get install postgresql-client-common
 
-Example call::
+Example call:
+
+.. code-block:: sh
 
     $ pganonymize --schema=myschema.yml \
         --dbname=test_database \
@@ -126,16 +134,22 @@ Example call::
 Quickstart
 ----------
 
-Clone repo::
+Clone repo:
+
+.. code-block:: sh
 
     $ git clone git@github.com:rheinwerk-verlag/postgresql-anonymizer.git
     $ cd postgresql-anonymizer
 
-For making changes and developing pganonymizer, you need to install ``poetry``::
+For making changes and developing pganonymizer, you need to install ``poetry``:
+
+.. code-block:: sh
 
     $ sudo pip install poetry
 
-Now you can install all requirements and activate the virtualenv::
+Now you can install all requirements and activate the virtualenv:
+
+.. code-block:: sh
 
     $ poetry install
     $ poetry shell
@@ -143,11 +157,15 @@ Now you can install all requirements and activate the virtualenv::
 Docker
 ------
 
-If you want to run the anonymizer within a Docker container you first have to build the image::
+If you want to run the anonymizer within a Docker container you first have to build the image:
+
+.. code-block:: sh
 
     $ docker build -t pganonymizer .
 
-After that you can pass a schema file to the container, using Docker volumes, and call the anonymizer::
+After that you can pass a schema file to the container, using Docker volumes, and call the anonymizer:
+
+.. code-block:: sh
 
     $ docker run \
         -v <path to your schema>:/schema.yml \
