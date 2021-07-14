@@ -129,31 +129,8 @@ Example call:
         --dump-file=/tmp/dump.gz \
         -v
 
-Quickstart
-----------
-
-Clone repo:
-
-.. code-block:: sh
-
-    $ git clone git@github.com:rheinwerk-verlag/postgresql-anonymizer.git
-    $ cd postgresql-anonymizer
-
-For making changes and developing pganonymizer, you need to install ``poetry``:
-
-.. code-block:: sh
-
-    $ sudo pip install poetry
-
-Now you can install all requirements and activate the virtualenv:
-
-.. code-block:: sh
-
-    $ poetry install
-    $ poetry shell
-
 Docker
-------
+~~~~~~
 
 If you want to run the anonymizer within a Docker container you first have to build the image:
 
