@@ -46,7 +46,7 @@ Creating a pull request
 
 Before creating a pull request make sure to check:
 
-* existing docstring have been updated
+* existing docstrings have been updated
 * new code has valid docstrings
 * whether existing `tests`_ have to be fixed
 * new tests have to be written first
