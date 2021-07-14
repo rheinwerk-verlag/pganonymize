@@ -16,9 +16,7 @@ Features
 
 * Intentionally compatible with Python 2.7 (for old, productive platforms)
 * Anonymize PostgreSQL tables on data level entry with various providers (some examples in the table below)
-* Exclude data for anonymization depending on
-  * regular expressions
-  * SQL ``WHERE`` clauses
+* Exclude data for anonymization depending on regular expressions or SQL ``WHERE`` clauses
 * Truncate entire tables for unwanted data
 
 +----------------+----------------------+-------------------------+----------------------------------+
@@ -117,7 +115,7 @@ database, e.g. under Linux:
 
 .. code-block:: sh
 
-    sudo apt-get install postgresql-client-common
+    $ sudo apt-get install postgresql-client-common
 
 Example call:
 
