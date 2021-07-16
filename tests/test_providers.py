@@ -91,6 +91,14 @@ class TestProviderRegistry:
         pass
 
 
+class TestProvider:
+
+    def test_alter_value(self):
+        provider = providers.Provider()
+        with pytest.raises(NotImplementedError):
+            provider.alter_value('Foo')
+
+
 class TestChoiceProvider:
 
     def test_alter_value(self):

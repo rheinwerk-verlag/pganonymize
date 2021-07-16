@@ -87,7 +87,7 @@ class Provider(object):
 
         :param value: The original value of the database column.
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 @register('choice')
