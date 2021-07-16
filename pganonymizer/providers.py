@@ -1,6 +1,7 @@
 import operator
 import random
 import re
+from collections import OrderedDict
 from hashlib import md5
 from uuid import uuid4
 
@@ -15,11 +16,11 @@ class ProviderRegistry(object):
     """A registry for provider classes."""
 
     def __init__(self):
-        self._registry = {}
+        self._registry = OrderedDict()
 
     def register(self, provider_class, provider_id):
         """
-        Register a provider.
+        Register a provider class.
 
         :param pganonymizer.providers.Provider provider_class: Provider class that should be registered
         :param str provider_id: A string id to register the provider for
@@ -47,7 +48,7 @@ class ProviderRegistry(object):
         """
         Return the registered providers.
 
-        :rtype: dict
+        :rtype: OrderedDict
         """
         return self._registry
 
@@ -61,6 +62,8 @@ def register(provider_id, **kwargs):
 
     :param str provider_id: The string id to register the provider for.
     :keyword registry: The registry the provider class is registered at (default is the `provider_registry` instance).
+    :return: The decorator function
+    :rtype: function
     """
     def wrapper(provider_class):
         registry = kwargs.get('registry', provider_registry)
