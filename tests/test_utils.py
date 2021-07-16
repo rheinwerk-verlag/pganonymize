@@ -1,12 +1,13 @@
-from collections import OrderedDict, namedtuple
 import math
-from tests.utils import quote_ident
-from mock import ANY, Mock, call, patch
+from collections import OrderedDict, namedtuple
 
 import pytest
+from mock import ANY, Mock, call, patch
 
-from pganonymizer.utils import anonymize_tables, build_and_then_import_data, get_column_values, \
-    get_connection, import_data, truncate_tables
+from tests.utils import quote_ident
+
+from pganonymizer.utils import (anonymize_tables, build_and_then_import_data, get_column_values,
+                                get_connection, import_data, truncate_tables)
 
 
 class TestGetConnection:

@@ -10,10 +10,10 @@ import subprocess
 import time
 
 import parmap
-from pgcopy import CopyManager
 import psycopg2
 import psycopg2.extras
-from psycopg2.sql import SQL, Identifier, Composed
+from pgcopy import CopyManager
+from psycopg2.sql import SQL, Composed, Identifier
 from tqdm import trange
 
 from pganonymizer.constants import DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY

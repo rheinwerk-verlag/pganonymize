@@ -1,9 +1,12 @@
-from tests.utils import quote_ident
-from mock import call, patch, Mock
-from pganonymizer.cli import get_arg_parser, main
-import pytest
 import shlex
 from argparse import Namespace
+
+import pytest
+from mock import Mock, call, patch
+
+from tests.utils import quote_ident
+
+from pganonymizer.cli import get_arg_parser, main
 
 
 class TestCli:
