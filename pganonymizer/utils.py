@@ -266,7 +266,7 @@ def create_database_dump(filename, db_args):
     :param dict db_args: A dictionary with database related information
     """
     arguments = '-d {dbname} -U {user} -h {host} -p {port}'.format(**db_args)
-    cmd = 'pg_dump -p -Fc -Z 9 {args} -f {filename}'.format(
+    cmd = 'pg_dump -Fc -Z 9 {args} -f {filename}'.format(
         args=arguments,
         filename=filename
     )
