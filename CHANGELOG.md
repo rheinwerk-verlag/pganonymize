@@ -2,6 +2,7 @@
 
 ## Development
 
+* [#32](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/32): Fixed pg_dump arguments ([korsar182](https://github.com/korsar182))
 * Simplified provider registration (no metaclass usage anymore)
 
 ## 0.6.1 (2021-07-13)
