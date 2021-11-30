@@ -79,8 +79,8 @@ class TestImportData:
         expected = [call('COPY "public"."src_tbl" ("id", "location") FROM STDIN WITH BINARY', ANY)]
         assert mock_cursor.copy_expert.call_args_list == expected
 
-    @ patch('pganonymizer.utils.CopyManager')
-    @ patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
+    @patch('pganonymizer.utils.CopyManager')
+    @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
     def test_anonymize_tables(self, quote_ident, copy_manager):
         mock_cursor = Mock()
         mock_cursor.fetchone.return_value = [2]
@@ -162,9 +162,9 @@ class TestImportData:
 
 
 class TestBuildAndThenImport:
-    @ patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
-    @ patch('pganonymizer.utils.CopyManager')
-    @ pytest.mark.parametrize('table, primary_key, columns, total_count, chunk_size', [
+    @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
+    @patch('pganonymizer.utils.CopyManager')
+    @pytest.mark.parametrize('table, primary_key, columns, total_count, chunk_size', [
         ['src_tbl', 'id', [{'col1': {'provider': {'name': 'md5'}}},
                            {'COL2': {'provider': {'name': 'md5'}}}], 10, 3]
     ])
