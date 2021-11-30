@@ -2,6 +2,8 @@
 
 ## Development
 
+## 0.7.0 (2021-11-30)
+
 * [#34](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/34): Subprocess "run" being used on Python2.7
 * [#35](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/35): parmap no longer supports Python 2.7
   * Dropped Python 3.5 support

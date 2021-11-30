@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "postgresql-anonymizer"
-version = "0.6.1"
+version = "0.7.0"
 description = "Commandline tool to anonymize PostgreSQL databases"
 authors = [
     "Henning Kage <henning.kage@rheinwerk-verlag.de>"
