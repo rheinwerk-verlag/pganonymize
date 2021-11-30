@@ -80,4 +80,4 @@ class TestCli:
         assert mock_cursor.execute.call_args_list == expected_executes
         assert connection.commit.call_count == commit_calls
 
-        assert subprocess.run.call_args_list == call_dump
+        assert subprocess.call.call_args_list == call_dump

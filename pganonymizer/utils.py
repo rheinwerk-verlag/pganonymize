@@ -271,7 +271,7 @@ def create_database_dump(filename, db_args):
         filename=filename
     )
     logging.info('Creating database dump file "%s"', filename)
-    subprocess.run(cmd, shell=True)
+    subprocess.call(cmd, shell=True)
 
 
 def get_column_name(definition, fully_qualified=False):

@@ -6,8 +6,8 @@ from mock import ANY, Mock, call, patch
 
 from tests.utils import quote_ident
 
-from pganonymizer.utils import (anonymize_tables, build_and_then_import_data, get_column_values,
-                                get_connection, import_data, truncate_tables)
+from pganonymizer.utils import (anonymize_tables, build_and_then_import_data, create_database_dump,
+                                get_column_values, get_connection, import_data, truncate_tables)
 
 
 class TestGetConnection:
@@ -227,3 +227,12 @@ class TestBuildAndThenImport:
                     'phone': '+65-91042872',
                     'templated': "hello-+65-91042872-hello-dummy name-world"}
         assert result == expected
+
+
+class TestCreateDatabaseDump:
+
+    @patch('pganonymizer.utils.subprocess.call')
+    def test(self, mock_call):
+        create_database_dump('/tmp/dump.gz', {'dbname': 'database', 'user': 'foo', 'host': 'localhost', 'port': 5432})
+        mock_call.assert_called_once_with('pg_dump -Fc -Z 9 -d database -U foo -h localhost -p 5432 -f /tmp/dump.gz',
+                                          shell=True)
