@@ -18,7 +18,10 @@ Faker = [
 ]
 psycopg2-binary = "^2.8.4"
 pyyaml = "^5.2"
-parmap = "^1.5.2"
+parmap = [
+    { version = "1.5.2", python = "~2.7"},
+    { version = "^1.5.2", python = "^3.5"}
+]
 tqdm = "^4.61.1"
 pgcopy = "^1.5.0"
 
