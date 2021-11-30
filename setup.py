@@ -50,7 +50,7 @@ install_requires = [
     'psycopg2',
     'psycopg2>=2.8.4,<2.9; python_version<"3.6"',
     'pyyaml',
-    'pyyaml>=5.2,<6.0; python_version<"3.6"',
+    'pyyaml>=5.4.1,<6.0; python_version<"3.6"',
     'tqdm'
 ]
 
@@ -80,9 +80,12 @@ setup(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
         'Operating System :: POSIX',
         'Programming Language :: Python',
+        "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
+        "Programming Language :: Python :: 3",
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',

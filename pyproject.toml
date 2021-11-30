@@ -23,8 +23,7 @@ psycopg2-binary = [
     { version = "^2.9.2", python = "^3.6"}
 ]
 pyyaml = [
-    { version = "^5.2", python = "~2.7" },
-    { version = "^5.2", python = "~3.5" },
+    { version = "^5.4.1", python = "~2.7" },
     { version = "^6.0", python = "^3.6" }
 ]
 parmap = [
