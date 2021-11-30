@@ -43,7 +43,6 @@ exec(read('pganonymizer', 'version.py'))
 install_requires = [
     'faker',
     'faker>=3.0,<4.0; python_version=="2.7"',
-    'faker>=4.0,<5.0; python_version=="3.5"',
     'parmap; python_version>="3.6"',
     'parmap==1.5.2; python_version<"3.6"',
     'pgcopy',
@@ -86,7 +85,6 @@ setup(
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
         "Programming Language :: Python :: 3",
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',

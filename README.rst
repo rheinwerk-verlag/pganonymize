@@ -41,7 +41,7 @@ Features
 | ``uuid_col``   | 00010203-0405-...... | ``uuid4``               | f7c1bd87-4d....                  |
 +----------------+----------------------+-------------------------+----------------------------------+
 
-* Note: ``faker.unique.[provider]`` only supported on Python 3.5+ (Faker library min. supported python version)
+* Note: ``faker.unique.[provider]`` only supported on Python 3.6+ (Faker library min. supported python version)
 * Note: ``uuid4`` - only for (native `uuid4`_) columns
 
 See the `documentation`_ for a more detailed description of the provided anonymization methods.
