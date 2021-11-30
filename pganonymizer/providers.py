@@ -1,92 +1,116 @@
 import operator
 import random
+import re
+from collections import OrderedDict
 from hashlib import md5
 from uuid import uuid4
 
 from faker import Faker
-from six import with_metaclass
 
-from pganonymizer.exceptions import InvalidProvider, InvalidProviderArgument
-
-PROVIDERS = []
+from pganonymizer.exceptions import InvalidProvider, InvalidProviderArgument, ProviderAlreadyRegistered
 
 fake_data = Faker()
 
 
-def get_provider(provider_config):
+class ProviderRegistry(object):
+    """A registry for provider classes."""
+
+    def __init__(self):
+        self._registry = OrderedDict()
+
+    def register(self, provider_class, provider_id):
+        """
+        Register a provider class.
+
+        :param pganonymizer.providers.Provider provider_class: Provider class that should be registered
+        :param str provider_id: A string id to register the provider for
+        :raises ProviderAlreadyRegistered: If another provider with the given id has been registered
+        """
+        if provider_id in self._registry:
+            raise ProviderAlreadyRegistered('A provider with the id "{}" has already been registered'
+                                            .format(provider_id))
+        self._registry[provider_id] = provider_class
+
+    def get_provider(self, provider_id):
+        """
+        Return a provider by it's provider id.
+
+        :param str provider_id: The string id of the desired provider.
+        :raises InvalidProvider: If no provider can be found with the given id.
+        """
+        for key, cls in self._registry.items():
+            if (cls.regex_match is True and re.match(re.compile(key), provider_id) is not None) or key == provider_id:
+                return cls
+        raise InvalidProvider('Could not find provider with id "{}"'.format(provider_id))
+
+    @property
+    def providers(self):
+        """
+        Return the registered providers.
+
+        :rtype: OrderedDict
+        """
+        return self._registry
+
+
+provider_registry = ProviderRegistry()
+
+
+def register(provider_id, **kwargs):
     """
-    Return a provider instance, according to the schema definition of a field.
+    A wrapper that registers a provider class to the provider registry.
 
-    :param dict provider_config: A provider configuration for a single field, e.g.:
-
-        {'name': 'set', 'value': 'Foo'}
-
-    :return: A provider instance
-    :rtype: Provider
+    :param str provider_id: The string id to register the provider for.
+    :keyword registry: The registry the provider class is registered at (default is the `provider_registry` instance).
+    :return: The decorator function
+    :rtype: function
     """
-    def get_provider_class(cid):
-        for klass in PROVIDERS:
-            if klass.matches(cid):
-                return klass
-    name = provider_config['name']
-    cls = get_provider_class(name)
-    if cls is None:
-        raise InvalidProvider('Could not find provider with id %s' % name)
-    return cls(**provider_config)
-
-
-class ProviderMeta(type):
-    """Metaclass to register all provider classes."""
-
-    def __new__(cls, clsname, bases, attrs):
-        newclass = super(ProviderMeta, cls).__new__(cls, clsname, bases, attrs)
-        if clsname != 'Provider':
-            PROVIDERS.append(newclass)
-        return newclass
+    def wrapper(provider_class):
+        registry = kwargs.get('registry', provider_registry)
+        registry.register(provider_class, provider_id)
+        return provider_class
+    return wrapper
 
 
 class Provider(object):
     """Base class for all providers."""
 
-    id = None
+    regex_match = False
+    """Defines whether a provider matches it's id using regular expressions."""
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
-    @classmethod
-    def matches(cls, name):
-        return cls.id.lower() == name.lower()
-
     def alter_value(self, value):
-        raise NotImplementedError
+        """
+        Alter or replace the original value of the database column.
+
+        :param value: The original value of the database column.
+        """
+        raise NotImplementedError()
 
 
-class ChoiceProvider(with_metaclass(ProviderMeta, Provider)):
+@register('choice')
+class ChoiceProvider(Provider):
     """Provider that returns a random value from a list of choices."""
-
-    id = 'choice'
 
     def alter_value(self, value):
         return random.choice(self.kwargs.get('values'))
 
 
-class ClearProvider(with_metaclass(ProviderMeta, Provider)):
+@register('clear')
+class ClearProvider(Provider):
     """Provider to set a field value to None."""
-
-    id = 'clear'
 
     def alter_value(self, value):
         return None
 
 
-class FakeProvider(with_metaclass(ProviderMeta, Provider)):
+@register('fake.+')
+class FakeProvider(Provider):
     """Provider to generate fake data."""
 
-    id = 'fake'
-
-    @classmethod
-    def matches(cls, name):
-        return cls.id.lower() == name.split('.')[0].lower()
+    regex_match = True
 
     def alter_value(self, value):
         func_name = self.kwargs['name'].split('.', 1)[1]
@@ -97,22 +121,24 @@ class FakeProvider(with_metaclass(ProviderMeta, Provider)):
         return func()
 
 
-class MaskProvider(with_metaclass(ProviderMeta, Provider)):
+@register('mask')
+class MaskProvider(Provider):
     """Provider that masks the original value."""
 
-    id = 'mask'
     default_sign = 'X'
+    """The default string used to replace each character."""
 
     def alter_value(self, value):
         sign = self.kwargs.get('sign', self.default_sign) or self.default_sign
         return sign * len(value)
 
 
-class MD5Provider(with_metaclass(ProviderMeta, Provider)):
+@register('md5')
+class MD5Provider(Provider):
     """Provider to hash a value with the md5 algorithm."""
 
-    id = 'md5'
     default_max_length = 8
+    """The default length used for the number representation."""
 
     def alter_value(self, value):
         as_number = self.kwargs.get('as_number', False)
@@ -124,19 +150,17 @@ class MD5Provider(with_metaclass(ProviderMeta, Provider)):
             return hashed
 
 
-class SetProvider(with_metaclass(ProviderMeta, Provider)):
+@register('set')
+class SetProvider(Provider):
     """Provider to set a static value."""
-
-    id = 'set'
 
     def alter_value(self, value):
         return self.kwargs.get('value')
 
 
-class UUID4Provider(with_metaclass(ProviderMeta, Provider)):
+@register('uuid4')
+class UUID4Provider(Provider):
     """Provider to set a random uuid value."""
-
-    id = 'uuid4'
 
     def alter_value(self, value):
         return uuid4()

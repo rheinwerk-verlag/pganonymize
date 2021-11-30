@@ -9,7 +9,7 @@ import time
 import yaml
 
 from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
-from pganonymizer.providers import PROVIDERS
+from pganonymizer.providers import provider_registry
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
 
 
@@ -28,8 +28,8 @@ def get_pg_args(args):
 def list_provider_classes():
     """List all available provider classes."""
     print('Available provider classes:\n')
-    for provider_cls in PROVIDERS:
-        print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
+    for key, provider_cls in provider_registry.providers.items():
+        print('{:<10} {}'.format(key, provider_cls.__doc__))
 
 
 def get_arg_parser():

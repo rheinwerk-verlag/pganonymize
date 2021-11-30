@@ -10,14 +10,14 @@ import subprocess
 import time
 
 import parmap
-from pgcopy import CopyManager
 import psycopg2
 import psycopg2.extras
-from psycopg2.sql import SQL, Identifier, Composed
+from pgcopy import CopyManager
+from psycopg2.sql import SQL, Composed, Identifier
 from tqdm import trange
 
 from pganonymizer.constants import DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
-from pganonymizer.providers import get_provider
+from pganonymizer.providers import provider_registry
 
 
 def anonymize_tables(connection, definitions, verbose=False, dry_run=False):
@@ -73,7 +73,7 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     :param int total_count: The amount of rows for the current table
     :param int chunk_size: Number of data rows to fetch with the cursor
     :param bool verbose: Display logging information and a progress bar.
-    :param bool dry_run: Script is runnin in dry-run mode, no commit expected.
+    :param bool dry_run: Script is running in dry-run mode, no commit expected.
     """
     column_names = get_column_names(columns)
     sql_columns = SQL(', ').join([Identifier(column_name) for column_name in [primary_key] + column_names])
@@ -190,7 +190,7 @@ def get_table_count(connection, table, dry_run):
 
     :param connection: A database connection instance
     :param str table: Name of the database table
-    :param bool dry_run: Script is runnin in dry-run mode, no commit expected.
+    :param bool dry_run: Script is running in dry-run mode, no commit expected.
     :return: The number of table entries
     :rtype: int
     """
@@ -229,7 +229,7 @@ def get_column_values(row, columns):
         orig_value = nested_get(row, full_column_name)
         # Skip the current column if there is no value to be altered
         if orig_value is not None:
-            provider = get_provider(provider_config)
+            provider = provider_registry.get_provider(provider_config['name'])(**provider_config)
             value = provider.alter_value(orig_value)
             append = column_definition.get('append')
             if append:
@@ -266,12 +266,12 @@ def create_database_dump(filename, db_args):
     :param dict db_args: A dictionary with database related information
     """
     arguments = '-d {dbname} -U {user} -h {host} -p {port}'.format(**db_args)
-    cmd = 'pg_dump -p -Fc -Z 9 {args} -f {filename}'.format(
+    cmd = 'pg_dump -Fc -Z 9 {args} -f {filename}'.format(
         args=arguments,
         filename=filename
     )
     logging.info('Creating database dump file "%s"', filename)
-    subprocess.run(cmd, shell=True)
+    subprocess.call(cmd, shell=True)
 
 
 def get_column_name(definition, fully_qualified=False):
@@ -294,7 +294,7 @@ def get_column_name(definition, fully_qualified=False):
 
 
 def get_column_names(definitions):
-    """Get disctinct column names from definitions
+    """Get distinct column names from definitions
 
     :param list definitions: A list of table definitions from the YAML schema.
     :return: A list of column names

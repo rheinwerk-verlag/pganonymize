@@ -1,9 +1,12 @@
-from tests.utils import quote_ident
-from mock import call, patch, Mock
-from pganonymizer.cli import get_arg_parser, main
-import pytest
 import shlex
 from argparse import Namespace
+
+import pytest
+from mock import Mock, call, patch
+
+from tests.utils import quote_ident
+
+from pganonymizer.cli import get_arg_parser, main
 
 
 class TestCli:
@@ -52,7 +55,7 @@ class TestCli:
              call('UPDATE "auth_user" t SET "first_name" = s."first_name", "last_name" = s."last_name", "email" = s."email" FROM "tmp_auth_user" s WHERE t."id" = s."id"')  # noqa
          ],
          1,
-         [call('pg_dump -p -Fc -Z 9 -d db -U root -h localhost -p 5432 -f ./dump.sql', shell=True)]
+         [call('pg_dump -Fc -Z 9 -d db -U root -h localhost -p 5432 -f ./dump.sql', shell=True)]
          ],
 
         ['--list-providers',
@@ -77,4 +80,4 @@ class TestCli:
         assert mock_cursor.execute.call_args_list == expected_executes
         assert connection.commit.call_count == commit_calls
 
-        assert subprocess.run.call_args_list == call_dump
+        assert subprocess.call.call_args_list == call_dump
