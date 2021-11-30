@@ -2,6 +2,9 @@
 
 ## Development
 
+* [#35](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/35): parmap no longer supports Python 2.7
+  * Dropped Python 3.5 support
+  * Pinned libraries Python 2.7
 * [#32](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/32): Fixed pg_dump arguments ([korsar182](https://github.com/korsar182))
 * Simplified provider registration (no metaclass usage anymore)
 
