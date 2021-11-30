@@ -42,8 +42,8 @@ exec(read('pganonymizer', 'version.py'))
 
 install_requires = [
     'faker',
-    'parmap; python_version>="3.5"',
-    'parmap<1.5.3; python_version=="2.7"',
+    'parmap; python_version>="3.6"',
+    'parmap<1.5.3; python_version<"3.6"',
     'pgcopy',
     'psycopg2',
     'pyyaml',
