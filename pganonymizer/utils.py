@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import json
 import logging
 import math
+import os
 import re
 import subprocess
 import time
@@ -15,6 +16,7 @@ import psycopg2.extras
 from pgcopy import CopyManager
 from psycopg2.sql import SQL, Composed, Identifier
 from tqdm import trange
+import yaml
 
 from pganonymizer.constants import DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
 from pganonymizer.providers import provider_registry
@@ -155,7 +157,7 @@ def create_temporary_table(connection, definitions, source_table, temp_table, pr
                     FROM {source_table} WITH NO DATA""")
     cursor = connection.cursor()
     cursor.execute(ctas_query.format(temp_table=Identifier(temp_table),
-                   source_table=Identifier(source_table), columns=sql_columns)
+                                     source_table=Identifier(source_table), columns=sql_columns)
                    .as_string(connection)
                    )
     cursor.close()
@@ -350,3 +352,33 @@ def nested_set(dic, path, value, delimiter='.'):
     for key in keys[:-1]:
         dic = dic.get(key, {})
     dic[keys[-1]] = value
+
+
+def load_config(schema):
+    # Original code from here https://gist.github.com/mkaranasou/ba83e25c835a8f7629e34dd7ede01931
+    tag = '!ENV'
+    pattern = re.compile(r'.*?\${(\w+)}.*?')
+    custom_loader = yaml.FullLoader
+    custom_loader.add_implicit_resolver(tag, pattern, None)
+
+    def constructor_env_variables(loader, node):
+        """
+        Extracts the environment variable from the node's value
+        :param yaml.Loader loader: the yaml loader
+        :param node: the current node in the yaml
+        :return: the parsed string that contains the value of the environment
+        variable
+        """
+        value = loader.construct_scalar(node)
+        match = pattern.findall(value)  # to find all env variables in line
+        if match:
+            full_value = value
+            for g in match:
+                full_value = full_value.replace(
+                    f'${{{g}}}', os.environ.get(g, g)
+                )
+            return full_value
+        return value
+
+    custom_loader.add_constructor(tag, constructor_env_variables)
+    return yaml.load(open(schema), Loader=custom_loader)
