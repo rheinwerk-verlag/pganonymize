@@ -85,7 +85,7 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     if dry_run:
         sql_select = Composed([sql_select, SQL(" LIMIT 100")])
         logging.info(sql_select.as_string(connection))
-    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')    
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql_select.as_string(connection))
     temp_table = 'tmp_{table}'.format(table=table)
     create_temporary_table(connection, columns, table, temp_table, primary_key)
