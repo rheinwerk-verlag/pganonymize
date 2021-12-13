@@ -1,5 +1,7 @@
 import math
+import os
 from collections import OrderedDict, namedtuple
+from unittest import mock
 
 import pytest
 from mock import ANY, Mock, call, patch
@@ -7,7 +9,7 @@ from mock import ANY, Mock, call, patch
 from tests.utils import quote_ident
 
 from pganonymizer.utils import (anonymize_tables, build_and_then_import_data, create_database_dump,
-                                get_column_values, get_connection, import_data, truncate_tables)
+                                get_column_values, get_connection, import_data, load_config, truncate_tables)
 
 
 class TestGetConnection:
@@ -236,3 +238,41 @@ class TestCreateDatabaseDump:
         create_database_dump('/tmp/dump.gz', {'dbname': 'database', 'user': 'foo', 'host': 'localhost', 'port': 5432})
         mock_call.assert_called_once_with('pg_dump -Fc -Z 9 -d database -U foo -h localhost -p 5432 -f /tmp/dump.gz',
                                           shell=True)
+
+
+class TestConfigLoader:
+
+    @pytest.mark.parametrize('file, envs, expected', [
+        ['./tests/schemes/valid_schema.yml', {}, {
+            'tables': [{'auth_user': {'primary_key': 'id', 'chunk_size': 5000, 'fields': [
+                {'first_name': {'provider': {'name': 'fake.first_name'}}},
+                {'last_name': {'provider': {'name': 'set', 'value': 'Bar'}}},
+                {'email': {'provider': {'name': 'md5'}, 'append': '@localhost'}}
+            ], 'excludes': [{'email': ['\\S[^@]*@example\\.com']}]}}], 'truncate': ['django_session']}],
+        ['./tests/schemes/schema_with_env_variables.yml', {
+            "TEST_CHUNK_SIZE": "123",
+            "TEST_PRIMARY_KEY": "foo-bar",
+            "PRESENT_WORLD_NAME": "beautiful world",
+            "COMPANY_ID": "42",
+            "USER_TO_BE_SEARCHED": "i wanna be forgotten",
+        }, {
+            'primary_key': 'foo-bar',
+            'primary_key2': 'foo-bar',
+            'chunk_size': '123',
+            'concat_missing': 'Hello, MISSING_ENV_VAL',
+            'concat_missing2': 'Hello, ${MISSING_ENV_VAL}',
+            'concat_present': 'Hello, beautiful world',
+            'concat_present2': 'beautiful world',
+            'concat_present3': 'Hello, beautiful world',
+            'search': 'id = 42',
+            'search2': "username = 'i wanna be forgotten'",
+            'corrupted': "username = '${CORRUPTED",
+            'corrupted2': '',
+            'corrupted3': '$'
+        }
+        ]
+    ])
+    def test(self, file, envs, expected):
+        with mock.patch.dict(os.environ, envs):
+            print(load_config(file))
+            assert load_config(file) == expected
