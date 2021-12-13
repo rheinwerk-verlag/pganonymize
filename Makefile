@@ -1,5 +1,5 @@
 BROWSER ?= xdg-open
-PYTHON_PACKAGE = pganonymizer
+PYTHON_PACKAGE = pganonymize
 TESTS_PACKAGE = tests
 
 .PHONY: clean clean-test clean-pyc clean-build docs help

@@ -194,7 +194,7 @@ html_theme = 'sphinx_rtd_theme'
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pganonymizerdoc'
+htmlhelp_basename = 'pganonymizedoc'
 
 
 # -- Options for LaTeX output ------------------------------------------

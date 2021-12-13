@@ -136,7 +136,7 @@ If you want to run the anonymizer within a Docker container you first have to bu
 
 .. code-block:: sh
 
-    $ docker build -t pganonymizer .
+    $ docker build -t pganonymize .
 
 After that you can pass a schema file to the container, using Docker volumes, and call the anonymizer:
 
@@ -144,7 +144,7 @@ After that you can pass a schema file to the container, using Docker volumes, an
 
     $ docker run \
         -v <path to your schema>:/schema.yml \
-        -it pganonymizer \
+        -it pganonymize \
         /usr/local/bin/pganonymize \
         --schema=/schema.yml \
         --dbname=<database> \

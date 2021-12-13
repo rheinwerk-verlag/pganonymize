@@ -1,53 +1,53 @@
-pganonymizer package
+pganonymize package
 ====================
 
 Submodules
 ----------
 
-pganonymizer.cli module
+pganonymize.cli module
 -----------------------
 
-.. automodule:: pganonymizer.cli
+.. automodule:: pganonymize.cli
     :members:
     :undoc-members:
     :show-inheritance:
 
-pganonymizer.constants module
+pganonymize.constants module
 -----------------------------
 
-.. automodule:: pganonymizer.constants
+.. automodule:: pganonymize.constants
     :members:
     :undoc-members:
     :show-inheritance:
 
-pganonymizer.exceptions module
+pganonymize.exceptions module
 ------------------------------
 
-.. automodule:: pganonymizer.exceptions
+.. automodule:: pganonymize.exceptions
     :members:
     :undoc-members:
     :show-inheritance:
 
-pganonymizer.providers module
+pganonymize.providers module
 -----------------------------
 
-.. automodule:: pganonymizer.providers
+.. automodule:: pganonymize.providers
     :members:
     :undoc-members:
     :show-inheritance:
 
-pganonymizer.utils module
+pganonymize.utils module
 -------------------------
 
-.. automodule:: pganonymizer.utils
+.. automodule:: pganonymize.utils
     :members:
     :undoc-members:
     :show-inheritance:
 
-pganonymizer.version module
+pganonymize.version module
 ---------------------------
 
-.. automodule:: pganonymizer.version
+.. automodule:: pganonymize.version
     :members:
     :undoc-members:
     :show-inheritance:
@@ -56,7 +56,7 @@ pganonymizer.version module
 Module contents
 ---------------
 
-.. automodule:: pganonymizer
+.. automodule:: pganonymize
     :members:
     :undoc-members:
     :show-inheritance:
