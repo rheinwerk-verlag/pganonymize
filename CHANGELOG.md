@@ -2,6 +2,8 @@
 
 ## Development
 
+* [#39](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/39): Renamed project to "pganonymize"
+
 ## 0.7.0 (2021-11-30)
 
 * [#34](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/34): Subprocess "run" being used on Python2.7

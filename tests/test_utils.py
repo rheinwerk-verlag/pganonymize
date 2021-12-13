@@ -6,13 +6,13 @@ from mock import ANY, Mock, call, patch
 
 from tests.utils import quote_ident
 
-from pganonymizer.utils import (anonymize_tables, build_and_then_import_data, create_database_dump,
-                                get_column_values, get_connection, import_data, truncate_tables)
+from pganonymize.utils import (anonymize_tables, build_and_then_import_data, create_database_dump,
+                               get_column_values, get_connection, import_data, truncate_tables)
 
 
 class TestGetConnection:
 
-    @patch('pganonymizer.utils.psycopg2.connect')
+    @patch('pganonymize.utils.psycopg2.connect')
     def test(self, mock_connect):
         connection_data = {
             'dbname': 'test',
@@ -79,7 +79,7 @@ class TestImportData:
         expected = [call('COPY "public"."src_tbl" ("id", "location") FROM STDIN WITH BINARY', ANY)]
         assert mock_cursor.copy_expert.call_args_list == expected
 
-    @patch('pganonymizer.utils.CopyManager')
+    @patch('pganonymize.utils.CopyManager')
     @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
     def test_anonymize_tables(self, quote_ident, copy_manager):
         mock_cursor = Mock()
@@ -163,7 +163,7 @@ class TestImportData:
 
 class TestBuildAndThenImport:
     @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
-    @patch('pganonymizer.utils.CopyManager')
+    @patch('pganonymize.utils.CopyManager')
     @pytest.mark.parametrize('table, primary_key, columns, total_count, chunk_size', [
         ['src_tbl', 'id', [{'col1': {'provider': {'name': 'md5'}}},
                            {'COL2': {'provider': {'name': 'md5'}}}], 10, 3]
@@ -190,7 +190,7 @@ class TestBuildAndThenImport:
                                   call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s WHERE t."id" = s."id"')]  # noqa
         assert mock_cursor.execute.call_args_list == expected_execute_calls
 
-    @patch('pganonymizer.utils.CopyManager')
+    @patch('pganonymize.utils.CopyManager')
     def test_column_format(self, copy_manager):
         columns = [
             {
@@ -231,7 +231,7 @@ class TestBuildAndThenImport:
 
 class TestCreateDatabaseDump:
 
-    @patch('pganonymizer.utils.subprocess.call')
+    @patch('pganonymize.utils.subprocess.call')
     def test(self, mock_call):
         create_database_dump('/tmp/dump.gz', {'dbname': 'database', 'user': 'foo', 'host': 'localhost', 'port': 5432})
         mock_call.assert_called_once_with('pg_dump -Fc -Z 9 -d database -U foo -h localhost -p 5432 -f /tmp/dump.gz',

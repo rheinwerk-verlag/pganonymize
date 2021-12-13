@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from faker import Faker
 
-from pganonymizer.exceptions import InvalidProvider, InvalidProviderArgument, ProviderAlreadyRegistered
+from pganonymize.exceptions import InvalidProvider, InvalidProviderArgument, ProviderAlreadyRegistered
 
 fake_data = Faker()
 

@@ -6,13 +6,13 @@ from mock import Mock, call, patch
 
 from tests.utils import quote_ident
 
-from pganonymizer.cli import get_arg_parser, main
+from pganonymize.cli import get_arg_parser, main
 
 
 class TestCli:
     @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
-    @patch('pganonymizer.utils.psycopg2.connect')
-    @patch('pganonymizer.utils.subprocess')
+    @patch('pganonymize.utils.psycopg2.connect')
+    @patch('pganonymize.utils.subprocess')
     @pytest.mark.parametrize('cli_args, expected, expected_executes, commit_calls, call_dump', [
         ['--host localhost --port 5432 --user root --password my-cool-password --dbname db --schema ./tests/schemes/valid_schema.yml -v --init-sql "set work_mem=\'1GB\'"',  # noqa
          Namespace(verbose=1, list_providers=False, schema='./tests/schemes/valid_schema.yml', dbname='db', user='root',

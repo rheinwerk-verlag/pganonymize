@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# pganonymizer documentation build configuration file
+# pganonymize documentation build configuration file
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -33,7 +33,7 @@ sys.path.insert(0, project_root)
 # exec version.py instead of importing it. Importing may trigger unwanted
 # side-effects (if autodoc is used, the pypackage may be imported anyway).
 meta = {}
-exec(open(os.path.join(project_root, 'pganonymizer', 'version.py')).read(), {}, meta)
+exec(open(os.path.join(project_root, 'pganonymize', 'version.py')).read(), {}, meta)
 
 # -- General configuration ---------------------------------------------
 
@@ -61,7 +61,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = u'PostgreSQL Anonymizer'
+project = u'pganonymize'
 copyright = u'2019, Rheinwerk Verlag GmbH, Henning Kage'
 
 # The version info for the project you're documenting, acts as replacement
@@ -214,8 +214,8 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass
 # [howto/manual]).
 latex_documents = [
-    ('index', 'pganonymizer.tex',
-     u'PostgreSQL Anonymizer Documentation',
+    ('index', 'pganonymize.tex',
+     u'pganonymize Documentation',
      u'Henning Kage', 'manual'),
 ]
 
@@ -245,8 +245,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pganonymizer',
-     u'PostgreSQL Anonymizer Documentation',
+    ('index', 'pganonymize',
+     u'pganonymize Anonymizer Documentation',
      [u'Henning Kage'], 1)
 ]
 
@@ -260,10 +260,10 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'pganonymizer',
-     u'PostgreSQL Anonymizer Documentation',
+    ('index', 'pganonymize',
+     u'pganonymize Documentation',
      u'Henning Kage',
-     'pganonymizer',
+     'pganonymize',
      'A cookiecutter template for Rheinwerk Python packages',
      'Miscellaneous'),
 ]

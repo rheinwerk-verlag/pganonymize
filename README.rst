@@ -1,5 +1,5 @@
-PostgreSQL Anonymizer
-=====================
+pganonymize
+===========
 
 A commandline tool to anonymize PostgreSQL databases for DSGVO/GDPR purposes.
 

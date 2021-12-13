@@ -8,9 +8,9 @@ import time
 
 import yaml
 
-from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
-from pganonymizer.providers import provider_registry
-from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
+from pganonymize.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
+from pganonymize.providers import provider_registry
+from pganonymize.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
 
 
 def get_pg_args(args):
