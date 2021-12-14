@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from faker import Faker
 
-from pganonymizer.exceptions import InvalidProvider, InvalidProviderArgument, ProviderAlreadyRegistered
+from pganonymize.exceptions import InvalidProvider, InvalidProviderArgument, ProviderAlreadyRegistered
 
 fake_data = Faker()
 
@@ -22,7 +22,7 @@ class ProviderRegistry(object):
         """
         Register a provider class.
 
-        :param pganonymizer.providers.Provider provider_class: Provider class that should be registered
+        :param pganonymize.providers.Provider provider_class: Provider class that should be registered
         :param str provider_id: A string id to register the provider for
         :raises ProviderAlreadyRegistered: If another provider with the given id has been registered
         """

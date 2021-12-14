@@ -13,13 +13,13 @@ import time
 import parmap
 import psycopg2
 import psycopg2.extras
+import yaml
 from pgcopy import CopyManager
 from psycopg2.sql import SQL, Composed, Identifier
 from tqdm import trange
-import yaml
 
-from pganonymizer.constants import DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
-from pganonymizer.providers import provider_registry
+from pganonymize.constants import DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
+from pganonymize.providers import provider_registry
 
 
 def anonymize_tables(connection, definitions, verbose=False, dry_run=False):

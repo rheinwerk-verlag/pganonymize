@@ -14,6 +14,7 @@ Contents:
    deploy
    license
    changelog
+   links
 
 
 Indices and tables

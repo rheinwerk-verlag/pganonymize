@@ -122,6 +122,7 @@ YAML schema file supports placeholders with environment variables, ex:
 
 So you can construct dynamic filter conditions like:
 .. code-block:: sh
+
     $ export COMPANY_ID=123
 
     $ export ACTION_TO_BE_TAKEN=clear

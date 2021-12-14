@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "postgresql-anonymizer"
+name = "pganonymize"
 version = "0.7.0"
 description = "Commandline tool to anonymize PostgreSQL databases"
 authors = [
@@ -7,8 +7,8 @@ authors = [
 ]
 license = "MIT"
 readme = "README.rst"
-homepage = "https://github.com/rheinwerk-verlag/postgresql-anonymizer"
-repository = "https://github.com/rheinwerk-verlag/postgresql-anonymizer"
+homepage = "https://github.com/rheinwerk-verlag/pganonymize/"
+repository = "https://github.com/rheinwerk-verlag/pganonymize.git"
 
 [tool.poetry.dependencies]
 python = "~2.7 || ^3.6"

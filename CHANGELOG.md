@@ -2,15 +2,16 @@
 
 ## Development
 
+* [#39](https://github.com/rheinwerk-verlag/pganonymize/issues/39): Renamed project to "pganonymize"
 * [#38](https://github.com/rheinwerk-verlag/pganonymize/pull/38): Allow environment variables in schema definition ([nurikk](https://github.com/nurikk))
 
 ## 0.7.0 (2021-11-30)
 
-* [#34](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/34): Subprocess "run" being used on Python2.7
-* [#35](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/35): parmap no longer supports Python 2.7
+* [#34](https://github.com/rheinwerk-verlag/pganonymize/issues/34): Subprocess "run" being used on Python2.7
+* [#35](https://github.com/rheinwerk-verlag/pganonymize/issues/35): parmap no longer supports Python 2.7
   * Dropped Python 3.5 support
   * Pinned libraries Python 2.7
-* [#32](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/32): Fixed pg_dump arguments ([korsar182](https://github.com/korsar182))
+* [#32](https://github.com/rheinwerk-verlag/pganonymize/pull/32): Fixed pg_dump arguments ([korsar182](https://github.com/korsar182))
 * Simplified provider registration (no metaclass usage anymore)
 
 ## 0.6.1 (2021-07-13)
@@ -19,35 +20,35 @@
 
 ## 0.6.0 (2021-07-13)
 
-* [#28](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Add json support ([nurikk](https://github.com/nurikk))
-* [#27](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Better anonymisation ([nurikk](https://github.com/nurikk))
-* [#25](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/25): Remove column specification for `cursor.copy_from` call ([nurikk](https://github.com/nurikk))
+* [#28](https://github.com/rheinwerk-verlag/pganonymize/pull/25): Add json support ([nurikk](https://github.com/nurikk))
+* [#27](https://github.com/rheinwerk-verlag/pganonymize/pull/25): Better anonymisation ([nurikk](https://github.com/nurikk))
+* [#25](https://github.com/rheinwerk-verlag/pganonymize/pull/25): Remove column specification for `cursor.copy_from` call ([nurikk](https://github.com/nurikk))
 
 ## 0.5.0 (2021-06-30)
 
-* [#22](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/22): Fix table and column name quotes in `cursor.copy_from` call ([nurikk](https://github.com/nurikk))
-* [#23](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/23): Allow uniq faker ([nurikk](https://github.com/nurikk))
+* [#22](https://github.com/rheinwerk-verlag/pganonymize/pull/22): Fix table and column name quotes in `cursor.copy_from` call ([nurikk](https://github.com/nurikk))
+* [#23](https://github.com/rheinwerk-verlag/pganonymize/pull/23): Allow uniq faker ([nurikk](https://github.com/nurikk))
 
 ## 0.4.1 (2021-05-27)
 
-* [#19](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/19): Make chunk size in the table definition dynamic ([halilkaya](https://github.com/halilkaya))
+* [#19](https://github.com/rheinwerk-verlag/pganonymize/pull/19): Make chunk size in the table definition dynamic ([halilkaya](https://github.com/halilkaya))
 
 ## 0.4.0 (2021-05-05)
 
-* [#18](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/18): Specify (SQL WHERE) search_condition, to filter the table for rows to be anonymized ([bobslee](https://github.com/bobslee))
-* [#17](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/17): Fix anonymizing error if there is a JSONB column in a table ([koptelovav](https://github.com/koptelovav))
+* [#18](https://github.com/rheinwerk-verlag/pganonymize/pull/18): Specify (SQL WHERE) search_condition, to filter the table for rows to be anonymized ([bobslee](https://github.com/bobslee))
+* [#17](https://github.com/rheinwerk-verlag/pganonymize/pull/17): Fix anonymizing error if there is a JSONB column in a table ([koptelovav](https://github.com/koptelovav))
 
 ## 0.3.3 (2021-04-16)
 
-* [#16](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/16): Preserve column and table cases during the copy process
+* [#16](https://github.com/rheinwerk-verlag/pganonymize/issues/16): Preserve column and table cases during the copy process
 
 ## 0.3.2 (2021-01-25)
 
-* [#15](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/15): Fix for exclude bug ([abhinavvaidya90](https://github.com/abhinavvaidya90))
+* [#15](https://github.com/rheinwerk-verlag/pganonymize/pull/15): Fix for exclude bug ([abhinavvaidya90](https://github.com/abhinavvaidya90))
 
 ## 0.3.1 (2020-12-04)
 
-* [#13](https://github.com/rheinwerk-verlag/postgresql-anonymizer/pull/13): Fixed a syntax error if no truncated tables are defined ([ray-man](https://github.com/ray-man))
+* [#13](https://github.com/rheinwerk-verlag/pganonymize/pull/13): Fixed a syntax error if no truncated tables are defined ([ray-man](https://github.com/ray-man))
 
 ## 0.3.0 (2020-02-11)
 
