@@ -1,0 +1,13 @@
+primary_key: !ENV ${TEST_PRIMARY_KEY}
+primary_key2: !ENV ${TEST_PRIMARY_KEY}
+chunk_size: !ENV ${TEST_CHUNK_SIZE}
+concat_missing: !ENV 'Hello, ${MISSING_ENV_VAL}'
+concat_missing2: 'Hello, ${MISSING_ENV_VAL}'
+concat_present: !ENV 'Hello, ${PRESENT_WORLD_NAME}'
+concat_present2: ${PRESENT_WORLD_NAME}
+concat_present3: Hello, ${PRESENT_WORLD_NAME}
+search: id = ${COMPANY_ID}
+search2: username = '${USER_TO_BE_SEARCHED}'
+corrupted: username = '${CORRUPTED
+corrupted2: !ENV
+corrupted3: !ENV $

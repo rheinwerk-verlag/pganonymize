@@ -6,7 +6,7 @@ import pytest
 import six
 from mock import MagicMock, Mock, patch
 
-from pganonymizer import exceptions, providers
+from pganonymize import exceptions, providers
 
 
 def test_register():
@@ -121,7 +121,7 @@ class TestFakeProvider:
         ('fake.first_name', 'first_name'),
         ('fake.unique.first_name', 'unique.first_name'),
     ])
-    @patch('pganonymizer.providers.fake_data')
+    @patch('pganonymize.providers.fake_data')
     def test_alter_value(self, mock_fake_data, name, function_name):
         provider = providers.FakeProvider(name=name)
         provider.alter_value('Foo')

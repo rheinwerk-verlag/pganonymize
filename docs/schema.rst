@@ -114,6 +114,33 @@ This is useful if you need to anonymize one or more specific records, eg for "Ri
             provider:
               name: clear
 
+YAML schema file supports placeholders with environment variables, ex:
+
+`!ENV ${HOST}``
+
+`!ENV '/var/${LOG_PATH}'`
+
+So you can construct dynamic filter conditions like:
+.. code-block:: sh
+
+    $ export COMPANY_ID=123
+
+    $ export ACTION_TO_BE_TAKEN=clear
+
+    $ pganonymize
+
+
+***Example**::
+
+    - login:
+        search: id = '!ENV ${COMPANY_ID}'
+        search2: id = ${COMPANY_ID}
+        search3: username = '${USER_TO_BE_SEARCHED}'
+        fields:
+         - first_name:
+            provider:
+              name: ${ACTION_TO_BE_TAKEN}
+
 ``chunk_size``
 ~~~~~~~~~~~~~~
 

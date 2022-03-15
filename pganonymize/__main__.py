@@ -5,7 +5,7 @@ import sys
 
 
 def main():
-    from pganonymizer.cli import get_arg_parser, main
+    from pganonymize.cli import get_arg_parser, main
 
     try:
         args = get_arg_parser().parse_args()

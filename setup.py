@@ -38,7 +38,7 @@ class ToxTestCommand(distutils.cmd.Command):
         return subprocess.call(['tox'])
 
 
-exec(read('pganonymizer', 'version.py'))
+exec(read('pganonymize', 'version.py'))
 
 install_requires = [
     'faker',
@@ -73,7 +73,7 @@ setup(
     author_email='henning.kage@rheinwerk-verlag.de',
     maintainer='Henning Kage',
     maintainer_email='henning.kage@rheinwerk-verlag.de',
-    url='https://github.com/rheinwerk-verlag/postgresql-anonymizer',
+    url='https://github.com/rheinwerk-verlag/pganonymize',
     license='MIT license',
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -92,7 +92,7 @@ setup(
         'Environment :: Console',
         'Topic :: Database'
     ],
-    packages=find_packages(include=['pganonymizer*']),
+    packages=find_packages(include=['pganonymize*']),
     include_package_data=True,
     install_requires=install_requires,
     tests_require=tests_require,
@@ -101,7 +101,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'pganonymize = pganonymizer.__main__:main'
+            'pganonymize = pganonymize.__main__:main'
         ]
     }
 )

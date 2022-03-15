@@ -1,9 +1,10 @@
-PostgreSQL Anonymizer
-=====================
+pganonymize
+===========
 
 A commandline tool to anonymize PostgreSQL databases for DSGVO/GDPR purposes.
 
-It uses a YAML file to define which tables and fields should be anonymized and provides various methods of anonymization. The tool requires a direct PostgreSQL connection to perform the anonymization.
+It uses a YAML file to define which tables and fields should be anonymized and provides various methods of
+anonymization. The tool requires a direct PostgreSQL connection to perform the anonymization.
 
 .. class:: no-web no-pdf
 
@@ -136,7 +137,7 @@ If you want to run the anonymizer within a Docker container you first have to bu
 
 .. code-block:: sh
 
-    $ docker build -t pganonymizer .
+    $ docker build -t pganonymize .
 
 After that you can pass a schema file to the container, using Docker volumes, and call the anonymizer:
 
@@ -144,7 +145,7 @@ After that you can pass a schema file to the container, using Docker volumes, an
 
     $ docker run \
         -v <path to your schema>:/schema.yml \
-        -it pganonymizer \
+        -it pganonymize \
         /usr/local/bin/pganonymize \
         --schema=/schema.yml \
         --dbname=<database> \
@@ -157,13 +158,13 @@ After that you can pass a schema file to the container, using Docker volumes, an
 .. _uuid4: https://www.postgresql.org/docs/current/datatype-uuid.html
 .. _documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/
 .. _schema documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/schema.html
-.. _YAML sample schema: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/sample_schema.yml
+.. _YAML sample schema: https://github.com/rheinwerk-verlag/pganonymize/blob/master/sample_schema.yml
 
 .. |python| image:: https://img.shields.io/pypi/pyversions/pganonymize
     :alt: PyPI - Python Version
 
 .. |license| image:: https://img.shields.io/badge/license-MIT-green.svg
-    :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/blob/master/LICENSE.rst
+    :target: https://github.com/rheinwerk-verlag/pganonymize/blob/master/LICENSE.rst
 
 .. |pypi| image:: https://badge.fury.io/py/pganonymize.svg
     :target: https://badge.fury.io/py/pganonymize
@@ -173,7 +174,7 @@ After that you can pass a schema file to the container, using Docker volumes, an
     :alt: Download count
 
 .. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Test/badge.svg
-    :target: https://github.com/rheinwerk-verlag/postgresql-anonymizer/actions
+    :target: https://github.com/rheinwerk-verlag/pganonymize/actions
 
 .. |health| image:: https://snyk.io/advisor/python/pganonymize/badge.svg
   :target: https://snyk.io/advisor/python/pganonymize
