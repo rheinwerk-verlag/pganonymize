@@ -2,6 +2,8 @@
 
 ## Development
 
+## 0.8.0 (2022-03-15)
+
 * [#39](https://github.com/rheinwerk-verlag/pganonymize/issues/39): Renamed project to "pganonymize"
 * [#38](https://github.com/rheinwerk-verlag/pganonymize/pull/38): Allow environment variables in schema definition ([nurikk](https://github.com/nurikk))
 
