@@ -21,7 +21,7 @@ class TestGetConnection:
             'user': 'user',
             'password': 'password',
             'host': 'localhost',
-            'port': 5432
+            'port': 5432,
         }
         get_connection(connection_data)
         mock_connect.assert_called_once_with(**connection_data)
@@ -53,11 +53,14 @@ class TestImportData:
     @patch('pgcopy.copy.util')
     @patch('pgcopy.copy.inspect')
     @pytest.mark.parametrize('tmp_table, cols, data', [
-        ['public.src_tbl', ('id', 'location'), [
-            OrderedDict([("id", 0), ('location', 'Jerusalem')]),
-            OrderedDict([("id", 1), ('location', 'New York')]),
-            OrderedDict([("id", 2), ('location', 'Moscow')]),
-        ]]
+        [
+            'public.src_tbl', ('id', 'location'),
+            [
+                OrderedDict([('id', 0), ('location', 'Jerusalem')]),
+                OrderedDict([('id', 1), ('location', 'New York')]),
+                OrderedDict([('id', 2), ('location', 'Moscow')]),
+            ]
+        ]
     ])
     def test(self, inspect, util, quote_ident, tmp_table, cols, data):
         mock_cursor = Mock()
@@ -65,7 +68,7 @@ class TestImportData:
         connection = Mock()
         connection.cursor.return_value = mock_cursor
         connection.encoding = 'UTF8'
-        Record = namedtuple("Record", "attname,type_category,type_name,type_mod,not_null,typelem")
+        Record = namedtuple('Record', 'attname,type_category,type_name,type_mod,not_null,typelem')
 
         inspect.get_types.return_value = {
             'id': Record(attname='id', type_category='N', type_name='int8', type_mod=-1, not_null=False, typelem=0),
@@ -88,18 +91,10 @@ class TestImportData:
         mock_cursor.fetchone.return_value = [2]
         mock_cursor.fetchmany.side_effect = [
             [
-                OrderedDict([("first_name", None),
-                             ("json_column", None)
-                             ]),
-                OrderedDict([("first_name", "exclude me"),
-                             ("json_column", {"field1": "foo"})
-                             ]),
-                OrderedDict([("first_name", "John Doe"),
-                             ("json_column", {"field1": "foo"})
-                             ]),
-                OrderedDict([("first_name", "John Doe"),
-                             ("json_column", {"field2": "bar"})
-                             ])
+                OrderedDict([('first_name', None), ('json_column', None)]),
+                OrderedDict([('first_name', 'exclude me'), ('json_column', {'field1': 'foo'})]),
+                OrderedDict([('first_name', 'John Doe'), ('json_column', {'field1': 'foo'})]),
+                OrderedDict([('first_name', 'John Doe'), ('json_column', {'field2': 'bar'})])
             ]
         ]
         cmm = Mock()
@@ -117,35 +112,35 @@ class TestImportData:
 
         definitions = [
             {
-                "auth_user": {
-                    "primary_key": "id",
-                    "chunk_size": 5000,
-                    "excludes": [
+                'auth_user': {
+                    'primary_key': 'id',
+                    'chunk_size': 5000,
+                    'excludes': [
                         {'first_name': ['exclude']}
                     ],
-                    "fields": [
+                    'fields': [
                         {
-                            "first_name": {
-                                "provider": {
-                                    "name": "set",
-                                    "value": "dummy name"
+                            'first_name': {
+                                'provider': {
+                                    'name': 'set',
+                                    'value': 'dummy name'
                                 },
-                                "append": "append-me"
+                                'append': 'append-me'
                             }
                         },
                         {
-                            "json_column.field1": {
-                                "provider": {
-                                    "name": "set",
-                                    "value": "dummy json field1"
+                            'json_column.field1': {
+                                'provider': {
+                                    'name': 'set',
+                                    'value': 'dummy json field1'
                                 }
                             }
                         },
                         {
-                            "json_column.field2": {
-                                "provider": {
-                                    "name": "set",
-                                    "value": "dummy json field2"
+                            'json_column.field2': {
+                                'provider': {
+                                    'name': 'set',
+                                    'value': 'dummy json field2'
                                 }
                             }
                         },
@@ -171,7 +166,7 @@ class TestBuildAndThenImport:
                            {'COL2': {'provider': {'name': 'md5'}}}], 10, 3]
     ])
     def test(self, quote_ident, copy_manager, table, primary_key, columns, total_count, chunk_size):
-        fake_record = dict.fromkeys([list(definition.keys())[0] for definition in columns], "")
+        fake_record = dict.fromkeys([list(definition.keys())[0] for definition in columns], '')
         records = [
             [fake_record for row in range(0, chunk_size)] for x in range(0, int(math.ceil(total_count / chunk_size)))
         ]
@@ -196,38 +191,40 @@ class TestBuildAndThenImport:
     def test_column_format(self, copy_manager):
         columns = [
             {
-                "first_name": {
-                    "format": "hello-{pga_value}-world",
-                    "provider": {
-                        "name": "set",
-                        "value": "dummy name"
+                'first_name': {
+                    'format': 'hello-{pga_value}-world',
+                    'provider': {
+                        'name': 'set',
+                        'value': 'dummy name',
                     }
                 }
             },
             {
-                "phone": {
-                    "format": "+65-{pga_value}",
-                    "provider": {
-                        "name": "md5",
-                        "as_number": True
+                'phone': {
+                    'format': '+65-{pga_value}',
+                    'provider': {
+                        'name': 'md5',
+                        'as_number': True,
                     }
                 }
             },
             {
-                "templated": {
-                    "format": "{pga_value}-{phone}-{first_name}",
-                    "provider": {
-                        "name": "set",
-                        "value": "hello"
+                'templated': {
+                    'format': '{pga_value}-{phone}-{first_name}',
+                    'provider': {
+                        'name': 'set',
+                        'value': 'hello',
                     }
                 }
             }
         ]
-        row = OrderedDict([("first_name", "John Doe"), ("phone", "2354223432"), ("templated", "")])
+        row = OrderedDict([('first_name', 'John Doe'), ('phone', '2354223432'), ('templated', '')])
         result = get_column_values(row, columns)
-        expected = {'first_name': 'hello-dummy name-world',
-                    'phone': '+65-91042872',
-                    'templated': "hello-+65-91042872-hello-dummy name-world"}
+        expected = {
+            'first_name': 'hello-dummy name-world',
+            'phone': '+65-91042872',
+            'templated': 'hello-+65-91042872-hello-dummy name-world',
+        }
         assert result == expected
 
 
@@ -243,33 +240,53 @@ class TestCreateDatabaseDump:
 class TestConfigLoader:
 
     @pytest.mark.parametrize('file, envs, expected', [
-        ['./tests/schemes/valid_schema.yml', {}, {
-            'tables': [{'auth_user': {'primary_key': 'id', 'chunk_size': 5000, 'fields': [
-                {'first_name': {'provider': {'name': 'fake.first_name'}}},
-                {'last_name': {'provider': {'name': 'set', 'value': 'Bar'}}},
-                {'email': {'provider': {'name': 'md5'}, 'append': '@localhost'}}
-            ], 'excludes': [{'email': ['\\S[^@]*@example\\.com']}]}}], 'truncate': ['django_session']}],
-        ['./tests/schemes/schema_with_env_variables.yml', {
-            "TEST_CHUNK_SIZE": "123",
-            "TEST_PRIMARY_KEY": "foo-bar",
-            "PRESENT_WORLD_NAME": "beautiful world",
-            "COMPANY_ID": "42",
-            "USER_TO_BE_SEARCHED": "i wanna be forgotten",
-        }, {
-            'primary_key': 'foo-bar',
-            'primary_key2': 'foo-bar',
-            'chunk_size': '123',
-            'concat_missing': 'Hello, MISSING_ENV_VAL',
-            'concat_missing2': 'Hello, ${MISSING_ENV_VAL}',
-            'concat_present': 'Hello, beautiful world',
-            'concat_present2': 'beautiful world',
-            'concat_present3': 'Hello, beautiful world',
-            'search': 'id = 42',
-            'search2': "username = 'i wanna be forgotten'",
-            'corrupted': "username = '${CORRUPTED",
-            'corrupted2': '',
-            'corrupted3': '$'
-        }
+        [
+            './tests/schemes/valid_schema.yml',
+            {},
+            {
+                'tables': [
+                    {
+                        'auth_user': {
+                            'primary_key': 'id',
+                            'chunk_size': 5000,
+                            'fields': [
+                                {'first_name': {'provider': {'name': 'fake.first_name'}}},
+                                {'last_name': {'provider': {'name': 'set', 'value': 'Bar'}}},
+                                {'email': {'provider': {'name': 'md5'}, 'append': '@localhost'}},
+                            ],
+                            'excludes': [
+                                {'email': ['\\S[^@]*@example\\.com']},
+                            ]
+                        }
+                    }
+                ],
+                'truncate': ['django_session']
+            }
+        ],
+        [
+            './tests/schemes/schema_with_env_variables.yml',
+            {
+                'TEST_CHUNK_SIZE': '123',
+                'TEST_PRIMARY_KEY': 'foo-bar',
+                'PRESENT_WORLD_NAME': 'beautiful world',
+                'COMPANY_ID': '42',
+                'USER_TO_BE_SEARCHED': 'i wanna be forgotten',
+            },
+            {
+                'primary_key': 'foo-bar',
+                'primary_key2': 'foo-bar',
+                'chunk_size': '123',
+                'concat_missing': 'Hello, MISSING_ENV_VAL',
+                'concat_missing2': 'Hello, ${MISSING_ENV_VAL}',
+                'concat_present': 'Hello, beautiful world',
+                'concat_present2': 'beautiful world',
+                'concat_present3': 'Hello, beautiful world',
+                'search': 'id = 42',
+                'search2': "username = 'i wanna be forgotten'",
+                'corrupted': "username = '${CORRUPTED",
+                'corrupted2': '',
+                'corrupted3': '$',
+            }
         ]
     ])
     def test(self, file, envs, expected):
