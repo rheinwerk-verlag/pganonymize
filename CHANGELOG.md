@@ -2,6 +2,7 @@
 
 ## Development
 
+* [#45](https://github.com/rheinwerk-verlag/pganonymize/pull/45): Add partial masked provider ([Tilley](https://github.com/Tilley/))
 * [#44](https://github.com/rheinwerk-verlag/pganonymize/pull/44): Pass kwargs through to faker functions from schema ([Tilley](https://github.com/Tilley/))
 
 ## 0.8.0 (2022-03-15)
