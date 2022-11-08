@@ -272,6 +272,9 @@ The ``clear`` provider will set a database field to ``null``.
 * ``fake.first_name``
 * ``fake.street_name``
 
+Some fake functions allow additional parameters to be passed, these can be specified in
+the schema as ``kwargs``.
+
 .. note::
    Please note: using the ``Faker`` library will generate randomly generated data for each data row
    within a table. This will dramatically slow down the anonymization process.
@@ -286,8 +289,14 @@ The ``clear`` provider will set a database field to ``null``.
          - email:
             provider:
               name: fake.email
+         - birth_date:
+            provider:
+              name: fake.date_of_birth
+              kwargs:
+                minimum_age: 18
 
 See the `Faker documentation`_ for a full set of providers.
+
 
 ``mask``
 ~~~~~~~~
@@ -297,6 +306,30 @@ See the `Faker documentation`_ for a full set of providers.
 * ``sign``: The sign to be used to replace the original characters (default ``X``).
 
 This provider will replace each character with a static sign.
+
+**Example usage**:
+
+.. code-block:: yaml
+
+    tables:
+     - auth_user:
+        fields:
+         - last_name:
+            provider:
+              name: mask
+              sign: '?'
+
+
+``partial_mask``
+~~~~~~~~
+
+**Arguments:**
+
+* ``sign``: The sign to be used to replace the original characters (default ``X``).
+* ``unmasked_left``: The number of characters on the left side to leave unmasked (default 1).
+* ``unmasked_right``: The number of characters on the right side to leave unmasked (default 1).
+
+This provider will replace some characters with a static sign. It will leave some characters on the left and right unmasked, you can determine how many by providing ``unmasked_left`` and ``unmasked_right`` arguments.
 
 **Example usage**:
 
