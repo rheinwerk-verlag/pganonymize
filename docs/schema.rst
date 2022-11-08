@@ -320,6 +320,30 @@ This provider will replace each character with a static sign.
               sign: '?'
 
 
+``partial_mask``
+~~~~~~~~
+
+**Arguments:**
+
+* ``sign``: The sign to be used to replace the original characters (default ``X``).
+* ``unmasked_left``: The number of characters on the left side to leave unmasked (default 1).
+* ``unmasked_right``: The number of characters on the right side to leave unmasked (default 1).
+
+This provider will replace some characters with a static sign. It will leave some characters on the left and right unmasked, you can determine how many by providing ``unmasked_left`` and ``unmasked_right`` arguments.
+
+**Example usage**:
+
+.. code-block:: yaml
+
+    tables:
+     - auth_user:
+        fields:
+         - last_name:
+            provider:
+              name: mask
+              sign: '?'
+
+
 ``md5``
 ~~~~~~~
 

@@ -158,6 +158,22 @@ class TestMaskProvider:
         assert provider.alter_value(value) == expected
 
 
+class TestPartialMaskProvider:
+
+    @pytest.mark.parametrize('value, sign, unmasked_left, unmasked_right, expected', [
+        ('Foo', None, 1, 1, 'FXo'),
+        ('Foo', None, 0, 0, 'FXo'),
+        ('Baaaar', '?', 2, 1, 'Ba???r'),
+    ])
+    def test_alter_value(self, value, sign, unmasked_left, unmasked_right, expected):
+        provider = providers.PartialMaskProvider(
+            sign=sign,
+            unmasked_left=unmasked_left,
+            unmasked_right=unmasked_right
+        )
+        assert provider.alter_value(value) == expected
+
+
 class TestMD5Provider:
 
     def test_alter_value(self):

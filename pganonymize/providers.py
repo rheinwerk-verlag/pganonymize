@@ -134,6 +134,27 @@ class MaskProvider(Provider):
         return sign * len(value)
 
 
+@register('partial_mask')
+class PartialMaskProvider(Provider):
+    """Provider that masks some of the original value."""
+
+    default_sign = 'X'
+    default_unmasked_left = 1
+    default_unmasked_right = 1
+    """The default string used to replace each character."""
+
+    def alter_value(self, value):
+        sign = self.kwargs.get('sign', self.default_sign) or self.default_sign
+        unmasked_left = self.kwargs.get('unmasked_left', self.default_unmasked_left) or self.default_unmasked_left
+        unmasked_right = self.kwargs.get('unmasked_right', self.default_unmasked_right) or self.default_unmasked_right
+
+        return (
+            value[:unmasked_left] +
+            (len(value) - (unmasked_left + unmasked_right)) * sign +
+            value[-unmasked_right:]
+        )
+
+
 @register('md5')
 class MD5Provider(Provider):
     """Provider to hash a value with the md5 algorithm."""
