@@ -114,11 +114,12 @@ class FakeProvider(Provider):
 
     def alter_value(self, value):
         func_name = self.kwargs['name'].split('.', 1)[1]
+        func_kwargs = self.kwargs.get('kwargs', {})
         try:
             func = operator.attrgetter(func_name)(fake_data)
         except AttributeError as exc:
             raise InvalidProviderArgument(exc)
-        return func()
+        return func(**func_kwargs)
 
 
 @register('mask')
