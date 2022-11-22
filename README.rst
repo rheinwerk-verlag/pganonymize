@@ -9,10 +9,10 @@ anonymization. The tool requires a direct PostgreSQL connection to perform the a
 .. class:: no-web no-pdf
 
     |python| |license| |pypi| |downloads| |build| |health|
+    
+.. image:: docs/_static/demo.gif
 
 .. contents::
-
-.. image:: docs/_static/demo.gif
 
 Features
 --------
