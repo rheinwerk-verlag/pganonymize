@@ -1,7 +1,6 @@
 import math
 import os
 from collections import OrderedDict, namedtuple
-from unittest import mock
 
 import pytest
 from mock import ANY, Mock, call, patch
@@ -290,6 +289,6 @@ class TestConfigLoader:
         ]
     ])
     def test(self, file, envs, expected):
-        with mock.patch.dict(os.environ, envs):
+        with patch.dict(os.environ, envs):
             print(load_config(file))
             assert load_config(file) == expected
