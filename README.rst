@@ -9,7 +9,7 @@ anonymization. The tool requires a direct PostgreSQL connection to perform the a
 .. class:: no-web no-pdf
 
     |python| |license| |pypi| |downloads| |build| |health|
-    
+
 .. image:: docs/_static/demo.gif
 
 .. contents::
@@ -32,6 +32,8 @@ Features
 | ``street``     | Irving St            | ``faker.street_name``   | Miller Station                   |
 +----------------+----------------------+-------------------------+----------------------------------+
 | ``password``   | dsf82hFxcM           | ``mask``                | XXXXXXXXXX                       |
++----------------+----------------------+-------------------------+----------------------------------+
+| ``credit_card``| 1234-567-890         | ``partial_mask``        | 1??????????0                     |
 +----------------+----------------------+-------------------------+----------------------------------+
 | ``email``      | jane.doe@example.com | ``md5``                 | 0cba00ca3da1b283a57287bcceb17e35 |
 +----------------+----------------------+-------------------------+----------------------------------+
