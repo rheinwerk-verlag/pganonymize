@@ -12,6 +12,8 @@ anonymization. The tool requires a direct PostgreSQL connection to perform the a
 
 .. contents::
 
+.. image:: docs/_static/demo.gif
+
 Features
 --------
 
@@ -46,8 +48,6 @@ Features
 * Note: ``uuid4`` - only for (native `uuid4`_) columns
 
 See the `documentation`_ for a more detailed description of the provided anonymization methods.
-
-.. image:: docs/_static/demo.gif
 
 Installation
 ------------
