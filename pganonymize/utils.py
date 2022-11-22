@@ -379,7 +379,7 @@ def load_config(schema):
             full_value = value
             for g in match:
                 full_value = full_value.replace(
-                    '${{{g}}}'.format(g=os.environ.get(g, g))
+                    '${{{g}}}'.format(g=g), os.environ.get(g, g)
                 )
             return full_value
         return value
