@@ -77,6 +77,7 @@ setup(
     license='MIT license',
     classifiers=[
         'Development Status :: 3 - Alpha',
+        'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
@@ -90,7 +91,6 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
-        'Environment :: Console',
         'Topic :: Database'
     ],
     packages=find_packages(include=['pganonymize*']),
