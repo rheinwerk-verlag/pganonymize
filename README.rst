@@ -47,6 +47,8 @@ Features
 
 See the `documentation`_ for a more detailed description of the provided anonymization methods.
 
+.. image:: _static/demo.gif
+
 Installation
 ------------
 
