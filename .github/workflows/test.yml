@@ -3,7 +3,21 @@ name: Test
 on: [push]
 
 jobs:
-  testing:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8
+    - name: Lint
+      run: flake8
+  tests:
+    needs: linting
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -11,18 +25,15 @@ jobs:
         python-version: ['2.7', '3.6', '3.7', '3.8', '3.9', '3.10']
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+    - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
+    - uses: snok/install-poetry@v1
       with:
         version: 1.1.5
         virtualenvs-create: true
         virtualenvs-in-project: true
-    - name: Load cached venv
-      uses: actions/cache@v3
+    - uses: actions/cache@v3
       with:
         path: .venv
         key: venv-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
@@ -31,11 +42,6 @@ jobs:
       run: poetry install --no-interaction --no-root
     - name: Install library
       run: poetry install --no-interaction
-    - name: Lint with flake8
-      run: |
-        source .venv/bin/activate
-        flake8
-      if: matrix.python-version == '3.10'
     - name: Run tests
       run: |
         source .venv/bin/activate
