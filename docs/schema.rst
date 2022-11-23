@@ -29,8 +29,9 @@ which tables should be anonymized.
 ``truncate``
 ~~~~~~~~~~~~
 
-You can also specify a list of tables that should be cleared instead of anonymized with the  `truncated` key. This is
-useful if you don't need the table data for development purposes or the reduce the size of the database dump.
+You can also specify a list of tables that should be cleared instead of anonymized with the  ``truncate`` keyword. This
+is useful if you don't need the actual table data (e.g. for a local development) or to the reduce the size of the
+database dump.
 
 **Example**:
 
@@ -40,8 +41,8 @@ useful if you don't need the table data for development purposes or the reduce t
      - django_session
      - my_other_table
 
-If two tables have a foreign key relation and you don't need to keep one of the table's data, just add the
-second table and they will be truncated at once, without causing a constraint error.
+If two tables have a foreign key relation and you don't need to keep one of the table's data, just add the second table
+and they will be truncated at once, without causing a constraint error.
 
 Table level
 -----------
@@ -56,16 +57,15 @@ Defines the name of the primary key field for the current table. The default is 
 .. code-block:: yaml
 
     tables:
-     - my_table:
-        primary_key: my_primary_key
+     - user:
+        primary_key: user_id
         fields: ...
 
 ``fields``
 ~~~~~~~~~~
 
 Starting with the keyword ``fields`` you can specify all fields of a table, that should be available for the
-anonymization process. Each field entry has its own ``provider`` that defines how the field should
-be treated.
+anonymization process. Each field entry has its own ``provider`` that defines how the field should be treated.
 
 **Example**:
 
@@ -87,8 +87,8 @@ be treated.
 ``excludes``
 ~~~~~~~~~~~~
 
-For each table you can also specify a list of ``excludes``. Each entry has to be a field name which contains
-a list of exclude patterns. If one of these patterns matches, the whole table row won't be anonymized.
+You can also specify a list of ``excludes`` for each table. Each entry has to be a field name which contains
+a list of exclude patterns. If one of these patterns matches, the record won't be anonymized.
 
 **Example**:
 
@@ -105,14 +105,15 @@ a list of exclude patterns. If one of these patterns matches, the whole table ro
          - email:
            - "\\S[^@]*@example\\.com"
 
-This will exclude all data from the table ``auth_user`` that have an ``email`` field which matches the
-regular expression pattern (the backslash is to escape the string for YAML).
+This will exclude all records from the table ``auth_user`` that have an ``email`` field which matches the regular
+expression pattern (the backslash is to escape the string for YAML).
 
 ``search``
 ~~~~~~~~~~
 
-You can also specify a (SQL WHERE) `search_condition`, to filter the table for rows to be anonymized.
-This is useful if you need to anonymize one or more specific records, eg for "Right to be forgotten" (GDPR etc) purpose.
+You can also specify a (SQL WHERE) ``search_condition``, to filter the table for rows to be anonymized.
+This is useful if you need to anonymize one or more specific records, e.g. for "Right to be forgotten" (GDPR etc)
+purpose.
 
 **Example**:
 
@@ -157,7 +158,7 @@ So you can construct dynamic filter conditions like:
 ``chunk_size``
 ~~~~~~~~~~~~~~
 
-Defines how many data rows should be fetched for each iteration of anonymizing the current table. The default is 2000.
+Defines how many records should be fetched for each iteration of anonymizing the current table. The default is 2000.
 
 **Example**:
 
@@ -175,7 +176,7 @@ Field level
 ~~~~~~~~~~~~
 
 Providers are the tools, which means functions, used to alter the data within the database. You can specify on field
-level which provider should be used to alter the specific field. The reference a provider you will have can use the
+level which provider should be used to alter the specific field. To reference a provider you will have to use the
 ``name`` attribute.
 
 **Example**:
@@ -217,8 +218,7 @@ Provider
 ``choice``
 ~~~~~~~~~~
 
-This provider will define a list of possible values for a database field and will randomly make a choice
-from this list.
+This provider will define a list of possible values for a database field and will randomly make a choice from this list.
 
 **Arguments:**
 
@@ -266,18 +266,17 @@ The ``clear`` provider will set a database field to ``null``.
 
 **Arguments:** none
 
-``pganonymize`` supports all providers from the Python library `Faker`_. All you have to do is prefix the provider with
-``fake`` and then use the function name from the Faker library, e.g:
+``pganonymize`` supports all providers from the Python library `Faker`_. All you have to do is to prefix the provider
+with ``fake`` and then use the function name from the Faker library, e.g:
 
 * ``fake.first_name``
 * ``fake.street_name``
 
-Some fake functions allow additional parameters to be passed, these can be specified in
-the schema as ``kwargs``.
+Some fake functions allow additional parameters to be passed, these can be specified in the schema as ``kwargs``.
 
 .. note::
-   Please note: using the ``Faker`` library will generate randomly generated data for each data row
-   within a table. This will dramatically slow down the anonymization process.
+   Please note: using the ``Faker`` library will generate randomly generated data for each data row within a table.
+   This will dramatically slow down the anonymization process.
 
 **Example usage**:
 
@@ -321,7 +320,7 @@ This provider will replace each character with a static sign.
 
 
 ``partial_mask``
-~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 **Arguments:**
 
@@ -329,7 +328,8 @@ This provider will replace each character with a static sign.
 * ``unmasked_left``: The number of characters on the left side to leave unmasked (default 1).
 * ``unmasked_right``: The number of characters on the right side to leave unmasked (default 1).
 
-This provider will replace some characters with a static sign. It will leave some characters on the left and right unmasked, you can determine how many by providing ``unmasked_left`` and ``unmasked_right`` arguments.
+This provider will replace some characters with a static sign. It will leave some characters on the left and right
+unmasked, you can determine how many by providing ``unmasked_left`` and ``unmasked_right`` arguments.
 
 **Example usage**:
 
