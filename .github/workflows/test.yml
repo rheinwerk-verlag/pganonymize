@@ -22,6 +22,8 @@ jobs:
     strategy:
       matrix:
         python-version: ['2.7', '3.6', '3.7', '3.8', '3.9', '3.10']
+    env:
+      PYTHON: ${{ matrix.python-version }}
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python }}
@@ -32,6 +34,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install tox
+        pip install tox "coverage<5"
     - name: Run tests
-      run: tox -e ${{ matrix.python-version }}
+      run: |
+        export TOXENV=$(echo "py${{ matrix.python-version }}")
+        tox -- -p no:warnings
