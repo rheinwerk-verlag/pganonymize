@@ -45,5 +45,7 @@ jobs:
       run: poetry install --no-interaction --no-root
     - name: Install library
       run: poetry install --no-interaction
+    - name: Using Python
+      run: poetry run python -V
     - name: Run tests
       run: poetry run pytest
