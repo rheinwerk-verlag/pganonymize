@@ -44,9 +44,7 @@ jobs:
       run: poetry install --no-interaction --no-root
     - name: Install library
       run: poetry install --no-interaction
-    - name: Using Python
-      run: poetry run python -V
-    - name: Using virtualenv Python
-      run: .venv/bin/python --version
     - name: Run tests
-      run: poetry run pytest
+      run: |
+        source .venv/bin/activate
+        pytest
