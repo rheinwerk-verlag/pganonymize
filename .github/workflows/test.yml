@@ -37,5 +37,5 @@ jobs:
         pip install tox "coverage<5"
     - name: Run tests
       run: |
-        export TOXENV=$(echo "py${{ matrix.python-version }}")
+        export TOXENV=$(echo "py${{ matrix.python-version }}" | sed 's/\.//g')
         tox -- -p no:warnings
