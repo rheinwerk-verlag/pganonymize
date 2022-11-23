@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import pytest
 import six
-from mock import MagicMock, Mock, patch
+from mock import MagicMock, Mock, call, patch
 
 from pganonymize import exceptions, providers
 
@@ -127,13 +127,17 @@ class TestFakeProvider:
         provider.alter_value('Foo')
         assert operator.attrgetter(function_name)(mock_fake_data).call_count == 1
 
-    @pytest.mark.parametrize('name', [
-        'fake.foo_name'
-    ])
+    @pytest.mark.parametrize('name', ['fake.foo_name'])
     def test_invalid_names(self, name):
         provider = providers.FakeProvider(name=name)
         with pytest.raises(exceptions.InvalidProviderArgument):
             provider.alter_value('Foo')
+
+    @patch('pganonymize.providers.fake_data')
+    def test_alter_value_with_kwargs(self, mock_fake_data):
+        provider = providers.FakeProvider(name='fake.date_of_birth', kwargs={'minimum_age': 18})
+        provider.alter_value('Foo')
+        assert mock_fake_data.date_of_birth.call_args == call(minimum_age=18)
 
 
 class TestMaskProvider:
@@ -144,6 +148,22 @@ class TestMaskProvider:
     ])
     def test_alter_value(self, value, sign, expected):
         provider = providers.MaskProvider(sign=sign)
+        assert provider.alter_value(value) == expected
+
+
+class TestPartialMaskProvider:
+
+    @pytest.mark.parametrize('value, sign, unmasked_left, unmasked_right, expected', [
+        ('Foo', None, 1, 1, 'FXo'),
+        ('Foo', None, 0, 0, 'FXo'),
+        ('Baaaar', '?', 2, 1, 'Ba???r'),
+    ])
+    def test_alter_value(self, value, sign, unmasked_left, unmasked_right, expected):
+        provider = providers.PartialMaskProvider(
+            sign=sign,
+            unmasked_left=unmasked_left,
+            unmasked_right=unmasked_right
+        )
         assert provider.alter_value(value) == expected
 
 

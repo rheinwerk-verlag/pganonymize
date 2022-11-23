@@ -29,7 +29,7 @@ def anonymize_tables(connection, definitions, verbose=False, dry_run=False):
     :param connection: A database connection instance.
     :param list definitions: A list of table definitions from the YAML schema.
     :param bool verbose: Display logging information and a progress bar.
-    :param bool dry_run: Script is runnin in dry-run mode, no commit expected.
+    :param bool dry_run: Script is running in dry-run mode, no commit expected.
     """
     for definition in definitions:
         start_time = time.time()
@@ -111,10 +111,10 @@ def apply_anonymized_data(connection, temp_table, source_table, primary_key, def
     columns_identifiers = [SQL('{column} = s.{column}').format(column=Identifier(column)) for column in column_names]
     set_columns = SQL(', ').join(columns_identifiers)
     sql_args = {
-        "table": Identifier(source_table),
-        "columns": set_columns,
-        "source": Identifier(temp_table),
-        "primary_key": Identifier(primary_key)
+        'table': Identifier(source_table),
+        'columns': set_columns,
+        'source': Identifier(temp_table),
+        'primary_key': Identifier(primary_key)
     }
     sql = SQL(
         'UPDATE {table} t '
@@ -167,6 +167,7 @@ def create_temporary_table(connection, definitions, source_table, temp_table, pr
 def import_data(connection, table_name, column_names, data):
     """
     Import the temporary and anonymized data to a temporary table and write the changes back.
+
     :param connection: A database connection instance.
     :param str table_name: Name of the table to be populated with data.
     :param list column_names: A list of table fields
@@ -297,7 +298,8 @@ def get_column_name(definition, fully_qualified=False):
 
 
 def get_column_names(definitions):
-    """Get distinct column names from definitions
+    """
+    Get distinct column names from definitions
 
     :param list definitions: A list of table definitions from the YAML schema.
     :return: A list of column names
@@ -312,11 +314,11 @@ def get_column_names(definitions):
 
 
 def escape_str_replace(value):
-    """Get escaped value
+    """
+    Get escaped value.
 
-    :param Value to be encoded.
+    :param value: The value to be encoded.
     :return: Escaped value
-    :rtype: unknown
     """
     if isinstance(value, dict):
         return json.dumps(value).encode()
@@ -324,13 +326,13 @@ def escape_str_replace(value):
 
 
 def nested_get(dic, path, delimiter='.'):
-    """Get from dictionary by path
+    """
+    Get from dictionary by path.
 
-    :dic dict Source dictionaly.
-    :path string Path withing dictionary
-    :delimiter string Path delimiter
+    :param dict dic: The source dictionary.
+    :param str path: The path within the dictionary.
+    :param str delimiter: The path delimiter
     :return: Value at path
-    :rtype: unknown
     """
     try:
         keys = path.split(delimiter)
@@ -342,12 +344,13 @@ def nested_get(dic, path, delimiter='.'):
 
 
 def nested_set(dic, path, value, delimiter='.'):
-    """Set dictionary value by path
+    """
+    Set dictionary value by path.
 
-    :dic dict Source dictionaly.
-    :path string Path withing dictionary
-    :value unknow Value to be set
-    :delimiter string Path delimiter
+    :param dict dic: The source dictionary
+    :param str path: The path withing dictionary
+    :param value: The value to be set
+    :param str delimiter: The path delimiter
     """
     keys = path.split(delimiter)
     for key in keys[:-1]:
@@ -364,11 +367,11 @@ def load_config(schema):
 
     def constructor_env_variables(loader, node):
         """
-        Extracts the environment variable from the node's value
-        :param yaml.Loader loader: the yaml loader
-        :param node: the current node in the yaml
-        :return: the parsed string that contains the value of the environment
-        variable
+        Extract the environment variable from the node's value.
+
+        :param yaml.Loader loader: The yaml loader
+        :param node: The current node in the yaml
+        :return: The parsed string that contains the value of the environment variable
         """
         value = loader.construct_scalar(node)
         match = pattern.findall(value)  # to find all env variables in line
@@ -376,7 +379,7 @@ def load_config(schema):
             full_value = value
             for g in match:
                 full_value = full_value.replace(
-                    f'${{{g}}}', os.environ.get(g, g)
+                    '${{{g}}}'.format(g=g), os.environ.get(g, g)
                 )
             return full_value
         return value

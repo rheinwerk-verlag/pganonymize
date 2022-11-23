@@ -114,11 +114,12 @@ class FakeProvider(Provider):
 
     def alter_value(self, value):
         func_name = self.kwargs['name'].split('.', 1)[1]
+        func_kwargs = self.kwargs.get('kwargs', {})
         try:
             func = operator.attrgetter(func_name)(fake_data)
         except AttributeError as exc:
             raise InvalidProviderArgument(exc)
-        return func()
+        return func(**func_kwargs)
 
 
 @register('mask')
@@ -131,6 +132,27 @@ class MaskProvider(Provider):
     def alter_value(self, value):
         sign = self.kwargs.get('sign', self.default_sign) or self.default_sign
         return sign * len(value)
+
+
+@register('partial_mask')
+class PartialMaskProvider(Provider):
+    """Provider that masks some of the original value."""
+
+    default_sign = 'X'
+    default_unmasked_left = 1
+    default_unmasked_right = 1
+    """The default string used to replace each character."""
+
+    def alter_value(self, value):
+        sign = self.kwargs.get('sign', self.default_sign) or self.default_sign
+        unmasked_left = self.kwargs.get('unmasked_left', self.default_unmasked_left) or self.default_unmasked_left
+        unmasked_right = self.kwargs.get('unmasked_right', self.default_unmasked_right) or self.default_unmasked_right
+
+        return (
+            value[:unmasked_left] +
+            (len(value) - (unmasked_left + unmasked_right)) * sign +
+            value[-unmasked_right:]
+        )
 
 
 @register('md5')

@@ -43,7 +43,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .tox/
 
 flake8: ## run style checks and static analysis with flake8
-	@poetry run flake8
+	@flake8
 
 release: clean ## package and upload a release
 	python setup.py sdist upload
@@ -58,7 +58,7 @@ install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
 test:
-	@poetry run pytest --cov=poetry --cov-config .coveragerc tests/ -sq
+	@pytest
 
 test-all: ## run tests on every Python version with tox
 	@tox
