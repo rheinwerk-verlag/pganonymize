@@ -160,7 +160,7 @@ After that you can pass a schema file to the container, using Docker volumes, an
 
 
 .. _uuid4: https://www.postgresql.org/docs/current/datatype-uuid.html
-.. _documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/
+.. _documentation: https://pganonymize.readthedocs.io/en/latest/
 .. _schema documentation: https://python-postgresql-anonymizer.readthedocs.io/en/latest/schema.html
 .. _YAML sample schema: https://github.com/rheinwerk-verlag/pganonymize/blob/master/sample_schema.yml
 
