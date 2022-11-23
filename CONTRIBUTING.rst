@@ -22,18 +22,11 @@ version:
     $ git clone git@github.com:rheinwerk-verlag/postgresql-anonymizer.git
     $ cd postgresql-anonymizer
 
-We are using `poetry`_ for development, you may need to install it first:
+For the development use a virtualenv or install the requirements directly:
 
 .. code-block:: sh
 
-    $ sudo pip install poetry
-
-Now you can install all development requirements and activate the virtualenv:
-
-.. code-block:: sh
-
-    $ poetry install
-    $ poetry shell
+    $ sudo pip install -r requirements.txt
 
 Coding style
 ------------
@@ -54,7 +47,6 @@ Before creating a pull request make sure to check:
 
 .. _issue: https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues
 .. _new issue: https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/new
-.. _poetry: https://python-poetry.org/
 .. _EditorConfig: https://editorconfig.org/
 .. _tests: https://github.com/rheinwerk-verlag/postgresql-anonymizer/tree/development/tests
 .. _Sphinx documentation: https://github.com/rheinwerk-verlag/postgresql-anonymizer/tree/development/docs

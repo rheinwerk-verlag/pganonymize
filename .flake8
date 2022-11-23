@@ -1,11 +1,10 @@
 [flake8]
 max-line-length = 120
 ignore = E731,W504
-exclude = 
+exclude =
     dist
     docs
     setup.py
-    get-poetry.py
     .tox
     .git
     .eggs
