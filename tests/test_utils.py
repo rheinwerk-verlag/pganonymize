@@ -167,7 +167,8 @@ class TestBuildAndThenImport:
     def test(self, quote_ident, copy_manager, table, primary_key, columns, total_count, chunk_size):
         fake_record = dict.fromkeys([list(definition.keys())[0] for definition in columns], '')
         records = [
-            [fake_record for row in range(0, chunk_size)] for x in range(0, int(math.ceil(total_count / chunk_size)))
+            [fake_record for row in range(0, chunk_size + 1)]
+            for x in range(0, int(math.ceil(total_count / chunk_size + 1)))
         ]
 
         mock_cursor = Mock()
