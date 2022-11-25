@@ -7,9 +7,32 @@ from uuid import uuid4
 
 from faker import Faker
 
+from pganonymize.config import config
 from pganonymize.exceptions import InvalidProvider, InvalidProviderArgument, ProviderAlreadyRegistered
 
-fake_data = Faker()
+
+class FakerInitializer(object):
+    """A wrapper that allows to instantiate a faker instance with specific locales."""
+
+    def __init__(self):
+        self._faker = None
+
+    @property
+    def faker(self):
+        """
+        Return the actual :class:`faker.Faker` instance, with optional locales taken from the YAML schema.
+
+        :return: A faker instance
+        :rtype: faker.Faker
+        """
+        if self._faker is None:
+            options = config.schema.get('options', {})
+            locales = options.get('faker', {}).get('locales', None)
+            self._faker = Faker(locales)
+        return self._faker
+
+
+faker_initializer = FakerInitializer()
 
 
 class ProviderRegistry(object):
@@ -33,10 +56,12 @@ class ProviderRegistry(object):
 
     def get_provider(self, provider_id):
         """
-        Return a provider by it's provider id.
+        Return a provider by its provider id.
 
         :param str provider_id: The string id of the desired provider.
         :raises InvalidProvider: If no provider can be found with the given id.
+        :return: The provider class that matches the id.
+        :rtype: type
         """
         for key, cls in self._registry.items():
             if (cls.regex_match is True and re.match(re.compile(key), provider_id) is not None) or key == provider_id:
@@ -78,10 +103,8 @@ class Provider(object):
     regex_match = False
     """Defines whether a provider matches it's id using regular expressions."""
 
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
-
-    def alter_value(self, value):
+    @classmethod
+    def alter_value(cls, value, **kwargs):
         """
         Alter or replace the original value of the database column.
 
@@ -94,15 +117,17 @@ class Provider(object):
 class ChoiceProvider(Provider):
     """Provider that returns a random value from a list of choices."""
 
-    def alter_value(self, value):
-        return random.choice(self.kwargs.get('values'))
+    @classmethod
+    def alter_value(cls, value, **kwargs):
+        return random.choice(kwargs.get('values'))
 
 
 @register('clear')
 class ClearProvider(Provider):
     """Provider to set a field value to None."""
 
-    def alter_value(self, value):
+    @classmethod
+    def alter_value(cls, value, **kwargs):
         return None
 
 
@@ -112,11 +137,12 @@ class FakeProvider(Provider):
 
     regex_match = True
 
-    def alter_value(self, value):
-        func_name = self.kwargs['name'].split('.', 1)[1]
-        func_kwargs = self.kwargs.get('kwargs', {})
+    @classmethod
+    def alter_value(cls, value, **kwargs):
+        func_name = kwargs['name'].split('.', 1)[1]
+        func_kwargs = kwargs.get('kwargs', {})
         try:
-            func = operator.attrgetter(func_name)(fake_data)
+            func = operator.attrgetter(func_name)(faker_initializer.faker)
         except AttributeError as exc:
             raise InvalidProviderArgument(exc)
         return func(**func_kwargs)
@@ -129,8 +155,9 @@ class MaskProvider(Provider):
     default_sign = 'X'
     """The default string used to replace each character."""
 
-    def alter_value(self, value):
-        sign = self.kwargs.get('sign', self.default_sign) or self.default_sign
+    @classmethod
+    def alter_value(cls, value, **kwargs):
+        sign = kwargs.get('sign', cls.default_sign) or cls.default_sign
         return sign * len(value)
 
 
@@ -143,10 +170,11 @@ class PartialMaskProvider(Provider):
     default_unmasked_right = 1
     """The default string used to replace each character."""
 
-    def alter_value(self, value):
-        sign = self.kwargs.get('sign', self.default_sign) or self.default_sign
-        unmasked_left = self.kwargs.get('unmasked_left', self.default_unmasked_left) or self.default_unmasked_left
-        unmasked_right = self.kwargs.get('unmasked_right', self.default_unmasked_right) or self.default_unmasked_right
+    @classmethod
+    def alter_value(cls, value, **kwargs):
+        sign = kwargs.get('sign', cls.default_sign) or cls.default_sign
+        unmasked_left = kwargs.get('unmasked_left', cls.default_unmasked_left) or cls.default_unmasked_left
+        unmasked_right = kwargs.get('unmasked_right', cls.default_unmasked_right) or cls.default_unmasked_right
 
         return (
             value[:unmasked_left] +
@@ -162,9 +190,10 @@ class MD5Provider(Provider):
     default_max_length = 8
     """The default length used for the number representation."""
 
-    def alter_value(self, value):
-        as_number = self.kwargs.get('as_number', False)
-        as_number_length = self.kwargs.get('as_number_length', self.default_max_length)
+    @classmethod
+    def alter_value(cls, value, **kwargs):
+        as_number = kwargs.get('as_number', False)
+        as_number_length = kwargs.get('as_number_length', cls.default_max_length)
         hashed = md5(value.encode('utf-8')).hexdigest()
         if as_number:
             return int(hashed, 16) % (10 ** as_number_length)
@@ -176,13 +205,15 @@ class MD5Provider(Provider):
 class SetProvider(Provider):
     """Provider to set a static value."""
 
-    def alter_value(self, value):
-        return self.kwargs.get('value')
+    @classmethod
+    def alter_value(cls, value, **kwargs):
+        return kwargs.get('value')
 
 
 @register('uuid4')
 class UUID4Provider(Provider):
     """Provider to set a random uuid value."""
 
-    def alter_value(self, value):
+    @classmethod
+    def alter_value(cls, value, **kwargs):
         return uuid4()

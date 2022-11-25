@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import json
 import logging
 import math
-import os
 import re
 import subprocess
 import time
@@ -13,24 +12,24 @@ import time
 import parmap
 import psycopg2
 import psycopg2.extras
-import yaml
 from pgcopy import CopyManager
 from psycopg2.sql import SQL, Composed, Identifier
 from tqdm import trange
 
+from pganonymize.config import config
 from pganonymize.constants import DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
 from pganonymize.providers import provider_registry
 
 
-def anonymize_tables(connection, definitions, verbose=False, dry_run=False):
+def anonymize_tables(connection, verbose=False, dry_run=False):
     """
     Anonymize a list of tables according to the schema definition.
 
     :param connection: A database connection instance.
-    :param list definitions: A list of table definitions from the YAML schema.
     :param bool verbose: Display logging information and a progress bar.
     :param bool dry_run: Script is running in dry-run mode, no commit expected.
     """
+    definitions = config.schema.get('tables', [])
     for definition in definitions:
         start_time = time.time()
         table_name = list(definition.keys())[0]
@@ -233,26 +232,26 @@ def get_column_values(row, columns):
         orig_value = nested_get(row, full_column_name)
         # Skip the current column if there is no value to be altered
         if orig_value is not None:
-            provider = provider_registry.get_provider(provider_config['name'])(**provider_config)
-            value = provider.alter_value(orig_value)
+            provider_class = provider_registry.get_provider(provider_config['name'])
+            value = provider_class.alter_value(orig_value, **provider_config)
             append = column_definition.get('append')
             if append:
                 value = value + append
-            format = column_definition.get('format')
-            if format:
-                value = format.format(pga_value=value, **row)
+            _format = column_definition.get('format')
+            if _format:
+                value = _format.format(pga_value=value, **row)
             nested_set(row, full_column_name, value)
             column_dict[column_name] = nested_get(row, column_name)
     return column_dict
 
 
-def truncate_tables(connection, tables):
+def truncate_tables(connection):
     """
     Truncate a list of tables.
 
     :param connection: A database connection instance
-    :param list[str] tables: A list of table names
     """
+    tables = config.schema.get('truncate', [])
     if not tables:
         return
     cursor = connection.cursor()
@@ -356,33 +355,3 @@ def nested_set(dic, path, value, delimiter='.'):
     for key in keys[:-1]:
         dic = dic.get(key, {})
     dic[keys[-1]] = value
-
-
-def load_config(schema):
-    # Original code from here https://gist.github.com/mkaranasou/ba83e25c835a8f7629e34dd7ede01931
-    tag = '!ENV'
-    pattern = re.compile(r'.*?\${(\w+)}.*?')
-    custom_loader = yaml.FullLoader
-    custom_loader.add_implicit_resolver(tag, pattern, None)
-
-    def constructor_env_variables(loader, node):
-        """
-        Extract the environment variable from the node's value.
-
-        :param yaml.Loader loader: The yaml loader
-        :param node: The current node in the yaml
-        :return: The parsed string that contains the value of the environment variable
-        """
-        value = loader.construct_scalar(node)
-        match = pattern.findall(value)  # to find all env variables in line
-        if match:
-            full_value = value
-            for g in match:
-                full_value = full_value.replace(
-                    '${{{g}}}'.format(g=g), os.environ.get(g, g)
-                )
-            return full_value
-        return value
-
-    custom_loader.add_constructor(tag, constructor_env_variables)
-    return yaml.load(open(schema), Loader=custom_loader)
