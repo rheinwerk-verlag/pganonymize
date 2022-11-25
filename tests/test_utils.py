@@ -1,5 +1,4 @@
 import math
-import os
 from collections import OrderedDict, namedtuple
 
 import pytest
@@ -7,11 +6,13 @@ from mock import ANY, Mock, call, patch
 
 from tests.utils import quote_ident
 
-from pganonymize.utils import (anonymize_tables, build_and_then_import_data, create_database_dump,
-                               get_column_values, get_connection, import_data, load_config, truncate_tables)
+from pganonymize.utils import (
+    anonymize_tables, build_and_then_import_data, create_database_dump, get_column_values, get_connection, import_data,
+    truncate_tables,
+)
 
 
-class TestGetConnection:
+class TestGetConnection(object):
 
     @patch('pganonymize.utils.psycopg2.connect')
     def test(self, mock_connect):
@@ -26,17 +27,20 @@ class TestGetConnection:
         mock_connect.assert_called_once_with(**connection_data)
 
 
-class TestTruncateTables:
+class TestTruncateTables(object):
+
     @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
+    @patch('pganonymize.utils.config')
     @pytest.mark.parametrize('tables, expected', [
         [('table_a', 'table_b', 'CAPS_TABLe'), 'TRUNCATE TABLE "table_a", "table_b", "CAPS_TABLe"'],
         [(), None],
     ])
-    def test(self, quote_ident, tables, expected):
+    def test(self, quote_ident, mock_config, tables, expected):
         mock_cursor = Mock()
         connection = Mock()
         connection.cursor.return_value = mock_cursor
-        truncate_tables(connection, tables)
+        mock_config.schema = {'truncate': tables}
+        truncate_tables(connection)
         if tables:
             connection.cursor.assert_called_once()
             assert mock_cursor.execute.call_args_list == [call(expected)]
@@ -47,7 +51,7 @@ class TestTruncateTables:
             mock_cursor.close.assert_not_called()
 
 
-class TestImportData:
+class TestImportData(object):
     @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
     @patch('pgcopy.copy.util')
     @patch('pgcopy.copy.inspect')
@@ -84,8 +88,9 @@ class TestImportData:
         assert mock_cursor.copy_expert.call_args_list == expected
 
     @patch('pganonymize.utils.CopyManager')
+    @patch('pganonymize.utils.config')
     @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
-    def test_anonymize_tables(self, quote_ident, copy_manager):
+    def test_anonymize_tables(self, quote_ident, mock_config, copy_manager):
         mock_cursor = Mock()
         mock_cursor.fetchone.return_value = [2]
         mock_cursor.fetchmany.side_effect = [
@@ -102,8 +107,8 @@ class TestImportData:
 
         connection = Mock()
         connection.cursor.return_value = mock_cursor
-        definitions = []
-        anonymize_tables(connection, definitions, verbose=True)
+        mock_config.schema = {'tables': []}
+        anonymize_tables(connection, verbose=True)
 
         assert connection.cursor.call_count == 0
         assert mock_cursor.close.call_count == 0
@@ -148,8 +153,8 @@ class TestImportData:
                 }
             }
         ]
-
-        anonymize_tables(connection, definitions, verbose=True)
+        mock_config.schema = {'tables': definitions}
+        anonymize_tables(connection, verbose=True)
         assert connection.cursor.call_count == mock_cursor.close.call_count
         assert copy_manager.call_args_list == [call(connection, 'tmp_auth_user', ['id', 'first_name', 'json_column'])]
         assert cmm.copy.call_count == 1
@@ -157,7 +162,7 @@ class TestImportData:
                                                  ['dummy nameappend-me', b'{"field2": "dummy json field2"}']])]
 
 
-class TestBuildAndThenImport:
+class TestBuildAndThenImport(object):
     @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
     @patch('pganonymize.utils.CopyManager')
     @pytest.mark.parametrize('table, primary_key, columns, total_count, chunk_size', [
@@ -228,68 +233,10 @@ class TestBuildAndThenImport:
         assert result == expected
 
 
-class TestCreateDatabaseDump:
+class TestCreateDatabaseDump(object):
 
     @patch('pganonymize.utils.subprocess.call')
     def test(self, mock_call):
         create_database_dump('/tmp/dump.gz', {'dbname': 'database', 'user': 'foo', 'host': 'localhost', 'port': 5432})
         mock_call.assert_called_once_with('pg_dump -Fc -Z 9 -d database -U foo -h localhost -p 5432 -f /tmp/dump.gz',
                                           shell=True)
-
-
-class TestConfigLoader:
-
-    @pytest.mark.parametrize('file, envs, expected', [
-        [
-            './tests/schemes/valid_schema.yml',
-            {},
-            {
-                'tables': [
-                    {
-                        'auth_user': {
-                            'primary_key': 'id',
-                            'chunk_size': 5000,
-                            'fields': [
-                                {'first_name': {'provider': {'name': 'fake.first_name'}}},
-                                {'last_name': {'provider': {'name': 'set', 'value': 'Bar'}}},
-                                {'email': {'provider': {'name': 'md5'}, 'append': '@localhost'}},
-                            ],
-                            'excludes': [
-                                {'email': ['\\S[^@]*@example\\.com']},
-                            ]
-                        }
-                    }
-                ],
-                'truncate': ['django_session']
-            }
-        ],
-        [
-            './tests/schemes/schema_with_env_variables.yml',
-            {
-                'TEST_CHUNK_SIZE': '123',
-                'TEST_PRIMARY_KEY': 'foo-bar',
-                'PRESENT_WORLD_NAME': 'beautiful world',
-                'COMPANY_ID': '42',
-                'USER_TO_BE_SEARCHED': 'i wanna be forgotten',
-            },
-            {
-                'primary_key': 'foo-bar',
-                'primary_key2': 'foo-bar',
-                'chunk_size': '123',
-                'concat_missing': 'Hello, MISSING_ENV_VAL',
-                'concat_missing2': 'Hello, ${MISSING_ENV_VAL}',
-                'concat_present': 'Hello, beautiful world',
-                'concat_present2': 'beautiful world',
-                'concat_present3': 'Hello, beautiful world',
-                'search': 'id = 42',
-                'search2': "username = 'i wanna be forgotten'",
-                'corrupted': "username = '${CORRUPTED",
-                'corrupted2': '',
-                'corrupted3': '$',
-            }
-        ]
-    ])
-    def test(self, file, envs, expected):
-        with patch.dict(os.environ, envs):
-            print(load_config(file))
-            assert load_config(file) == expected

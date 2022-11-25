@@ -29,7 +29,7 @@ def test_register():
     assert 'bar' in registry._registry
 
 
-class TestProviderRegistry:
+class TestProviderRegistry(object):
 
     def test_constructor(self):
         registry = providers.ProviderRegistry()
@@ -91,7 +91,7 @@ class TestProviderRegistry:
         pass
 
 
-class TestProvider:
+class TestProvider(object):
 
     def test_alter_value(self):
         provider = providers.Provider()
@@ -99,59 +99,54 @@ class TestProvider:
             provider.alter_value('Foo')
 
 
-class TestChoiceProvider:
+class TestChoiceProvider(object):
 
     def test_alter_value(self):
         choices = ['Foo', 'Bar', 'Baz']
-        provider = providers.ChoiceProvider(values=choices)
         for choice in choices:
-            assert provider.alter_value(choice) in choices
+            assert providers.ChoiceProvider.alter_value(choice, values=choices) in choices
 
 
-class TestClearProvider:
+class TestClearProvider(object):
 
     def test_alter_value(self):
         provider = providers.ClearProvider()
         assert provider.alter_value('Foo') is None
 
 
-class TestFakeProvider:
+class TestFakeProvider(object):
 
     @pytest.mark.parametrize('name, function_name', [
         ('fake.first_name', 'first_name'),
         ('fake.unique.first_name', 'unique.first_name'),
     ])
-    @patch('pganonymize.providers.fake_data')
-    def test_alter_value(self, mock_fake_data, name, function_name):
-        provider = providers.FakeProvider(name=name)
-        provider.alter_value('Foo')
-        assert operator.attrgetter(function_name)(mock_fake_data).call_count == 1
+    @patch('pganonymize.providers.faker_initializer')
+    def test_alter_value(self, mock_faker_initializer, name, function_name):
+        providers.FakeProvider.alter_value('Foo', name=name)
+        assert operator.attrgetter(function_name)(mock_faker_initializer.faker).call_count == 1
 
     @pytest.mark.parametrize('name', ['fake.foo_name'])
     def test_invalid_names(self, name):
-        provider = providers.FakeProvider(name=name)
         with pytest.raises(exceptions.InvalidProviderArgument):
-            provider.alter_value('Foo')
+            providers.FakeProvider.alter_value('Foo', name=name)
 
-    @patch('pganonymize.providers.fake_data')
-    def test_alter_value_with_kwargs(self, mock_fake_data):
-        provider = providers.FakeProvider(name='fake.date_of_birth', kwargs={'minimum_age': 18})
-        provider.alter_value('Foo')
-        assert mock_fake_data.date_of_birth.call_args == call(minimum_age=18)
+    @patch('pganonymize.providers.faker_initializer')
+    def test_alter_value_with_kwargs(self, mock_faker_initializer):
+        providers.FakeProvider.alter_value('Foo', name='fake.date_of_birth', kwargs={'minimum_age': 18})
+        assert mock_faker_initializer.faker.date_of_birth.call_args == call(minimum_age=18)
 
 
-class TestMaskProvider:
+class TestMaskProvider(object):
 
     @pytest.mark.parametrize('value, sign, expected', [
         ('Foo', None, 'XXX'),
         ('Baaaar', '?', '??????'),
     ])
     def test_alter_value(self, value, sign, expected):
-        provider = providers.MaskProvider(sign=sign)
-        assert provider.alter_value(value) == expected
+        assert providers.MaskProvider.alter_value(value, sign=sign) == expected
 
 
-class TestPartialMaskProvider:
+class TestPartialMaskProvider(object):
 
     @pytest.mark.parametrize('value, sign, unmasked_left, unmasked_right, expected', [
         ('Foo', None, 1, 1, 'FXo'),
@@ -159,15 +154,11 @@ class TestPartialMaskProvider:
         ('Baaaar', '?', 2, 1, 'Ba???r'),
     ])
     def test_alter_value(self, value, sign, unmasked_left, unmasked_right, expected):
-        provider = providers.PartialMaskProvider(
-            sign=sign,
-            unmasked_left=unmasked_left,
-            unmasked_right=unmasked_right
-        )
-        assert provider.alter_value(value) == expected
+        assert providers.PartialMaskProvider.alter_value(value, sign=sign, unmasked_left=unmasked_left,
+                                                         unmasked_right=unmasked_right) == expected
 
 
-class TestMD5Provider:
+class TestMD5Provider(object):
 
     def test_alter_value(self):
         provider = providers.MD5Provider()
@@ -176,33 +167,26 @@ class TestMD5Provider:
         assert len(value) == 32
 
     def test_as_number(self):
-        provider = providers.MD5Provider(as_number=True)
-        value = provider.alter_value('foo')
+        value = providers.MD5Provider.alter_value('foo', as_number=True)
         assert isinstance(value, six.integer_types)
         assert value == 985560
-
-        provider = providers.MD5Provider(as_number=True, as_number_length=8)
-        value = provider.alter_value('foobarbazadasd')
+        value = providers.MD5Provider.alter_value('foobarbazadasd', as_number=True, as_number_length=8)
         assert isinstance(value, six.integer_types)
         assert value == 45684001
 
 
-class TestSetProvider:
+class TestSetProvider(object):
 
     @pytest.mark.parametrize('kwargs, expected', [
         ({'value': None}, None),
         ({'value': 'Bar'}, 'Bar')
     ])
     def test_alter_value(self, kwargs, expected):
-        provider = providers.SetProvider(**kwargs)
-        assert provider.alter_value('Foo') == expected
+        assert providers.SetProvider.alter_value('Foo', **kwargs) == expected
 
 
-class TestUUID4Provider:
-    @pytest.mark.parametrize('kwargs, expected', [
-        ({'value': None}, None),
-        ({'value': 'Bar'}, 'Bar')
-    ])
-    def test_alter_value(self, kwargs, expected):
-        provider = providers.UUID4Provider(**kwargs)
-        assert type(provider.alter_value('Foo')) == uuid.UUID
+class TestUUID4Provider(object):
+
+    @pytest.mark.parametrize('value, expected', [(None, uuid.UUID), ('Foo', uuid.UUID)])
+    def test_alter_value(self, value, expected):
+        assert type(providers.UUID4Provider.alter_value(value)) == expected
