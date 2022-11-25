@@ -104,11 +104,11 @@ class Provider(object):
     """Defines whether a provider matches it's id using regular expressions."""
 
     @classmethod
-    def alter_value(cls, value, **kwargs):
+    def alter_value(cls, original_value, **kwargs):
         """
         Alter or replace the original value of the database column.
 
-        :param value: The original value of the database column.
+        :param original_value: The original value of the database column.
         """
         raise NotImplementedError()
 
@@ -118,7 +118,7 @@ class ChoiceProvider(Provider):
     """Provider that returns a random value from a list of choices."""
 
     @classmethod
-    def alter_value(cls, value, **kwargs):
+    def alter_value(cls, original_value, **kwargs):
         return random.choice(kwargs.get('values'))
 
 
@@ -127,7 +127,7 @@ class ClearProvider(Provider):
     """Provider to set a field value to None."""
 
     @classmethod
-    def alter_value(cls, value, **kwargs):
+    def alter_value(cls, original_value, **kwargs):
         return None
 
 
@@ -138,7 +138,7 @@ class FakeProvider(Provider):
     regex_match = True
 
     @classmethod
-    def alter_value(cls, value, **kwargs):
+    def alter_value(cls, original_value, **kwargs):
         func_name = kwargs['name'].split('.', 1)[1]
         func_kwargs = kwargs.get('kwargs', {})
         try:
@@ -156,9 +156,9 @@ class MaskProvider(Provider):
     """The default string used to replace each character."""
 
     @classmethod
-    def alter_value(cls, value, **kwargs):
+    def alter_value(cls, original_value, **kwargs):
         sign = kwargs.get('sign', cls.default_sign) or cls.default_sign
-        return sign * len(value)
+        return sign * len(original_value)
 
 
 @register('partial_mask')
@@ -171,15 +171,15 @@ class PartialMaskProvider(Provider):
     """The default string used to replace each character."""
 
     @classmethod
-    def alter_value(cls, value, **kwargs):
+    def alter_value(cls, original_value, **kwargs):
         sign = kwargs.get('sign', cls.default_sign) or cls.default_sign
         unmasked_left = kwargs.get('unmasked_left', cls.default_unmasked_left) or cls.default_unmasked_left
         unmasked_right = kwargs.get('unmasked_right', cls.default_unmasked_right) or cls.default_unmasked_right
 
         return (
-            value[:unmasked_left] +
-            (len(value) - (unmasked_left + unmasked_right)) * sign +
-            value[-unmasked_right:]
+            original_value[:unmasked_left] +
+            (len(original_value) - (unmasked_left + unmasked_right)) * sign +
+            original_value[-unmasked_right:]
         )
 
 
@@ -191,10 +191,10 @@ class MD5Provider(Provider):
     """The default length used for the number representation."""
 
     @classmethod
-    def alter_value(cls, value, **kwargs):
+    def alter_value(cls, original_value, **kwargs):
         as_number = kwargs.get('as_number', False)
         as_number_length = kwargs.get('as_number_length', cls.default_max_length)
-        hashed = md5(value.encode('utf-8')).hexdigest()
+        hashed = md5(original_value.encode('utf-8')).hexdigest()
         if as_number:
             return int(hashed, 16) % (10 ** as_number_length)
         else:
@@ -206,7 +206,7 @@ class SetProvider(Provider):
     """Provider to set a static value."""
 
     @classmethod
-    def alter_value(cls, value, **kwargs):
+    def alter_value(cls, original_value, **kwargs):
         return kwargs.get('value')
 
 
@@ -215,5 +215,5 @@ class UUID4Provider(Provider):
     """Provider to set a random uuid value."""
 
     @classmethod
-    def alter_value(cls, value, **kwargs):
+    def alter_value(cls, original_value, **kwargs):
         return uuid4()
