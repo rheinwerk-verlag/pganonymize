@@ -16,7 +16,17 @@ class FakerInitializer(object):
 
     def __init__(self):
         self._faker = None
-        self.default_locale = None
+        self._options = None
+
+    @property
+    def options(self):
+        if self._options is None:
+            self._options = config.schema.get('options', {}).get('faker', {})
+        return self._options
+
+    @property
+    def default_locale(self):
+        return self.options.get('default_locale')
 
     @property
     def faker(self):
@@ -27,10 +37,8 @@ class FakerInitializer(object):
         :rtype: faker.Faker
         """
         if self._faker is None:
-            options = config.schema.get('options', {})
-            locales = options.get('faker', {}).get('locales', None)
+            locales = self.options.get('locales')
             self._faker = Faker(locales)
-            self.default_locale = options.get('faker', {}).get('default_locale', None)
         return self._faker
 
     def get_locale_generator(self, locale):
@@ -48,6 +56,7 @@ class FakerInitializer(object):
             raise InvalidProviderArgument('Locale \'{}\' is unknown. Have you added it to the global option '
                                           '(options.faker.locales)?'.format(locale))
         return generator
+
 
 faker_initializer = FakerInitializer()
 
