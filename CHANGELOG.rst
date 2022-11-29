@@ -4,6 +4,9 @@ Changelog
 Development
 -----------
 
+0.10.0 (2022-11-29)
+-------------------
+
 * `#49 <https://github.com/rheinwerk-verlag/pganonymize/pull/49>`_: Configure psycopg2 to support UUID objects
 * `#48 <https://github.com/rheinwerk-verlag/pganonymize/pull/48>`_: Add support for localized "Faker" data
 
