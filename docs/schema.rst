@@ -274,6 +274,8 @@ with ``fake`` and then use the function name from the Faker library, e.g:
 
 Some fake functions allow additional parameters to be passed, these can be specified in the schema as ``kwargs``.
 
+For localization options see :doc:`localization`.
+
 .. note::
    Please note: using the ``Faker`` library will generate randomly generated data for each data row within a table.
    This will dramatically slow down the anonymization process.
