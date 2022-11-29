@@ -16,6 +16,7 @@ class FakerInitializer(object):
 
     def __init__(self):
         self._faker = None
+        self.default_locale = None
 
     @property
     def faker(self):
@@ -29,8 +30,24 @@ class FakerInitializer(object):
             options = config.schema.get('options', {})
             locales = options.get('faker', {}).get('locales', None)
             self._faker = Faker(locales)
+            self.default_locale = options.get('faker', {}).get('default_locale', None)
         return self._faker
 
+    def get_locale_generator(self, locale):
+        """
+        Get the internal generator for the given locale.
+
+        :param str locale: A locale string
+        :raises InvalidProviderArgument: If locale is unknown (not configured within the global locales option).
+        :return: A Generator instance for the given locale
+        :rtype: faker.Generator
+        """
+        try:
+            generator = self.faker[locale]
+        except KeyError:
+            raise InvalidProviderArgument('Locale \'{}\' is unknown. Have you added it to the global option '
+                                          '(options.faker.locales)?'.format(locale))
+        return generator
 
 faker_initializer = FakerInitializer()
 
@@ -141,8 +158,11 @@ class FakeProvider(Provider):
     def alter_value(cls, original_value, **kwargs):
         func_name = kwargs['name'].split('.', 1)[1]
         func_kwargs = kwargs.get('kwargs', {})
+        locale = kwargs.get('locale', faker_initializer.default_locale)
+        # Use the generator for the locale if a locale is configured (per field definition or as global default locale)
+        faker_generator = faker_initializer.get_locale_generator(locale) if locale else faker_initializer.faker
         try:
-            func = operator.attrgetter(func_name)(faker_initializer.faker)
+            func = operator.attrgetter(func_name)(faker_generator)
         except AttributeError as exc:
             raise InvalidProviderArgument(exc)
         return func(**func_kwargs)

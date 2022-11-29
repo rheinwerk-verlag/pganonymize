@@ -5,8 +5,10 @@ from collections import OrderedDict
 import pytest
 import six
 from mock import MagicMock, Mock, call, patch
+from mock.mock import PropertyMock
 
 from pganonymize import exceptions, providers
+from pganonymize.exceptions import InvalidProviderArgument
 
 
 def test_register():
@@ -114,26 +116,42 @@ class TestClearProvider(object):
         assert provider.alter_value('Foo') is None
 
 
+@pytest.mark.usefixtures('valid_config')
 class TestFakeProvider(object):
 
     @pytest.mark.parametrize('name, function_name', [
         ('fake.first_name', 'first_name'),
         ('fake.unique.first_name', 'unique.first_name'),
     ])
-    @patch('pganonymize.providers.faker_initializer')
-    def test_alter_value(self, mock_faker_initializer, name, function_name):
+    @patch('pganonymize.providers.faker_initializer._faker')
+    def test_alter_value(self, mock_faker, name, function_name):
         providers.FakeProvider.alter_value('Foo', name=name)
-        assert operator.attrgetter(function_name)(mock_faker_initializer.faker).call_count == 1
+        assert operator.attrgetter(function_name)(mock_faker).call_count == 1
 
     @pytest.mark.parametrize('name', ['fake.foo_name'])
     def test_invalid_names(self, name):
         with pytest.raises(exceptions.InvalidProviderArgument):
             providers.FakeProvider.alter_value('Foo', name=name)
 
-    @patch('pganonymize.providers.faker_initializer')
-    def test_alter_value_with_kwargs(self, mock_faker_initializer):
+    @patch('pganonymize.providers.faker_initializer._faker')
+    def test_alter_value_with_kwargs(self, mock_faker):
         providers.FakeProvider.alter_value('Foo', name='fake.date_of_birth', kwargs={'minimum_age': 18})
-        assert mock_faker_initializer.faker.date_of_birth.call_args == call(minimum_age=18)
+        assert mock_faker.date_of_birth.call_args == call(minimum_age=18)
+
+    @patch('pganonymize.providers.faker_initializer._faker')
+    def test_alter_value_with_locale(self, mock_faker):
+        providers.FakeProvider.alter_value('Foo', name='fake.date_of_birth', locale='de_DE')
+        assert mock_faker['de_DE'].date_of_birth.call_count == 1
+
+    def test_alter_value_with_unkown_locale(self):
+        with pytest.raises(InvalidProviderArgument):
+            providers.FakeProvider.alter_value('Foo', name='fake.date_of_birth', locale='de_DE')
+
+    @patch('pganonymize.providers.faker_initializer._faker')
+    def test_alter_value_use_default_locale(self, mock_faker):
+        with patch('pganonymize.providers.faker_initializer.default_locale', new=PropertyMock(return_value='en_US')):
+            providers.FakeProvider.alter_value('Foo', name='fake.date_of_birth')
+        assert mock_faker['en_US'].date_of_birth.call_count == 1
 
 
 class TestMaskProvider(object):

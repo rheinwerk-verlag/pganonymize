@@ -58,5 +58,4 @@ from pganonymize.config import load_schema
 ])
 def test_load_schema(file, envs, expected):
     with patch.dict(os.environ, envs):
-        print(load_schema(file))
         assert load_schema(file) == expected

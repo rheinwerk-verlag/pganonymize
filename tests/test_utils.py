@@ -3,6 +3,7 @@ from collections import OrderedDict, namedtuple
 
 import pytest
 from mock import ANY, Mock, call, patch
+from mock.mock import PropertyMock
 
 from tests.utils import quote_ident
 
@@ -30,17 +31,16 @@ class TestGetConnection(object):
 class TestTruncateTables(object):
 
     @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
-    @patch('pganonymize.utils.config')
     @pytest.mark.parametrize('tables, expected', [
         [('table_a', 'table_b', 'CAPS_TABLe'), 'TRUNCATE TABLE "table_a", "table_b", "CAPS_TABLe"'],
         [(), None],
     ])
-    def test(self, quote_ident, mock_config, tables, expected):
+    def test(self, quote_ident, tables, expected):
         mock_cursor = Mock()
         connection = Mock()
         connection.cursor.return_value = mock_cursor
-        mock_config.schema = {'truncate': tables}
-        truncate_tables(connection)
+        with patch.multiple('pganonymize.config.config', schema_file=None, _schema={'truncate': tables}):
+            truncate_tables(connection)
         if tables:
             connection.cursor.assert_called_once()
             assert mock_cursor.execute.call_args_list == [call(expected)]
