@@ -17,14 +17,14 @@ Making changes
 Create a fork if you want to make changes or clone the repo if you want a readonly access to the current development
 version:
 
-.. code-block:: sh
+.. code-block:: bash
 
     $ git clone git@github.com:rheinwerk-verlag/postgresql-anonymizer.git
     $ cd postgresql-anonymizer
 
 For the development use a virtualenv or install the requirements directly:
 
-.. code-block:: sh
+.. code-block:: bash
 
     $ sudo pip install -r requirements.txt
 
