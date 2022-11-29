@@ -2,7 +2,7 @@
 
 ## Development
 
-* [#47](https://github.com/rheinwerk-verlag/pganonymize/pull/47): Add support for localized "Faker" data
+* [#48](https://github.com/rheinwerk-verlag/pganonymize/pull/48): Add support for localized "Faker" data
 
 ## 0.9.0 (2022-11-23)
 
