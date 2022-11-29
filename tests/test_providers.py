@@ -5,7 +5,6 @@ from collections import OrderedDict
 import pytest
 import six
 from mock import MagicMock, Mock, call, patch
-from mock.mock import PropertyMock
 
 from pganonymize import exceptions, providers
 from pganonymize.exceptions import InvalidProviderArgument
@@ -147,11 +146,15 @@ class TestFakeProvider(object):
         with pytest.raises(InvalidProviderArgument):
             providers.FakeProvider.alter_value('Foo', name='fake.date_of_birth', locale='de_DE')
 
-    @patch('pganonymize.providers.faker_initializer._faker')
-    def test_alter_value_use_default_locale(self, mock_faker):
-        with patch('pganonymize.providers.faker_initializer.default_locale', new=PropertyMock(return_value='en_US')):
-            providers.FakeProvider.alter_value('Foo', name='fake.date_of_birth')
-        assert mock_faker['en_US'].date_of_birth.call_count == 1
+    def test_alter_value_use_default_locale(self, faker_initializer_with_localization):
+        providers.FakeProvider.alter_value('Foo', name='fake.date_of_birth')
+        faker = faker_initializer_with_localization._faker
+        assert faker[faker_initializer_with_localization.default_locale].date_of_birth.call_count == 1
+
+    def test_alter_value_ignore_default_locale(self, faker_initializer_with_localization):
+        providers.FakeProvider.alter_value('Foo', name='fake.date_of_birth', locale=None)
+        faker = faker_initializer_with_localization._faker
+        assert faker.date_of_birth.call_count == 1
 
 
 class TestMaskProvider(object):

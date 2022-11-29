@@ -3,7 +3,6 @@ from collections import OrderedDict, namedtuple
 
 import pytest
 from mock import ANY, Mock, call, patch
-from mock.mock import PropertyMock
 
 from tests.utils import quote_ident
 
