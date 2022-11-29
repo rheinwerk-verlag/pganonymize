@@ -16,8 +16,8 @@ class Config(object):
         """
         Return the schema loaded from the given YAML schema file.
 
-        :return:
-        :rtype:
+        :return: The parsed YAML schema.
+        :rtype: dict
         """
         if self._schema is None and self.schema_file is not None:
             self._schema = load_schema(self.schema_file)
