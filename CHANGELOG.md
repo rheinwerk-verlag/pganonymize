@@ -2,6 +2,8 @@
 
 ## Development
 
+* [#47](https://github.com/rheinwerk-verlag/pganonymize/pull/47): Add support for localized "Faker" data
+
 ## 0.9.0 (2022-11-23)
 
 * [#46](https://github.com/rheinwerk-verlag/pganonymize/pull/46): Broken Python 2.7 compatibility
