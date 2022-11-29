@@ -20,6 +20,9 @@ from pganonymize.config import config
 from pganonymize.constants import DEFAULT_CHUNK_SIZE, DEFAULT_PRIMARY_KEY
 from pganonymize.providers import provider_registry
 
+# Needed to work with UUID objects
+psycopg2.extras.register_uuid()
+
 
 def anonymize_tables(connection, verbose=False, dry_run=False):
     """
