@@ -9,7 +9,8 @@ from tests.utils import quote_ident
 from pganonymize.cli import get_arg_parser, main
 
 
-class TestCli:
+class TestCli(object):
+
     @patch('psycopg2.extensions.quote_ident', side_effect=quote_ident)
     @patch('pganonymize.utils.psycopg2.connect')
     @patch('pganonymize.utils.subprocess')

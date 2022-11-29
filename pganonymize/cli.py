@@ -6,9 +6,10 @@ import argparse
 import logging
 import time
 
+from pganonymize.config import config
 from pganonymize.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
 from pganonymize.providers import provider_registry
-from pganonymize.utils import anonymize_tables, create_database_dump, get_connection, load_config, truncate_tables
+from pganonymize.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
 
 
 def get_pg_args(args):
@@ -62,7 +63,7 @@ def main(args):
         list_provider_classes()
         return 0
 
-    schema = load_config(args.schema)
+    config.schema_file = args.schema
 
     pg_args = get_pg_args(args)
     connection = get_connection(pg_args)
@@ -73,8 +74,8 @@ def main(args):
         cursor.close()
 
     start_time = time.time()
-    truncate_tables(connection, schema.get('truncate', []))
-    anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose, dry_run=args.dry_run)
+    truncate_tables(connection)
+    anonymize_tables(connection, verbose=args.verbose, dry_run=args.dry_run)
 
     if not args.dry_run:
         connection.commit()

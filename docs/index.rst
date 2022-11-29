@@ -8,6 +8,7 @@ Contents:
 
    readme
    schema
+   localization
    api
    tests
    documentation

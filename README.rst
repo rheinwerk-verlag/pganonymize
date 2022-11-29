@@ -56,14 +56,14 @@ Installation
 
 The default installation method is to use ``pip``:
 
-.. code-block:: sh
+.. code-block::
 
     $ pip install pganonymize
 
 Usage
 -----
 
-.. code-block:: sh
+.. code-block::
 
     usage: pganonymize [-h] [-v] [-l] [--schema SCHEMA] [--dbname DBNAME]
                    [--user USER] [--password PASSWORD] [--host HOST]
@@ -94,7 +94,7 @@ all anonymization rules for that database. Take a look at the `schema documentat
 
 Example calls:
 
-.. code-block:: sh
+.. code-block::
 
     $ pganonymize --schema=myschema.yml \
         --dbname=test_database \
@@ -118,13 +118,13 @@ With the ``--dump-file`` argument it is possible to create a dump file after ano
 that the ``pg_dump`` command from the ``postgresql-client-common`` library is necessary to create the dump file for the
 database, e.g. under Linux:
 
-.. code-block:: sh
+.. code-block::
 
     $ sudo apt-get install postgresql-client-common
 
 Example call:
 
-.. code-block:: sh
+.. code-block::
 
     $ pganonymize --schema=myschema.yml \
         --dbname=test_database \
@@ -139,13 +139,13 @@ Docker
 
 If you want to run the anonymizer within a Docker container you first have to build the image:
 
-.. code-block:: sh
+.. code-block::
 
     $ docker build -t pganonymize .
 
 After that you can pass a schema file to the container, using Docker volumes, and call the anonymizer:
 
-.. code-block:: sh
+.. code-block::
 
     $ docker run \
         -v <path to your schema>:/schema.yml \
