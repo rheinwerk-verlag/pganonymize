@@ -66,7 +66,7 @@ jobs:
           name: coverage-data
       - name: Create HTML report
         run: |
-          unzip ${{ steps.download.outputs.download-path }}
+          unzip ${{ steps.download.outputs.download-path }}/coverage-data
           coverage html
       - name: Upload HTML report if check failed.
         uses: actions/upload-artifact@v3
