@@ -47,7 +47,6 @@ jobs:
       with:
         name: coverage-data
         path: 'coverage.xml'
-        verbose: true
         if-no-files-found: ignore
       if: ${{ success() }}
   coverage:
