@@ -39,3 +39,12 @@ jobs:
       run: |
         export TOXENV=$(echo "py${{ matrix.python-version }}" | sed 's/\.//g')
         tox -- -p no:warnings
+    - name: Generate coverage report
+      run: coverage xml
+      if: ${{ success() }}
+    - name: Upload coverage data
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-data
+        path: "coverage.xml"
+        if-no-files-found: ignore
