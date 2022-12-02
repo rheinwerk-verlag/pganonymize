@@ -46,12 +46,12 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: coverage-data
-        files: 'coverage.xml'
+        path: 'coverage.xml'
         verbose: true
         if-no-files-found: ignore
       if: ${{ success() }}
   coverage:
-    name: Combine & check coverage.
+    name: coverage
     runs-on: ubuntu-latest
     needs: tests
     steps:
