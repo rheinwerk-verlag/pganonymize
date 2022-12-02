@@ -63,9 +63,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: coverage-data
-      - name: Combine coverage
-        run: |
-          python -m coverage html
+      - name: Create HTML report
+        run: coverage html
       - name: Upload HTML report if check failed.
         uses: actions/upload-artifact@v3
         with:
