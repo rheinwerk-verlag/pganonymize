@@ -423,6 +423,37 @@ This provider will replace values with a unique UUID4.
             provider:
               name: uuid4
 
+``update_json``
+~~~~~~~~~~~~~~~
+
+**Arguments:**
+
+* ``update_values_type``
+
+This provider will replace json and jsonb data values with a specified provider configuration per data type.
+
+
+**Example usage**:
+
+.. code-block:: yaml
+
+    tables:
+      - payment_transaction:
+          fields:
+            - data:
+                provider:
+                  name: update_json
+                  update_values_type:
+                    str:
+                      provider:
+                        name: uuid
+                    int:
+                      provider:
+                        name: fake.pyint
+                    float:
+                      provider:
+                        name: fake.pyfloat
+
 .. _Faker: https://github.com/joke2k/faker
 .. _Faker documentation: http://faker.rtfd.org/
 .. _native UUIDs: https://www.postgresql.org/docs/current/datatype-uuid.html

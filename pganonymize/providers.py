@@ -246,3 +246,32 @@ class UUID4Provider(Provider):
     @classmethod
     def alter_value(cls, original_value, **kwargs):
         return uuid4()
+
+
+@register('update_json')
+class UpdateJSONProvider(Provider):
+    """Provider to update JSON data (currently values) by
+    providers."""
+
+    @classmethod
+    def alter_value(cls, original_value, **kwargs):
+        def update_dict(input_dict, update_values_type={}):
+            """Update dictionary with recursion (nested dictionaries)."""
+            if not update_values_type:
+                return
+            for key, val in input_dict.items():
+                if isinstance(val, dict):
+                    update_dict(val, update_values_type=update_values_type)
+                else:
+                    val_type = type(val).__name__
+                    val_update = update_values_type.get(val_type)
+                    if val_update:
+                        if val_update.get('provider'):
+                            provider_config = val_update.get('provider')
+                            provider_class = provider_registry.get_provider(provider_config['name'])
+                            provider_value = provider_class.alter_value(val, **provider_config)
+                            input_dict[key] = provider_value
+                    else:
+                        input_dict[key] = val_update
+        update_dict(original_value, update_values_type=kwargs.get('update_values_type', {}))
+        return original_value

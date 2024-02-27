@@ -211,3 +211,92 @@ class TestUUID4Provider(object):
     @pytest.mark.parametrize('value, expected', [(None, uuid.UUID), ('Foo', uuid.UUID)])
     def test_alter_value(self, value, expected):
         assert type(providers.UUID4Provider.alter_value(value)) == expected
+
+
+class TestUpdateJSONProvider(object):
+
+    @pytest.mark.parametrize('value, update_values_type, expected', [
+        ({'foo': 'bar'}, {'str': {'provider': {'name': 'set', 'value': 'foobar'}}}, {'foo': 'foobar'}),
+        ({'chef': 'cuisine'}, {'str': {'provider': {'name': 'uuid4'}}}, {'chef': uuid.UUID})
+    ])
+    def test_str_type(self, value, update_values_type, expected):
+        res = providers.UpdateJSONProvider.alter_value(value, update_values_type=update_values_type)
+        if res.get('foo'):
+            assert res['foo'] == expected['foo']
+        if res.get('chef'):
+            assert type(res['chef']) is expected['chef']
+
+    def test_int_type(self):
+        test_dict = {'foo': 123}
+
+        update_values_type = {'int': {'provider': {'name': 'set', 'value': 999}}}
+        res = providers.UpdateJSONProvider.alter_value(test_dict, update_values_type=update_values_type)
+        assert res['foo'] == 999
+
+        update_values_type = {'int': {'provider': {'name': 'clear'}}}
+        res = providers.UpdateJSONProvider.alter_value(test_dict, update_values_type=update_values_type)
+        assert res['foo'] is None
+
+    def test_float_type(self):
+        test_dict = {'foo': 123.45, 'bar': 234.77}
+
+        update_values_type = {'float': {'provider': {'name': 'set', 'value': 999.99}}}
+        res = providers.UpdateJSONProvider.alter_value(test_dict, update_values_type=update_values_type)
+        assert res['foo'] == 999.99
+        assert res['bar'] == 999.99
+
+        update_values_type = {'float': {'provider': {'name': 'clear'}}}
+        res = providers.UpdateJSONProvider.alter_value(test_dict, update_values_type=update_values_type)
+        assert res['foo'] is None
+
+    def test_multi_types(self):
+        test_dict = {
+            'fooInt': 123,
+            'fooFloat': 123.45,
+            'fooStr': 'some foo',
+            'barStr': 'some bar'
+        }
+        update_values_type = {
+            'int': {'provider': {'name': 'set', 'value': 999}},
+            'float': {'provider': {'name': 'set', 'value': 999.99}},
+            'str': {'provider': {'name': 'set', 'value': 'foobar'}},
+        }
+        res = providers.UpdateJSONProvider.alter_value(test_dict, update_values_type=update_values_type)
+        assert res['fooInt'] == 999
+        assert res['fooFloat'] == 999.99
+        assert res['fooStr'] == 'foobar'
+        assert res['barStr'] == 'foobar'
+
+    def test_nested_json(self):
+        test_dict = {
+            'fooInt': 123,
+            'fooFloat': 123.45,
+            'fooStr': 'some foo',
+            'barStr': 'some bar',
+            'nested': {
+                'fooInt': 444,
+                'fooFloat': 50.9,
+                'fooStr': 'abc',
+                'anotherNested': {
+                    'fooInt': 555,
+                    'fooFloat': 6000.123,
+                    'fooStr': 'xyz',
+                }
+            }
+        }
+        update_values_type = {
+            'int': {'provider': {'name': 'set', 'value': 999}},
+            'float': {'provider': {'name': 'set', 'value': 999.99}},
+            'str': {'provider': {'name': 'set', 'value': 'foobar'}},
+        }
+        res = providers.UpdateJSONProvider.alter_value(test_dict, update_values_type=update_values_type)
+        assert res['fooInt'] == 999
+        assert res['fooFloat'] == 999.99
+        assert res['fooStr'] == 'foobar'
+        assert res['barStr'] == 'foobar'
+        assert res['nested']['fooInt'] == 999
+        assert res['nested']['fooFloat'] == 999.99
+        assert res['nested']['fooStr'] == 'foobar'
+        assert res['nested']['anotherNested']['fooInt'] == 999
+        assert res['nested']['anotherNested']['fooFloat'] == 999.99
+        assert res['nested']['anotherNested']['fooStr'] == 'foobar'
