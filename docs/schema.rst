@@ -446,7 +446,7 @@ This provider will replace json and jsonb data values with a specified provider 
                   update_values_type:
                     str:
                       provider:
-                        name: uuid
+                        name: uuid4
                     int:
                       provider:
                         name: fake.pyint

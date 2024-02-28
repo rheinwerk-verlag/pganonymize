@@ -250,8 +250,7 @@ class UUID4Provider(Provider):
 
 @register('update_json')
 class UpdateJSONProvider(Provider):
-    """Provider to update JSON data (currently values) by
-    providers."""
+    """Provider to update JSON data (currently values) by providers."""
 
     @classmethod
     def alter_value(cls, original_value, **kwargs):
@@ -271,7 +270,5 @@ class UpdateJSONProvider(Provider):
                             provider_class = provider_registry.get_provider(provider_config['name'])
                             provider_value = provider_class.alter_value(val, **provider_config)
                             input_dict[key] = provider_value
-                    else:
-                        input_dict[key] = val_update
         update_dict(original_value, update_values_type=kwargs.get('update_values_type', {}))
         return original_value

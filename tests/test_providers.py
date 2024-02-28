@@ -267,6 +267,22 @@ class TestUpdateJSONProvider(object):
         assert res['fooStr'] == 'foobar'
         assert res['barStr'] == 'foobar'
 
+    def test_type_not_specified(self):
+        test_dict = {
+            'fooInt': 123,
+            'fooFloat': 123.45,
+            'fooStr': 'some foo',
+            'barStr': 'some bar'
+        }
+        update_values_type = {
+            'int': {'provider': {'name': 'set', 'value': 999}},
+        }
+        res = providers.UpdateJSONProvider.alter_value(test_dict, update_values_type=update_values_type)
+        assert res['fooInt'] == 999
+        assert res['fooFloat'] == 123.45
+        assert res['fooStr'] == 'some foo'
+        assert res['barStr'] == 'some bar'
+
     def test_nested_json(self):
         test_dict = {
             'fooInt': 123,
