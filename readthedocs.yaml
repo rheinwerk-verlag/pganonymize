@@ -6,7 +6,7 @@ sphinx:
 formats: all
 
 build:
-  os: "ubuntu-latest"
+  os: "ubuntu-20.04"
   tools:
     python: "3.10"
 
