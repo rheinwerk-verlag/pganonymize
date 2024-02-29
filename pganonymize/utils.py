@@ -323,7 +323,7 @@ def escape_str_replace(value):
     :return: Escaped value
     """
     if isinstance(value, dict):
-        return json.dumps(value).encode()
+        return json.dumps(value, default=str).encode()
     return value
 
 
