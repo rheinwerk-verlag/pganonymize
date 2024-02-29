@@ -34,8 +34,18 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install tox "coverage<5"
+        pip install --use-pep517 tox "coverage<5"
     - name: Run tests
       run: |
         export TOXENV=$(echo "py${{ matrix.python-version }}" | sed 's/\.//g')
         tox -- -p no:warnings
+    - name: Generate coverage report
+      run: coverage html
+      if: ${{ success() }}
+    - name: Upload coverage data
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage
+        path: htmlcov
+        if-no-files-found: ignore
+      if: ${{ success() }}
