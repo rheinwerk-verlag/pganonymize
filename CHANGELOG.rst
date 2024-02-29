@@ -4,6 +4,11 @@ Changelog
 Development
 -----------
 
+0.11.0 (2024-02-29)
+-------------------
+
+* `#52 <https://github.com/rheinwerk-verlag/pganonymize/pull/52>`_: Add update_json provider (`bobslee <https://github.com/bobslee>`_)
+
 0.10.0 (2022-11-29)
 -------------------
 
