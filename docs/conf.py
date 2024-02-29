@@ -58,7 +58,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pganonymize'
-copyright = u'2019, Rheinwerk Verlag GmbH, Henning Kage'
+copyright = u'2019-2024, Rheinwerk Verlag GmbH, Henning Kage'
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
