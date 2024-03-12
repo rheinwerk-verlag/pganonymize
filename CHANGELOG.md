@@ -2,6 +2,11 @@
 
 ## Development
 
+* [#53 Python 2.7 tests are failing](https://github.com/rheinwerk-verlag/pganonymize/pull/53)
+  * Dropped Python 3.6, 3.7 support
+  * Split requirements into Python 2 and 3
+  * Use markdown for the changelog and contributing docs
+
 ## 0.11.0 (2024-02-29)
 
 * [#52 Add update_json provider](https://github.com/rheinwerk-verlag/pganonymize/pull/52) ([bobslee](https://github.com/bobslee))
