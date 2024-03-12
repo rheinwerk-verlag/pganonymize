@@ -1,0 +1,5 @@
+coverage
+mock
+pytest-cov
+pytest-pythonpath
+six==1.16.0

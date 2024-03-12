@@ -1,0 +1,10 @@
+-r tox-py3.in
+
+flake8
+isort
+pgcopy
+pytest
+myst-parser
+Sphinx
+sphinx-rtd-theme
+tqdm
