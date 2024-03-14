@@ -5,6 +5,7 @@ mock==3.0.5
 more-itertools==5.0.0           # Version 5 is the last one to support Python 2.7
 parmap==1.5.2
 pgcopy
+psycopg2==2.8.6
 pytest<4
 pytest-cov==2.8.1
 pytest-pythonpath==0.7.3

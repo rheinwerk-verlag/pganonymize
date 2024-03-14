@@ -30,8 +30,10 @@ pgcopy==1.5.0
     # via -r tox-py2.in
 pluggy==0.13.1
     # via pytest
-psycopg2==2.9.9
-    # via pgcopy
+psycopg2==2.8.6
+    # via
+    #   -r tox-py2.in
+    #   pgcopy
 py==1.11.0
     # via pytest
 pytest==3.10.1

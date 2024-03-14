@@ -27,7 +27,9 @@ pgcopy==1.5.0
 pluggy==1.4.0
     # via pytest
 psycopg2==2.9.9
-    # via pgcopy
+    # via
+    #   -r tox-py3.in
+    #   pgcopy
 py==1.11.0
     # via pytest
 pytest==6.2.5

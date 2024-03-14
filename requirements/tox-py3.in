@@ -3,6 +3,7 @@ Faker
 mock
 parmap
 pgcopy
+psycopg2
 pytest-cov
 pytest-pythonpath
 pyyaml

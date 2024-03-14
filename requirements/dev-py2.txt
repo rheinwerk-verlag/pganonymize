@@ -47,6 +47,7 @@ pluggy==0.13.1
 psycopg2==2.8.6
     # via
     #   -r dev-py2.in
+    #   -r tox-py2.in
     #   pgcopy
 py==1.11.0
     # via pytest
