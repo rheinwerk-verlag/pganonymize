@@ -11,7 +11,8 @@ jobs:
     name: Upload release to PyPI
     runs-on: ubuntu-latest
     environment:
-      name: pypi
+      #name: pypi
+      name: testpypi
       url: https://pypi.org/project/pganonymize/
     permissions:
       id-token: write
