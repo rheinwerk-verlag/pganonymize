@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       #name: pypi
-      name: testpypi
+      #name: testpypi
+      name: production
       url: https://pypi.org/project/pganonymize/
     permissions:
       id-token: write
