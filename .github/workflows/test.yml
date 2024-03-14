@@ -30,6 +30,7 @@ jobs:
         echo "TOXFACTOR=$(echo '${{ matrix.image }}' | sed -r 's/^python:([0-9]+)\.([0-9]+).*$/py\1\2/g')" >> $GITHUB_ENV
     - name: Install importlib-metadata for older Python versions
       run: pip install "importlib-metadata<3"
+      if: >-
         matrix.image == 'python:2.7-buster' ||
         matrix.image == 'python:3.4-stretch' ||
         matrix.image == 'python:3.5-buster' ||
