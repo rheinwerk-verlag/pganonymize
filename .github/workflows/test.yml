@@ -3,42 +3,40 @@ name: Test
 on: [push]
 
 jobs:
-  linting:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install tox
-    - name: Lint
-      run: tox -e flake8
   tests:
-    needs: linting
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['2.7', '3.6', '3.7', '3.8', '3.9', '3.10']
-    env:
-      PYTHON: ${{ matrix.python-version }}
+        image:
+          - 'python:2.7-buster'
+          - 'python:3.6-bullseye'
+          - 'python:3.7-bookworm'
+          - 'python:3.8-bookworm'
+          - 'python:3.9-bookworm'
+          - 'python:3.10-bookworm'
+          - 'python:3.11-bookworm'
+          - 'python:3.12-bookworm'
+    container:
+      image: ${{ matrix.image }}
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Set environment variables
       run: |
-        python -m pip install --upgrade pip
-        pip install --use-pep517 tox "coverage<5"
-    - name: Run tests
-      run: |
-        export TOXENV=$(echo "py${{ matrix.python-version }}" | sed 's/\.//g')
-        tox -- -p no:warnings
+        echo "PYTHON=$(echo '${{ matrix.image }}' | sed -r 's/^python:([0-9]+)\.([0-9]+).*$/\1.\2/g')" >> $GITHUB_ENV
+        echo "TOXFACTOR=$(echo '${{ matrix.image }}' | sed -r 's/^python:([0-9]+)\.([0-9]+).*$/py\1\2/g')" >> $GITHUB_ENV
+    - name: Install importlib-metadata for older Python versions
+      run: pip install "importlib-metadata<3"
+      if: >-
+        matrix.image == 'python:2.7-buster' ||
+        matrix.image == 'python:3.6-bullseye' ||
+        matrix.image == 'python:3.7-bookworm'
+    - name: Install test utilities
+      run: pip install "tox<4" tox-factor "coverage<5"
+    - name: Lint with flake8
+      run: tox -e flake8
+      if: matrix.image == 'python:3.12-bookworm'
+    - name: Test via tox
+      run: tox -- -p no:warnings
     - name: Generate coverage report
       run: coverage html
       if: ${{ success() }}

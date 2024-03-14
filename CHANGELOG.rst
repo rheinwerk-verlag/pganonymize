@@ -4,6 +4,8 @@ Changelog
 Development
 -----------
 
+* `#56 <https://github.com/rheinwerk-verlag/pganonymize/issues/56>`_: Add Trusted Publisher Management workflow
+
 0.11.0 (2024-02-29)
 -------------------
 
