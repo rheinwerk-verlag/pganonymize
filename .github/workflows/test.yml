@@ -44,4 +44,4 @@ jobs:
         files: coverage.xml
         flags: unittests
         verbose: true
-        if: ${{ success() }}
+      if: ${{ success() }}
