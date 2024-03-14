@@ -7,9 +7,7 @@
 #--index-url https://pypi.python.org/simple
 
 attrs==21.1.0
-    # via
-    #   -r tox-py3.in
-    #   pytest
+    # via pytest
 coverage[toml]==7.4.3
     # via
     #   -r tox-py3.in

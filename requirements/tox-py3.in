@@ -1,4 +1,3 @@
-attrs==21.1.0
 coverage
 Faker
 mock

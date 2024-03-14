@@ -9,9 +9,7 @@
 alabaster==0.7.16
     # via sphinx
 attrs==21.1.0
-    # via
-    #   -r tox-py3.in
-    #   pytest
+    # via pytest
 babel==2.14.0
     # via sphinx
 certifi==2024.2.2
