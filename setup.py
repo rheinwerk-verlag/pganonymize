@@ -43,13 +43,13 @@ exec(read('pganonymize', 'version.py'))
 install_requires = [
     'faker',
     'faker>=3.0,<4.0; python_version=="2.7"',
-    'parmap; python_version>="3"',
-    'parmap==1.5.2; python_version<"3"',
+    'parmap; python_version>="3.6"',
+    'parmap==1.5.2; python_version<"3.6"',
     'pgcopy',
     'psycopg2',
-    'psycopg2>=2.8.4,<2.9; python_version<"3"',
+    'psycopg2>=2.8.4,<2.9; python_version<"3.6"',
     'pyyaml',
-    'pyyaml>=5.4.1,<6.0; python_version<"3"',
+    'pyyaml>=5.4.1,<6.0; python_version<"3.6"',
     'tqdm'
 ]
 
@@ -86,7 +86,6 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
