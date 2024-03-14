@@ -12,7 +12,7 @@ jobs:
       name: production
       url: https://pypi.org/project/pganonymize/
     permissions:
-      id-token: write
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
     steps:
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
