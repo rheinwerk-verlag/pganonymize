@@ -18,8 +18,6 @@ jobs:
           - 'python:3.12-bookworm'
     container:
       image: ${{ matrix.image }}
-    env:
-      PYTHON: ${{ matrix.python-version }}
     steps:
     - uses: actions/checkout@v3
     - name: Set environment variables
