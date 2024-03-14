@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   publish:
-    name: Publish Python 🐍 distribution 📦 to TestPyPI
+    name: Upload release to TestPyPI
     runs-on: ubuntu-latest
     environment:
       name: testing
