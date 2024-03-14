@@ -1,9 +1,8 @@
 -r tox-py2.in
 
+click<8                            # Version 8 drops Python 2.7 support
 flake8==3.9.2
-isort==5.10.1
+isort==4.3.21
+pip-tools<6
 pgcopy>=1.5.0
-pytest==6.2.5
-Sphinx==4.3.0
-sphinx-rtd-theme==1.0.0
-tqdm>=4.61.1
+psycopg2==2.8.6

@@ -6,31 +6,61 @@
 #
 #--index-url https://pypi.python.org/simple
 
-coverage==4.5.4
+atomicwrites==1.4.1
+    # via pytest
+attrs==21.4.0
+    # via
+    #   -r tox-py2.in
+    #   pytest
+coverage==4.5.1
     # via
     #   -r tox-py2.in
     #   pytest-cov
-exceptiongroup==1.2.0
-    # via pytest
-iniconfig==2.0.0
-    # via pytest
+faker==3.0.1
+    # via -r tox-py2.in
 mock==3.0.5
     # via -r tox-py2.in
-packaging==24.0
-    # via pytest
-pluggy==1.4.0
-    # via pytest
-pytest==8.1.1
+more-itertools==5.0.0
     # via
+    #   -r tox-py2.in
+    #   pytest
+parmap==1.5.2
+    # via -r tox-py2.in
+pgcopy==1.5.0
+    # via -r tox-py2.in
+pluggy==0.13.1
+    # via pytest
+psycopg2==2.9.9
+    # via pgcopy
+py==1.11.0
+    # via pytest
+pytest==3.10.1
+    # via
+    #   -r tox-py2.in
     #   pytest-cov
     #   pytest-pythonpath
 pytest-cov==2.8.1
     # via -r tox-py2.in
 pytest-pythonpath==0.7.3
     # via -r tox-py2.in
+python-dateutil==2.9.0.post0
+    # via faker
+pytz==2024.1
+    # via pgcopy
+pyyaml==5.3.1
+    # via -r tox-py2.in
 six==1.12.0
     # via
     #   -r tox-py2.in
+    #   faker
     #   mock
-tomli==2.0.1
-    # via pytest
+    #   more-itertools
+    #   pytest
+    #   python-dateutil
+text-unidecode==1.3
+    # via faker
+tqdm==4.64.1
+    # via -r tox-py2.in
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

@@ -12,14 +12,22 @@ coverage[toml]==7.4.3
     # via
     #   -r tox-py3.in
     #   pytest-cov
+faker==24.2.0
+    # via -r tox-py3.in
 iniconfig==2.0.0
     # via pytest
 mock==5.1.0
     # via -r tox-py3.in
 packaging==24.0
     # via pytest
+parmap==1.7.0
+    # via -r tox-py3.in
+pgcopy==1.5.0
+    # via -r tox-py3.in
 pluggy==1.4.0
     # via pytest
+psycopg2==2.9.9
+    # via pgcopy
 py==1.11.0
     # via pytest
 pytest==6.2.5
@@ -30,9 +38,19 @@ pytest-cov==4.1.0
     # via -r tox-py3.in
 pytest-pythonpath==0.7.4
     # via -r tox-py3.in
-six==1.16.0
+python-dateutil==2.9.0.post0
+    # via faker
+pytz==2024.1
+    # via pgcopy
+pyyaml==6.0.1
     # via -r tox-py3.in
+six==1.16.0
+    # via
+    #   -r tox-py3.in
+    #   python-dateutil
 toml==0.10.2
     # via pytest
 tomli==2.0.1
     # via coverage
+tqdm==4.66.2
+    # via -r tox-py3.in

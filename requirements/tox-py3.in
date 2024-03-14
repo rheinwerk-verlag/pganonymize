@@ -1,5 +1,10 @@
 coverage
+Faker
 mock
+parmap
+pgcopy
 pytest-cov
 pytest-pythonpath
+pyyaml
 six==1.16.0
+tqdm

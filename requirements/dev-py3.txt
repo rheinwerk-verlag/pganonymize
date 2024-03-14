@@ -25,6 +25,8 @@ docutils==0.20.1
     #   myst-parser
     #   sphinx
     #   sphinx-rtd-theme
+faker==24.2.0
+    # via -r tox-py3.in
 flake8==7.0.0
     # via -r dev-py3.in
 idna==3.6
@@ -59,8 +61,12 @@ packaging==24.0
     # via
     #   pytest
     #   sphinx
+parmap==1.7.0
+    # via -r tox-py3.in
 pgcopy==1.5.0
-    # via -r dev-py3.in
+    # via
+    #   -r dev-py3.in
+    #   -r tox-py3.in
 pluggy==1.4.0
     # via pytest
 psycopg2==2.9.9
@@ -82,14 +88,20 @@ pytest-cov==4.1.0
     # via -r tox-py3.in
 pytest-pythonpath==0.7.4
     # via -r tox-py3.in
+python-dateutil==2.9.0.post0
+    # via faker
 pytz==2024.1
     # via pgcopy
 pyyaml==6.0.1
-    # via myst-parser
+    # via
+    #   -r tox-py3.in
+    #   myst-parser
 requests==2.31.0
     # via sphinx
 six==1.16.0
-    # via -r tox-py3.in
+    # via
+    #   -r tox-py3.in
+    #   python-dateutil
 snowballstemmer==2.2.0
     # via sphinx
 sphinx==7.2.6
@@ -119,6 +131,8 @@ toml==0.10.2
 tomli==2.0.1
     # via coverage
 tqdm==4.66.2
-    # via -r dev-py3.in
+    # via
+    #   -r dev-py3.in
+    #   -r tox-py3.in
 urllib3==2.2.1
     # via requests
