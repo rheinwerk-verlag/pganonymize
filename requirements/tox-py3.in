@@ -1,4 +1,4 @@
-attrs<22.2.0                    # Version 22.2.0 drops Python 3.5 support
+attrs==21.1.0
 coverage
 Faker
 mock
