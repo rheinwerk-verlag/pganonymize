@@ -35,13 +35,12 @@ jobs:
     - name: Test via tox
       run: tox -- -p no:warnings
     - name: Generate coverage report
-      run: coverage xml
+      run: coverage html
       if: ${{ success() }}
     - name: Upload coverage data
-      uses: codecov/codecov-action@v3
+      uses: actions/upload-artifact@v3
       with:
-        env_vars: PYTHON
-        files: coverage.xml
-        flags: unittests
-        verbose: true
+        name: coverage
+        path: htmlcov
+        if-no-files-found: ignore
       if: ${{ success() }}
