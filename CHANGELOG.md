@@ -2,7 +2,7 @@
 
 ## Development
 
-* [#53 Python 2.7 tests are failing](https://github.com/rheinwerk-verlag/pganonymize/pull/53)
+* [#53 Python 2.7 tests are failing](https://github.com/rheinwerk-verlag/pganonymize/issues/53)
   * Dropped Python 3.6, 3.7 support
   * Split development requirements for Python 2 and 3
   * Use markdown for the changelog and contributing docs
