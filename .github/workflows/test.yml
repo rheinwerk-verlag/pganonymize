@@ -9,6 +9,10 @@ jobs:
       matrix:
         image:
           - 'python:2.7-buster'
+          - 'python:3.4-stretch'
+          - 'python:3.5-buster'
+          - 'python:3.6-bullseye'
+          - 'python:3.7-bookworm'
           - 'python:3.8-bookworm'
           - 'python:3.9-bookworm'
           - 'python:3.10-bookworm'
@@ -26,7 +30,11 @@ jobs:
         echo "TOXFACTOR=$(echo '${{ matrix.image }}' | sed -r 's/^python:([0-9]+)\.([0-9]+).*$/py\1\2/g')" >> $GITHUB_ENV
     - name: Install importlib-metadata for older Python versions
       run: pip install "importlib-metadata<3"
-      if: matrix.image == 'python:2.7-buster'
+        matrix.image == 'python:2.7-buster' ||
+        matrix.image == 'python:3.4-stretch' ||
+        matrix.image == 'python:3.5-buster' ||
+        matrix.image == 'python:3.6-bullseye' ||
+        matrix.image == 'python:3.7-bookworm'
     - name: Install test utilities
       run: pip install "tox<4" tox-factor "coverage<5"
     - name: Lint with flake8
