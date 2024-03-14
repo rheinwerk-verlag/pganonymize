@@ -7,8 +7,8 @@ The following document is a small set of guidelines for contributing to this pro
 ## Reporting bugs
 
 If you have found a bug, please check the project's 
-[issue](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues) page first and feel free to create a 
-[new issue](https://github.com/rheinwerk-verlag/postgresql-anonymizer/issues/new), if no one else has reported it yet.
+[issue](https://github.com/rheinwerk-verlag/pganonymize/issues) page first and feel free to create a 
+[new issue](https://github.com/rheinwerk-verlag/pganonymize/issues/new), if no one else has reported it yet.
 
 ## Making changes
 
@@ -16,8 +16,8 @@ Create a fork if you want to make changes or clone the repo if you want a readon
 version:
 
 ```bash
-$ git clone git@github.com:rheinwerk-verlag/postgresql-anonymizer.git
-$ cd postgresql-anonymizer
+$ git clone git@github.com:rheinwerk-verlag/pganonymize.git
+$ cd pganonymize
 ```
 
 For the development use a virtualenv or install the requirements directly:
@@ -37,6 +37,6 @@ Before creating a pull request make sure to check:
 
 * existing docstrings have been updated
 * new code has valid docstrings
-* whether existing [tests](https://github.com/rheinwerk-verlag/postgresql-anonymizer/tree/development/tests) have to be fixed
+* whether existing [tests](https://github.com/rheinwerk-verlag/pganonymize/tree/development/tests) have to be fixed
 * new tests have to be written first
-* the documentation (in particular the [Sphinx documentation](https://github.com/rheinwerk-verlag/postgresql-anonymizer/tree/development/docs)) has to be modified
+* the documentation (in particular the [Sphinx documentation](https://github.com/rheinwerk-verlag/pganonymize/tree/development/docs)) has to be modified
