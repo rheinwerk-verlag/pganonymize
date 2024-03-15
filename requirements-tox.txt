@@ -4,3 +4,4 @@ pgcopy
 pytest-cov==2.8.1
 pytest-pythonpath==0.7.3
 six==1.12.0
+tqdm
