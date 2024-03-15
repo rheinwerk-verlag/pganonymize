@@ -19,7 +19,7 @@ jobs:
     container:
       image: ${{ matrix.image }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set environment variables
       run: |
         echo "PYTHON=$(echo '${{ matrix.image }}' | sed -r 's/^python:([0-9]+)\.([0-9]+).*$/\1.\2/g')" >> $GITHUB_ENV
