@@ -48,12 +48,12 @@ jobs:
     - name: Test via tox
       run: tox -- -p no:warnings
     - name: Generate coverage report
-      run: coverage html
+      run: coverage xml
       if: ${{ success() }}
-    - name: Upload coverage data
-      uses: actions/upload-artifact@v3
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v4
       with:
-        name: coverage
-        path: htmlcov
-        if-no-files-found: ignore
+        files: coverage.xml
+        flags: unittests
+        token: ${{ secrets.CODECOV_TOKEN }}
       if: ${{ success() }}
