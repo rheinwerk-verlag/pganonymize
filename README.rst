@@ -8,7 +8,7 @@ anonymization. The tool requires a direct PostgreSQL connection to perform the a
 
 .. class:: no-web no-pdf
 
-    |python| |license| |pypi| |downloads| |build| |health|
+    |python| |license| |pypi| |downloads| |build| |codecov| |health|
 
 .. image:: docs/_static/demo.gif
 
@@ -179,6 +179,9 @@ After that you can pass a schema file to the container, using Docker volumes, an
 
 .. |build| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Test/badge.svg
     :target: https://github.com/rheinwerk-verlag/pganonymize/actions
+
+.. |codecov| image:: https://github.com/rheinwerk-verlag/postgresql-anonymizer/workflows/Test/badge.svg
+    :target: https://codecov.io/gh/rheinwerk-verlag/pganonymize
 
 .. |health| image:: https://snyk.io/advisor/python/pganonymize/badge.svg
   :target: https://snyk.io/advisor/python/pganonymize
