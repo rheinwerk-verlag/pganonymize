@@ -1,9 +1,9 @@
-FROM python:3.8.1-slim
+FROM python:3.12.2-slim
 
 LABEL maintainer="webteam@rheinwerk-verlag.de"
 
 RUN apt-get update -y \
- && apt-get upgrade -y \ 
+ && apt-get upgrade -y \
  && apt-get install -y libpq-dev python3-pip \
  && pip install -U pip \
  && pip install pganonymize psycopg2-binary \
