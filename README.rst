@@ -10,7 +10,7 @@ anonymization. The tool requires a direct PostgreSQL connection to perform the a
 
     |python| |license| |pypi| |downloads| |build| |codecov| |health|
 
-.. figure:: https://raw.githubusercontent.com/rheinwerk-verlag/planning-poker/main/docs/_static/demo.gif
+.. figure:: https://raw.githubusercontent.com/rheinwerk-verlag/pganonymize/main/docs/_static/demo.gif
     :width: 100%
 
 .. contents::
