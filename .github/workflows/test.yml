@@ -24,12 +24,10 @@ jobs:
       run: |
         echo "PYTHON=$(echo '${{ matrix.image }}' | sed -r 's/^python:([0-9]+)\.([0-9]+).*$/\1.\2/g')" >> $GITHUB_ENV
         echo "TOXFACTOR=$(echo '${{ matrix.image }}' | sed -r 's/^python:([0-9]+)\.([0-9]+).*$/py\1\2/g')" >> $GITHUB_ENV
-    - name: Install psycopg2 requirements (Python 2)
-      run: apt-get install python2-dev
-      if: matrix.image == 'python:2.7-buster'
-    - name: Install psycopg2 requirements (Python 3)
-      run: apt-get install python3-dev
-      if: matrix.image != 'python:2.7-buster'
+    - name: Install psycopg2 requirements
+      run: |
+        apt update
+        apt-get install python2-dev
     - name: Install importlib-metadata for older Python versions
       run: pip install "importlib-metadata<3"
       if: >-
