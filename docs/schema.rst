@@ -82,7 +82,7 @@ anonymization process. Each field entry has its own ``provider`` that defines ho
          - email:
             provider:
               name: md5
-            append: @localhost
+            append: "@localhost"
 
 ``excludes``
 ~~~~~~~~~~~~
