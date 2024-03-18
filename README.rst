@@ -177,10 +177,10 @@ After that you can pass a schema file to the container, using Docker volumes, an
     :target: https://pepy.tech/project/pganonymize
     :alt: Download count
 
-.. |build| image:: https://github.com/rheinwerk-verlag/pganonymize/workflows/test.yml/badge.svg
+.. |build| image:: https://github.com/rheinwerk-verlag/pganonymize/actions/workflows/test.yml/badge.svg
     :target: https://github.com/rheinwerk-verlag/pganonymize/actions
 
-.. |codecov| image:: https://github.com/rheinwerk-verlag/pganonymize/workflows/test.yml/badge.svg
+.. |codecov| image:: https://github.com/rheinwerk-verlag/pganonymize/actions/workflows/test.yml/badge.svg
     :target: https://codecov.io/gh/rheinwerk-verlag/pganonymize
 
 .. |health| image:: https://snyk.io/advisor/python/pganonymize/badge.svg
