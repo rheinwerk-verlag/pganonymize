@@ -10,7 +10,8 @@ anonymization. The tool requires a direct PostgreSQL connection to perform the a
 
     |python| |license| |pypi| |downloads| |build| |codecov| |health|
 
-.. image:: docs/_static/demo.gif
+.. figure:: https://raw.githubusercontent.com/rheinwerk-verlag/planning-poker/main/docs/_static/demo.gif
+    :width: 100%
 
 .. contents::
 
@@ -180,7 +181,7 @@ After that you can pass a schema file to the container, using Docker volumes, an
 .. |build| image:: https://github.com/rheinwerk-verlag/pganonymize/actions/workflows/test.yml/badge.svg
     :target: https://github.com/rheinwerk-verlag/pganonymize/actions
 
-.. |codecov| image:: https://github.com/rheinwerk-verlag/pganonymize/actions/workflows/test.yml/badge.svg
+.. |codecov| image:: https://codecov.io/gh/rheinwerk-verlag/pganonymize/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/rheinwerk-verlag/pganonymize
 
 .. |health| image:: https://snyk.io/advisor/python/pganonymize/badge.svg
