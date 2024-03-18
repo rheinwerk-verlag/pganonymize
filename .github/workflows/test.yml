@@ -28,6 +28,12 @@ jobs:
       run: |
         apt update
         apt-get -y install python-dev
+      if: matrix.image == 'python:2.7-buster'
+    - name: Install psycopg2 requirements
+      run: |
+        apt update
+        apt-get -y install python3-dev
+      if: matrix.image != 'python:2.7-buster'
     - name: Install importlib-metadata for older Python versions
       run: pip install "importlib-metadata<3"
       if: >-
