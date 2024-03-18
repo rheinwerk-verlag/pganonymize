@@ -184,6 +184,6 @@ After that you can pass a schema file to the container, using Docker volumes, an
     :target: https://codecov.io/gh/rheinwerk-verlag/pganonymize
 
 .. |health| image:: https://snyk.io/advisor/python/pganonymize/badge.svg
-  :target: https://snyk.io/advisor/python/pganonymize
-  :alt: pganonymize
+    :target: https://snyk.io/advisor/python/pganonymize
+    :alt: pganonymize
 
