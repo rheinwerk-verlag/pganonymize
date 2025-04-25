@@ -194,7 +194,7 @@ def create_temporary_table(connection, definitions, source_table, temp_table, pr
 def remove_temporary_table(connection, temp_table):
     """
     Remove the temporary table created during the anonymization process.
-    
+
     :param connection: A database connection instance.
     :param str temp_table: Name of the temporary table to be removed.
     """
