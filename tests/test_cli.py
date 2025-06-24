@@ -23,7 +23,7 @@ class TestCli(object):
           call('SELECT COUNT(*) FROM "auth_user"'),
           call('SELECT "id", "first_name", "last_name", "email" FROM "auth_user"'),
           call(
-             'CREATE TEMP TABLE "tmp_auth_user" AS SELECT "id", "first_name", "last_name", "email"\n                    FROM "auth_user" WITH NO DATA'),  # noqa
+             'CREATE TEMP TABLE "tmp_auth_user" AS SELECT "id", "first_name", "last_name", "email" FROM "auth_user" WITH NO DATA'),  # noqa
           call('CREATE INDEX ON "tmp_auth_user" ("id")'),
           call('UPDATE "auth_user" t SET "first_name" = s."first_name", "last_name" = s."last_name", "email" = s."email" FROM "tmp_auth_user" s WHERE t."id" = s."id"'),  # noqa
           call('DROP TABLE IF EXISTS "tmp_auth_user"')
@@ -37,7 +37,7 @@ class TestCli(object):
          [call("set work_mem='1GB'"),
           call('TRUNCATE TABLE "django_session"'),
              call('SELECT "id", "first_name", "last_name", "email" FROM "auth_user" LIMIT 100'),
-             call('CREATE TEMP TABLE "tmp_auth_user" AS SELECT "id", "first_name", "last_name", "email"\n                    FROM "auth_user" WITH NO DATA'),  # noqa
+             call('CREATE TEMP TABLE "tmp_auth_user" AS SELECT "id", "first_name", "last_name", "email" FROM "auth_user" WITH NO DATA'),  # noqa
              call('CREATE INDEX ON "tmp_auth_user" ("id")'),
              call('UPDATE "auth_user" t SET "first_name" = s."first_name", "last_name" = s."last_name", "email" = s."email" FROM "tmp_auth_user" s WHERE t."id" = s."id"'),  # noqa
              call('DROP TABLE IF EXISTS "tmp_auth_user"')
@@ -53,7 +53,7 @@ class TestCli(object):
              call('SELECT COUNT(*) FROM "auth_user"'),
              call('SELECT "id", "first_name", "last_name", "email" FROM "auth_user"'),
              call(
-                 'CREATE TEMP TABLE "tmp_auth_user" AS SELECT "id", "first_name", "last_name", "email"\n                    FROM "auth_user" WITH NO DATA'),  # noqa
+                 'CREATE TEMP TABLE "tmp_auth_user" AS SELECT "id", "first_name", "last_name", "email" FROM "auth_user" WITH NO DATA'),  # noqa
              call('CREATE INDEX ON "tmp_auth_user" ("id")'),
              call('UPDATE "auth_user" t SET "first_name" = s."first_name", "last_name" = s."last_name", "email" = s."email" FROM "tmp_auth_user" s WHERE t."id" = s."id"'),  # noqa
              call('DROP TABLE IF EXISTS "tmp_auth_user"')

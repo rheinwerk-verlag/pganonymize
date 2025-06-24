@@ -181,13 +181,15 @@ def create_temporary_table(connection, definitions, source_table, temp_table, pr
     primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
     column_names = get_column_names(definitions)
     sql_columns = SQL(', ').join([Identifier(column_name) for column_name in [primary_key] + column_names])
-    ctas_query = SQL("""CREATE TEMP TABLE {temp_table} AS SELECT {columns}
-                    FROM {source_table} WITH NO DATA""")
+    query = SQL('CREATE TEMP TABLE {temp_table} AS SELECT {columns} FROM {source_table} WITH NO DATA')
     cursor = connection.cursor()
-    cursor.execute(ctas_query.format(temp_table=Identifier(temp_table),
-                                     source_table=Identifier(source_table), columns=sql_columns)
-                   .as_string(connection)
-                   )
+    cursor.execute(
+        query.format(
+            temp_table=Identifier(temp_table),
+            columns=sql_columns,
+            source_table=Identifier(source_table),
+        ).as_string(connection)
+    )
     cursor.close()
 
 

@@ -184,13 +184,14 @@ class TestBuildAndThenImport(object):
 
         build_and_then_import_data(connection, table, primary_key, columns, None, None, total_count, chunk_size)
 
-        expected_execute_calls = [call('SELECT "id", "col1", "COL2" FROM "src_tbl"'),
-                                  call(
-                                      'CREATE TEMP TABLE "tmp_src_tbl" AS SELECT "id", "col1", "COL2"\n                    FROM "src_tbl" WITH NO DATA'),  # noqa
-                                  call('CREATE INDEX ON "tmp_src_tbl" ("id")'),
-                                  call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s WHERE t."id" = s."id"'),
-                                  call('DROP TABLE IF EXISTS "tmp_src_tbl"')
-                                  ]  # noqa
+        expected_execute_calls = [
+            call('SELECT "id", "col1", "COL2" FROM "src_tbl"'),
+            call('CREATE TEMP TABLE "tmp_src_tbl" AS SELECT "id", "col1", "COL2" FROM "src_tbl" WITH NO DATA'),
+            call('CREATE INDEX ON "tmp_src_tbl" ("id")'),
+            call('UPDATE "src_tbl" t SET "col1" = s."col1", "COL2" = s."COL2" FROM "tmp_src_tbl" s '
+                 'WHERE t."id" = s."id"'),
+            call('DROP TABLE IF EXISTS "tmp_src_tbl"'),
+        ]
         assert mock_cursor.execute.call_args_list == expected_execute_calls
 
     @patch('pganonymize.utils.CopyManager')
