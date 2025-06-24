@@ -122,6 +122,7 @@ def build_and_then_import_data(
             data = parmap.map(process_row, records, columns, excludes, pm_pbar=verbose, pm_parallel=parallel)
             import_data(connection, temp_table, [primary_key] + column_names, filter(None, data))
     apply_anonymized_data(connection, temp_table, table, primary_key, columns)
+    remove_temporary_table(connection, temp_table)
 
     cursor.close()
 
@@ -187,6 +188,19 @@ def create_temporary_table(connection, definitions, source_table, temp_table, pr
                                      source_table=Identifier(source_table), columns=sql_columns)
                    .as_string(connection)
                    )
+    cursor.close()
+
+
+def remove_temporary_table(connection, temp_table):
+    """
+    Remove the temporary table created during the anonymization process.
+
+    :param connection: A database connection instance.
+    :param str temp_table: Name of the temporary table to be removed.
+    """
+    cursor = connection.cursor()
+    sql = SQL('DROP TABLE IF EXISTS {temp_table}').format(temp_table=Identifier(temp_table))
+    cursor.execute(sql.as_string(connection))
     cursor.close()
 
 

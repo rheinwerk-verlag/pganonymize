@@ -25,7 +25,8 @@ class TestCli(object):
           call(
              'CREATE TEMP TABLE "tmp_auth_user" AS SELECT "id", "first_name", "last_name", "email"\n                    FROM "auth_user" WITH NO DATA'),  # noqa
           call('CREATE INDEX ON "tmp_auth_user" ("id")'),
-          call('UPDATE "auth_user" t SET "first_name" = s."first_name", "last_name" = s."last_name", "email" = s."email" FROM "tmp_auth_user" s WHERE t."id" = s."id"')  # noqa
+          call('UPDATE "auth_user" t SET "first_name" = s."first_name", "last_name" = s."last_name", "email" = s."email" FROM "tmp_auth_user" s WHERE t."id" = s."id"'),  # noqa
+          call('DROP TABLE IF EXISTS "tmp_auth_user"')
           ],
          1,
          []
@@ -38,7 +39,8 @@ class TestCli(object):
              call('SELECT "id", "first_name", "last_name", "email" FROM "auth_user" LIMIT 100'),
              call('CREATE TEMP TABLE "tmp_auth_user" AS SELECT "id", "first_name", "last_name", "email"\n                    FROM "auth_user" WITH NO DATA'),  # noqa
              call('CREATE INDEX ON "tmp_auth_user" ("id")'),
-             call('UPDATE "auth_user" t SET "first_name" = s."first_name", "last_name" = s."last_name", "email" = s."email" FROM "tmp_auth_user" s WHERE t."id" = s."id"')  # noqa
+             call('UPDATE "auth_user" t SET "first_name" = s."first_name", "last_name" = s."last_name", "email" = s."email" FROM "tmp_auth_user" s WHERE t."id" = s."id"'),  # noqa
+             call('DROP TABLE IF EXISTS "tmp_auth_user"')
           ],
             0, []
          ],
@@ -53,7 +55,8 @@ class TestCli(object):
              call(
                  'CREATE TEMP TABLE "tmp_auth_user" AS SELECT "id", "first_name", "last_name", "email"\n                    FROM "auth_user" WITH NO DATA'),  # noqa
              call('CREATE INDEX ON "tmp_auth_user" ("id")'),
-             call('UPDATE "auth_user" t SET "first_name" = s."first_name", "last_name" = s."last_name", "email" = s."email" FROM "tmp_auth_user" s WHERE t."id" = s."id"')  # noqa
+             call('UPDATE "auth_user" t SET "first_name" = s."first_name", "last_name" = s."last_name", "email" = s."email" FROM "tmp_auth_user" s WHERE t."id" = s."id"'),  # noqa
+             call('DROP TABLE IF EXISTS "tmp_auth_user"')
          ],
          1,
          [call('PGPASSWORD=my-cool-password pg_dump --format plain --dbname db --username root --host localhost --port 5432 --file ./dump.sql', shell=True)]  # noqa
