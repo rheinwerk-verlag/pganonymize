@@ -267,7 +267,10 @@ def get_column_values(row, columns):
         # Skip the current column if there is no value to be altered
         if orig_value is not None:
             provider_class = provider_registry.get_provider(provider_config['name'])
-            value = generate_value(provider_class, orig_value, **provider_config)
+            if provider_config.get('use_row'):
+                value = provider_class.alter_value(orig_value, row=row, **provider_config)
+            else:
+                value = generate_value(provider_class, orig_value, **provider_config)
             if append := column_definition.get('append'):
                 value = value + append
             if _format := column_definition.get('format'):

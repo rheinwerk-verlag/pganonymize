@@ -10,6 +10,7 @@ from faker import Faker
 import string
 import datetime
 from calendar import isleap
+import unicodedata
 
 from pganonymize.config import config
 from pganonymize.exceptions import InvalidProvider, InvalidProviderArgument, ProviderAlreadyRegistered
@@ -276,6 +277,82 @@ def _fiscal_code_checksum(code_15):
     return chr(ord('A') + (total % 26))
 
 
+def _row_get(row, field_name):
+    if not field_name:
+        return None
+    if '.' not in field_name:
+        return row.get(field_name)
+    current = row
+    for part in field_name.split('.'):
+        if not isinstance(current, dict):
+            return None
+        current = current.get(part)
+    return current
+
+
+def _normalize_letters(value):
+    if value is None:
+        return ''
+    normalized = unicodedata.normalize('NFKD', str(value))
+    normalized = normalized.encode('ascii', 'ignore').decode('ascii')
+    normalized = normalized.upper()
+    return re.sub(r'[^A-Z]', '', normalized)
+
+
+def _normalize_comune_code(value):
+    if value is None:
+        return None
+    value_str = str(value).strip().upper()
+    letter = _normalize_letters(value_str)[:1]
+    digits = re.sub(r'[^0-9]', '', value_str)[:3]
+    if letter and len(digits) == 3:
+        return f"{letter}{digits}"
+    return None
+
+
+def _fiscal_code_surname(surname):
+    letters = _normalize_letters(surname)
+    consonants = ''.join([ch for ch in letters if ch not in 'AEIOU'])
+    vowels = ''.join([ch for ch in letters if ch in 'AEIOU'])
+    code = (consonants + vowels + 'XXX')[:3]
+    return code
+
+
+def _fiscal_code_name(name):
+    letters = _normalize_letters(name)
+    consonants = ''.join([ch for ch in letters if ch not in 'AEIOU'])
+    vowels = ''.join([ch for ch in letters if ch in 'AEIOU'])
+    if len(consonants) >= 4:
+        code = consonants[0] + consonants[2] + consonants[3]
+    else:
+        code = (consonants + vowels + 'XXX')[:3]
+    return code
+
+
+def _parse_birth_date(value, date_format=None):
+    if isinstance(value, datetime.datetime):
+        return value.date()
+    if isinstance(value, datetime.date):
+        return value
+    if isinstance(value, str):
+        if date_format:
+            return datetime.datetime.strptime(value, date_format).date()
+        try:
+            return datetime.date.fromisoformat(value)
+        except ValueError:
+            return datetime.datetime.strptime(value, "%Y-%m-%d").date()
+    return None
+
+
+def _is_female(value, rng=None):
+    if value is None:
+        return rng.choice([True, False]) if rng else False
+    if isinstance(value, bool):
+        return value
+    val = str(value).strip().lower()
+    return val in {'f', 'female', 'femmina', 'donna'}
+
+
 def _generate_pseudo_fiscal_code(seed_source):
     rng_seed = int(md5(seed_source.encode('utf-8')).hexdigest(), 16)
     rng = random.Random(rng_seed)
@@ -301,6 +378,48 @@ class FiscalCodeProvider(Provider):
     def alter_value(cls, original_value, **kwargs):
         if not original_value:
             return None
+        if kwargs.get('use_row'):
+            row = kwargs.get('row', {})
+            surname = _row_get(row, kwargs.get('surname_field', 'surname'))
+            name = _row_get(row, kwargs.get('name_field', 'name'))
+            birth_date_raw = _row_get(row, kwargs.get('birth_date_field', 'birth_date'))
+            gender = _row_get(row, kwargs.get('gender_field', 'gender'))
+            comune_code = _row_get(row, kwargs.get('comune_code_field', 'comune_code'))
+            comune_code = _normalize_comune_code(comune_code or kwargs.get('comune_code'))
+            comune_codes = kwargs.get('comune_codes')
+            if isinstance(comune_codes, str):
+                comune_codes = [code.strip() for code in comune_codes.split(',') if code.strip()]
+            comune_codes = comune_codes or FISCAL_CODE_COMUNE_CODES
+
+            strict = kwargs.get('strict', False)
+            birth_date = _parse_birth_date(birth_date_raw, kwargs.get('birth_date_format'))
+            if not (surname and name and birth_date):
+                if strict:
+                    return None
+                return _generate_pseudo_fiscal_code(str(original_value))
+            if not comune_code:
+                if strict and not comune_codes:
+                    return None
+                rng_seed = int(md5(str(original_value).encode('utf-8')).hexdigest(), 16)
+                rng = random.Random(rng_seed)
+                comune_code = _normalize_comune_code(rng.choice(comune_codes))
+                if not comune_code:
+                    if strict:
+                        return None
+                    return _generate_pseudo_fiscal_code(str(original_value))
+
+            year = birth_date.year % 100
+            month = FISCAL_CODE_MONTHS[birth_date.month - 1]
+            rng_seed = int(md5(str(original_value).encode('utf-8')).hexdigest(), 16)
+            rng = random.Random(rng_seed)
+            day = birth_date.day + (40 if _is_female(gender, rng=rng) else 0)
+            code_15 = (
+                f"{_fiscal_code_surname(surname)}"
+                f"{_fiscal_code_name(name)}"
+                f"{year:02d}{month}{day:02d}{comune_code}"
+            )
+            return code_15 + _fiscal_code_checksum(code_15)
+
         return _generate_pseudo_fiscal_code(str(original_value))
 
 
