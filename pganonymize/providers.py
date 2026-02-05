@@ -252,55 +252,56 @@ class UUID4Provider(Provider):
         return uuid4()
 
 
+FISCAL_CODE_MONTHS = ['A', 'B', 'C', 'D', 'E', 'H', 'L', 'M', 'P', 'R', 'S', 'T']
+FISCAL_CODE_COMUNE_CODES = ['H501', 'F205', 'D612', 'L219', 'A794', 'G273']
+FISCAL_CODE_ODD_MAP = {
+    **{str(i): v for i, v in enumerate([1, 0, 5, 7, 9, 13, 15, 17, 19, 21])},
+    **{k: v for k, v in zip('ABCDEFGHIJ', [1, 0, 5, 7, 9, 13, 15, 17, 19, 21])},
+    **{k: v for k, v in zip('KLMNOPQRST', [2, 4, 18, 20, 11, 3, 6, 8, 12, 14])},
+    **{k: v for k, v in zip('UVWXYZ', [16, 10, 22, 25, 24, 23])},
+}
+FISCAL_CODE_EVEN_MAP = {
+    **{str(i): i for i in range(10)},
+    **{k: v for k, v in zip(string.ascii_uppercase, range(26))},
+}
+
+
+def _fiscal_code_checksum(code_15):
+    total = 0
+    for index, char in enumerate(code_15, start=1):
+        if index % 2 == 1:
+            total += FISCAL_CODE_ODD_MAP[char]
+        else:
+            total += FISCAL_CODE_EVEN_MAP[char]
+    return chr(ord('A') + (total % 26))
+
+
+def _generate_pseudo_fiscal_code(seed_source):
+    rng_seed = int(md5(seed_source.encode('utf-8')).hexdigest(), 16)
+    rng = random.Random(rng_seed)
+
+    surname = ''.join(rng.choice(string.ascii_uppercase) for _ in range(3))
+    name = ''.join(rng.choice(string.ascii_uppercase) for _ in range(3))
+    year = rng.randint(0, 99)
+    month = rng.choice(FISCAL_CODE_MONTHS)
+    day = rng.randint(1, 28)
+    female = rng.choice([True, False])
+    day_code = day + (40 if female else 0)
+    comune = rng.choice(FISCAL_CODE_COMUNE_CODES)
+
+    code_15 = f"{surname}{name}{year:02d}{month}{day_code:02d}{comune}"
+    return code_15 + _fiscal_code_checksum(code_15)
+
+
 @register('fiscalcode')
 class FiscalCodeProvider(Provider):
-    """Provider to hash a fiscal code."""
+    """Provider to generate a syntactically valid Italian fiscal code."""
 
     @classmethod
     def alter_value(cls, original_value, **kwargs):
-        crypt_fiscal_code = md5(original_value.encode('utf-8')).hexdigest()
-
-        def check_day(n_day):
-            if int(n_day[3]) > 7:
-                n_day[3] = str(1)
-            return n_day[3:5]
-
-        def check_month(month_character):
-            char_month = ['A', 'B', 'C', 'D', 'E', 'H', 'L', 'M', 'P', 'R', 'S', 'T']
-            if month_character in char_month:
-                return month_character
-            index = 4
-            return char_month[index]
-
-        def generate_fiscal_code(fc_characters, fc_numbers):
-            separator = ''
-            generate_fiscal_code = ((separator.join(fc_characters[:6]) + separator.join(fc_numbers[:2]) +
-                                     check_month(fc_characters[8])) + separator.join(check_day(fc_numbers)) +
-                                    fc_characters[11]) + separator.join(fc_numbers[6:9]) + fc_characters[12]
-
-            return generate_fiscal_code
-
-        split_string = []
-        n = 2
-        for index in range(0, len(crypt_fiscal_code), n):
-            split_string.append(crypt_fiscal_code[index: index + n])
-
-        characters = []
-
-        for digit in split_string:
-            digit_hex = int(digit, 16)
-            digit_char = digit_hex % 26
-            character = chr(ord('A') + digit_char)
-            characters.append(character)
-
-        numbers = []
-        for digit in split_string[6:]:
-            digit_hex = int(digit, 16)
-            digit_char = digit_hex % 10
-            numbers.append(str(digit_char))
-
-        generate_fiscal_code = generate_fiscal_code(characters, numbers)
-        return generate_fiscal_code
+        if not original_value:
+            return None
+        return _generate_pseudo_fiscal_code(str(original_value))
 
 
 @register('vatnumber')
