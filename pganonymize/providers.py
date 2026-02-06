@@ -254,7 +254,29 @@ class UUID4Provider(Provider):
 
 
 FISCAL_CODE_MONTHS = ['A', 'B', 'C', 'D', 'E', 'H', 'L', 'M', 'P', 'R', 'S', 'T']
-FISCAL_CODE_COMUNE_CODES = ['H501', 'F205', 'D612', 'L219', 'A794', 'G273']
+ITALIAN_COMUNI = [
+    ('Roma', 'H501', 'RM'),
+    ('Milano', 'F205', 'MI'),
+    ('Torino', 'L219', 'TO'),
+    ('Napoli', 'F839', 'NA'),
+    ('Bologna', 'A944', 'BO'),
+    ('Firenze', 'D612', 'FI'),
+    ('Venezia', 'L736', 'VE'),
+    ('Genova', 'D969', 'GE'),
+    ('Palermo', 'G273', 'PA'),
+    ('Catania', 'C351', 'CT'),
+    ('Bari', 'A662', 'BA'),
+    ('Verona', 'L781', 'VR'),
+    ('Trieste', 'L424', 'TS'),
+    ('Padova', 'G224', 'PD'),
+    ('Parma', 'G337', 'PR'),
+    ('Prato', 'G999', 'PO'),
+    ('Modena', 'F257', 'MO'),
+    ('Reggio Emilia', 'H223', 'RE'),
+    ('Perugia', 'G478', 'PG'),
+    ('Cagliari', 'B354', 'CA'),
+]
+FISCAL_CODE_COMUNE_CODES = [code for _, code, _ in ITALIAN_COMUNI]
 FISCAL_CODE_ODD_MAP = {
     **{str(i): v for i, v in enumerate([1, 0, 5, 7, 9, 13, 15, 17, 19, 21])},
     **{k: v for k, v in zip('ABCDEFGHIJ', [1, 0, 5, 7, 9, 13, 15, 17, 19, 21])},
@@ -299,6 +321,10 @@ def _normalize_letters(value):
     return re.sub(r'[^A-Z]', '', normalized)
 
 
+def _normalize_city(value):
+    return _normalize_letters(value)
+
+
 def _normalize_comune_code(value):
     if value is None:
         return None
@@ -308,6 +334,22 @@ def _normalize_comune_code(value):
     if letter and len(digits) == 3:
         return f"{letter}{digits}"
     return None
+
+
+def _comune_code_from_city(city_value):
+    city_key = _normalize_city(city_value)
+    if not city_key:
+        return None
+    mapping = {_normalize_city(name): code for name, code, _ in ITALIAN_COMUNI}
+    return mapping.get(city_key)
+
+
+def _province_from_city(city_value):
+    city_key = _normalize_city(city_value)
+    if not city_key:
+        return None
+    mapping = {_normalize_city(name): province for name, _, province in ITALIAN_COMUNI}
+    return mapping.get(city_key)
 
 
 def _fiscal_code_surname(surname):
@@ -386,6 +428,9 @@ class FiscalCodeProvider(Provider):
             gender = _row_get(row, kwargs.get('gender_field', 'gender'))
             comune_code = _row_get(row, kwargs.get('comune_code_field', 'comune_code'))
             comune_code = _normalize_comune_code(comune_code or kwargs.get('comune_code'))
+            birth_city = _row_get(row, kwargs.get('birth_city_field', 'birth_city'))
+            if not comune_code and birth_city:
+                comune_code = _comune_code_from_city(birth_city)
             comune_codes = kwargs.get('comune_codes')
             if isinstance(comune_codes, str):
                 comune_codes = [code.strip() for code in comune_codes.split(',') if code.strip()]
@@ -397,11 +442,11 @@ class FiscalCodeProvider(Provider):
                 if strict:
                     return None
                 return _generate_pseudo_fiscal_code(str(original_value))
+            rng_seed = int(md5(str(original_value).encode('utf-8')).hexdigest(), 16)
+            rng = random.Random(rng_seed)
             if not comune_code:
                 if strict and not comune_codes:
                     return None
-                rng_seed = int(md5(str(original_value).encode('utf-8')).hexdigest(), 16)
-                rng = random.Random(rng_seed)
                 comune_code = _normalize_comune_code(rng.choice(comune_codes))
                 if not comune_code:
                     if strict:
@@ -410,8 +455,6 @@ class FiscalCodeProvider(Provider):
 
             year = birth_date.year % 100
             month = FISCAL_CODE_MONTHS[birth_date.month - 1]
-            rng_seed = int(md5(str(original_value).encode('utf-8')).hexdigest(), 16)
-            rng = random.Random(rng_seed)
             day = birth_date.day + (40 if _is_female(gender, rng=rng) else 0)
             code_15 = (
                 f"{_fiscal_code_surname(surname)}"
@@ -421,6 +464,35 @@ class FiscalCodeProvider(Provider):
             return code_15 + _fiscal_code_checksum(code_15)
 
         return _generate_pseudo_fiscal_code(str(original_value))
+
+
+@register('italiancity')
+class ItalianCityProvider(Provider):
+    """Provider to generate a real Italian city name from a fixed list."""
+
+    @classmethod
+    def alter_value(cls, original_value, **kwargs):
+        seed_source = str(original_value) if original_value is not None else str(uuid4())
+        rng_seed = int(md5(seed_source.encode('utf-8')).hexdigest(), 16)
+        rng = random.Random(rng_seed)
+        return rng.choice([name for name, _, _ in ITALIAN_COMUNI])
+
+
+@register('italianprovince')
+class ItalianProvinceProvider(Provider):
+    """Provider to generate a province code consistent with a city."""
+
+    @classmethod
+    def alter_value(cls, original_value, **kwargs):
+        row = kwargs.get('row', {})
+        birth_city = _row_get(row, kwargs.get('birth_city_field', 'birth_city'))
+        province = _province_from_city(birth_city)
+        if province:
+            return province
+        seed_source = str(original_value) if original_value is not None else str(uuid4())
+        rng_seed = int(md5(seed_source.encode('utf-8')).hexdigest(), 16)
+        rng = random.Random(rng_seed)
+        return rng.choice([province for _, _, province in ITALIAN_COMUNI])
 
 
 @register('vatnumber')
