@@ -230,11 +230,8 @@ def cache_key_generator(name, value):
         value = value.isoformat()
     if not isinstance({}, typing.Hashable):
         value = json.dumps(value)
-    match name:
-        case "fiscalcode" | "fiscalcodevat" | "fiscalcodebusiness" | "vatnumber":
-            name = "fiscalcode"
-        case _:
-            pass
+    if name in ("fiscalcode", "fiscalcodevat", "fiscalcodebusiness", "vatnumber"):
+        name = "fiscalcode"
     return hashkey(name, value)
 
 
