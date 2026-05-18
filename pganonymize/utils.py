@@ -30,6 +30,68 @@ psycopg2.extras.register_uuid()
 
 global_cache = {}
 
+# Maps (str(user_id), normalized_original_value) -> anonymized value.
+# Composite key keeps distinct anonymizations when the same userId has multiple original
+# fiscal/vat values across rows or tables. Populated by ``publish_anonymized_fiscal_user_id_field``
+# and consumed by ``reuse_anonymized_fiscal_user_id_field``. Process publishing tables
+# (e.g. ``user_profile``) before reusing ones (e.g. ``sim_account`` / ``cdt_account``).
+ANONYMIZED_FISCAL_BY_USER_ID = {}
+
+
+def _fiscal_publish_key(user_id, raw_value):
+    """Composite key for the user→fiscal registry; ``None`` when either side is missing."""
+    if user_id is None or raw_value is None:
+        return None
+    return (str(user_id), str(raw_value).strip())
+
+
+# Maps normalized original VAT/business-fiscal string -> 9-digit "core" anonymized value.
+# Indexed by the original value (across tables / providers) so that VAT-like identifiers stay
+# consistent. The stored core is the 9-digit body shared by ``vatnumber``, ``fiscalcodebusiness``
+# and the digit-leading branch of ``fiscalcodevat``; consumers rebuild the prefixed form when
+# needed (e.g. ``vatnumber`` re-prepends ``IT``). Populated by ``publish_anonymized_vat`` and
+# consumed by ``reuse_anonymized_vat``.
+ANONYMIZED_VAT_BY_ORIGINAL = {}
+
+
+def _vat_normalize_original(raw):
+    """Drop leading ``IT`` and surrounding spaces, uppercase: registry key."""
+    if raw is None:
+        return None
+    s = str(raw).strip().upper()
+    if s.startswith('IT'):
+        s = s[2:]
+    return s or None
+
+
+def _vat_extract_core(anonymized_value):
+    """Strip ``IT`` prefix from an anonymized VAT-like output; keep only digit strings."""
+    if anonymized_value is None:
+        return None
+    s = str(anonymized_value).strip().upper()
+    if s.startswith('IT'):
+        s = s[2:]
+    return s if s.isdigit() else None
+
+
+def _vat_format_for_provider(provider_name, core_digits):
+    """Re-shape the 9-digit core to match the format expected by ``provider_name``."""
+    if core_digits is None:
+        return None
+    return f'IT{core_digits}' if provider_name == 'vatnumber' else core_digits
+
+
+def _merge_select_columns(primary_key, anonymized_column_names, context_columns):
+    """Primary key first, then anonymized fields, then extra context columns (deduplicated)."""
+    context_columns = context_columns or []
+    seen = set()
+    out = []
+    for col in [primary_key] + list(anonymized_column_names) + list(context_columns):
+        if col not in seen:
+            seen.add(col)
+            out.append(col)
+    return out
+
 
 def anonymize_tables(connection, verbose=False, dry_run=False):
     """
@@ -40,6 +102,8 @@ def anonymize_tables(connection, verbose=False, dry_run=False):
     :param bool dry_run: Script is running in dry-run mode, no commit expected.
     """
     definitions = config.schema.get('tables', [])
+    ANONYMIZED_FISCAL_BY_USER_ID.clear()
+    ANONYMIZED_VAT_BY_ORIGINAL.clear()
     for definition in definitions:
         start_time = time.time()
         table_name = list(definition.keys())[0]
@@ -51,8 +115,12 @@ def anonymize_tables(connection, verbose=False, dry_run=False):
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name, dry_run)
         chunk_size = table_definition.get('chunk_size', DEFAULT_CHUNK_SIZE)
-        build_and_then_import_data(connection, table_name, primary_key, columns, excludes,
-                                   search, total_count, chunk_size, verbose=verbose, dry_run=dry_run)
+        context_columns = table_definition.get('context_columns') or []
+        build_and_then_import_data(
+            connection, table_name, primary_key, columns, excludes,
+            search, total_count, chunk_size, context_columns=context_columns,
+            verbose=verbose, dry_run=dry_run,
+        )
         end_time = time.time()
         logging.info('{} anonymization took {:.2f}s'.format(table_name, end_time - start_time))
 
@@ -75,7 +143,8 @@ def process_row(row, columns, excludes):
 
 
 def build_and_then_import_data(connection, table, primary_key, columns,
-                               excludes, search, total_count, chunk_size, verbose=False, dry_run=False):
+                               excludes, search, total_count, chunk_size,
+                               context_columns=None, verbose=False, dry_run=False):
     """
     Select all data from a table and return it together with a list of table columns.
 
@@ -87,11 +156,14 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     :param str search: A SQL WHERE (search_condition) to filter and keep only the searched rows.
     :param int total_count: The amount of rows for the current table
     :param int chunk_size: Number of data rows to fetch with the cursor
+    :param list context_columns: Extra source columns included in SELECT/COPY but not listed in
+        ``fields`` (not anonymized). Use for linkage ids (e.g. ``userId``) with fiscal reuse options.
     :param bool verbose: Display logging information and a progress bar.
     :param bool dry_run: Script is running in dry-run mode, no commit expected.
     """
     column_names = get_column_names(columns)
-    sql_columns = SQL(', ').join([Identifier(column_name) for column_name in [primary_key] + column_names])
+    select_columns = _merge_select_columns(primary_key, column_names, context_columns)
+    sql_columns = SQL(', ').join([Identifier(column_name) for column_name in select_columns])
     sql_select = SQL('SELECT {columns} FROM {table}').format(table=Identifier(table), columns=sql_columns)
     if search:
         sql_select = Composed([sql_select, SQL(" WHERE {search_condition}".format(search_condition=search))])
@@ -101,13 +173,13 @@ def build_and_then_import_data(connection, table, primary_key, columns,
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql_select.as_string(connection))
     temp_table = 'tmp_{table}'.format(table=table)
-    create_temporary_table(connection, columns, table, temp_table, primary_key)
+    create_temporary_table(connection, columns, table, temp_table, primary_key, context_columns)
     batches = int(math.ceil((1.0 * total_count) / (1.0 * chunk_size)))
     for i in trange(batches, desc="Processing {} batches for {}".format(batches, table), disable=not verbose):
         records = cursor.fetchmany(size=chunk_size)
         if records:
             data = parmap.map(process_row, records, columns, excludes, pm_pbar=verbose, pm_parallel=False)
-            import_data(connection, temp_table, [primary_key] + column_names, filter(None, data))
+            import_data(connection, temp_table, select_columns, filter(None, data))
     apply_anonymized_data(connection, temp_table, table, primary_key, columns)
 
     cursor.close()
@@ -166,10 +238,12 @@ def row_matches_excludes(row, excludes=None):
     return False
 
 
-def create_temporary_table(connection, definitions, source_table, temp_table, primary_key):
+def create_temporary_table(connection, definitions, source_table, temp_table, primary_key,
+                            context_columns=None):
     primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
     column_names = get_column_names(definitions)
-    sql_columns = SQL(', ').join([Identifier(column_name) for column_name in [primary_key] + column_names])
+    select_columns = _merge_select_columns(primary_key, column_names, context_columns)
+    sql_columns = SQL(', ').join([Identifier(column_name) for column_name in select_columns])
     ctas_query = SQL("""CREATE TEMP TABLE {temp_table} AS SELECT {columns}
                     FROM {source_table} WITH NO DATA""")
     cursor = connection.cursor()
@@ -225,20 +299,58 @@ def get_table_count(connection, table, dry_run):
         return total_count
 
 
-def cache_key_generator(name, value):
+def _normalize_provider_cache_name(raw_name):
+    """Strip Faker-style ``fake.`` prefix for cache partitioning (matches YAML ``name: fake.*``)."""
+    if not raw_name:
+        return ''
+    segment = raw_name.split('fake.')[-1]
+    return segment.lstrip('.')
+
+
+def _provider_cache_bucket(normalized_name, value):
+    """
+    Map a provider to a cache partition shared only with providers whose
+    ``alter_value`` yields the same string for the same ``value``.
+
+    ``@cached`` stores the return value of ``generate_value`` without re-calling
+    ``alter_value``. If two providers shared a key but differed in logic, the
+    first hit would poison the cache for the other (order-dependent bugs).
+    """
+    if normalized_name == 'fiscalcodebusiness':
+        return 'fiscal_md5_9digits'
+    if normalized_name == 'fiscalcodevat':
+        s = str(value).strip() if value is not None else ''
+        if s and s[0].isdigit():
+            return 'fiscal_md5_9digits'
+        return 'fiscalcodevat_natural'
+    if normalized_name == 'fiscalcode':
+        return 'fiscalcode'
+    if normalized_name == 'vatnumber':
+        return 'vatnumber'
+    return normalized_name
+
+
+def cache_key_generator(provider_name, value):
+    """
+    Build a stable cache key for :func:`generate_value`.
+
+    ``value`` is normalized for ``hashkey``; the provider branch for
+    ``fiscalcodevat`` uses the raw value shape (before ``json.dumps``) so
+    numeric-vs-natural detection stays correct.
+    """
+    normalized = _normalize_provider_cache_name(provider_name)
+    bucket = _provider_cache_bucket(normalized, value)
     if isinstance(value, (datetime, date)):
         value = value.isoformat()
-    if not isinstance({}, typing.Hashable):
+    if not isinstance(value, typing.Hashable):
         value = json.dumps(value)
-    if name in ("fiscalcode", "fiscalcodevat", "fiscalcodebusiness", "vatnumber"):
-        name = "fiscalcode"
-    return hashkey(name, value)
+    return hashkey(bucket, value)
 
 
 @cached(
     cache=global_cache,
     key=lambda provider_class, orig_value, **provider_config: cache_key_generator(
-        provider_config.get('name').split("fake.")[-1], orig_value)
+        provider_config.get('name'), orig_value)
 )
 def generate_value(provider_class, orig_value, **provider_config):
     return provider_class.alter_value(orig_value, **provider_config)
@@ -265,7 +377,42 @@ def get_column_values(row, columns):
         column_name = get_column_name(definition, False)
         column_definition = definition[full_column_name]
         provider_config = column_definition.get('provider')
+        if not provider_config:
+            continue
         orig_value = nested_get(row, full_column_name)
+
+        reuse_field = provider_config.get('reuse_anonymized_fiscal_user_id_field')
+        if reuse_field:
+            link_uid = nested_get(row, reuse_field)
+            lookup_key = _fiscal_publish_key(link_uid, orig_value)
+            if lookup_key is not None:
+                cached_fc = ANONYMIZED_FISCAL_BY_USER_ID.get(lookup_key)
+                # Safety net: business-shaped originals (digit-leading) stay on fiscalcodevat,
+                # even if a stale match existed in the registry.
+                if cached_fc is not None and not lookup_key[1][:1].isdigit():
+                    value = cached_fc
+                    if append := column_definition.get('append'):
+                        value = value + append
+                    if _format := column_definition.get('format'):
+                        value = _format.format(pga_value=value, **row)
+                    nested_set(row, full_column_name, value)
+                    column_dict[column_name] = nested_get(row, column_name)
+                    continue
+
+        if provider_config.get('reuse_anonymized_vat'):
+            vat_key = _vat_normalize_original(orig_value)
+            cached_core = ANONYMIZED_VAT_BY_ORIGINAL.get(vat_key) if vat_key else None
+            if cached_core is not None:
+                value = _vat_format_for_provider(provider_config.get('name'), cached_core)
+                if value is not None:
+                    if append := column_definition.get('append'):
+                        value = value + append
+                    if _format := column_definition.get('format'):
+                        value = _format.format(pga_value=value, **row)
+                    nested_set(row, full_column_name, value)
+                    column_dict[column_name] = nested_get(row, column_name)
+                    continue
+
         # Skip the current column if there is no value to be altered
         if orig_value is not None:
             provider_class = provider_registry.get_provider(provider_config['name'])
@@ -279,6 +426,32 @@ def get_column_values(row, columns):
                 value = _format.format(pga_value=value, **row)
             nested_set(row, full_column_name, value)
             column_dict[column_name] = nested_get(row, column_name)
+
+            publish_field = provider_config.get('publish_anonymized_fiscal_user_id_field')
+            if publish_field:
+                link_uid = nested_get(row, publish_field)
+                pub_key = _fiscal_publish_key(link_uid, orig_value)
+                if pub_key is not None and value is not None:
+                    existing = ANONYMIZED_FISCAL_BY_USER_ID.get(pub_key)
+                    if existing is not None and existing != value:
+                        logging.warning(
+                            'Duplicate fiscal publish for userId=%s original=%s: '
+                            'overwriting previous anonymized value.',
+                            pub_key[0], pub_key[1],
+                        )
+                    ANONYMIZED_FISCAL_BY_USER_ID[pub_key] = value
+
+            if provider_config.get('publish_anonymized_vat'):
+                vat_key = _vat_normalize_original(orig_value)
+                core = _vat_extract_core(value)
+                if vat_key and core:
+                    existing_core = ANONYMIZED_VAT_BY_ORIGINAL.get(vat_key)
+                    if existing_core is not None and existing_core != core:
+                        logging.warning(
+                            'Duplicate VAT publish for original=%s: '
+                            'overwriting previous anonymized core.', vat_key,
+                        )
+                    ANONYMIZED_VAT_BY_ORIGINAL[vat_key] = core
     return column_dict
 
 
