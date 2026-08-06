@@ -52,7 +52,8 @@ def load_schema(schema_file):
         return value
 
     custom_loader.add_constructor(tag, constructor_env_variables)
-    return yaml.load(open(schema_file), Loader=custom_loader)
+    with open(schema_file) as f:
+        return yaml.load(f, Loader=custom_loader)
 
 
 config = Config()
