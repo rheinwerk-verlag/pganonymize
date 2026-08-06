@@ -2,6 +2,9 @@
 
 ## Development
 
+* [#68 Explicitly close files to prevent resource leak](https://github.com/rheinwerk-verlag/pganonymize/pull/68) ([Stephen0512](https://github.com/Stephen0512))
+* [#65 Remove a temporary table after it is used](https://github.com/rheinwerk-verlag/pganonymize/pull/65) ([TikiTDO](https://github.com/TikiTDO))
+
 ## 0.12.0 (2024-07-18)
 
 * [#64 Fix typos](https://github.com/rheinwerk-verlag/pganonymize/pull/64) ([kianmeng](https://github.com/kianmeng))
