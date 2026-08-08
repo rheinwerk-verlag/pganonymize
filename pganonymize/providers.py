@@ -6,7 +6,7 @@ from hashlib import md5
 from uuid import uuid4
 
 from faker import Faker
-
+from decimal import Decimal
 from pganonymize.config import config
 from pganonymize.exceptions import InvalidProvider, InvalidProviderArgument, ProviderAlreadyRegistered
 
@@ -236,7 +236,11 @@ class SetProvider(Provider):
 
     @classmethod
     def alter_value(cls, original_value, **kwargs):
-        return kwargs.get('value')
+        if kwargs.get("type") == "integer":
+            return int(kwargs.get("value"))
+        if kwargs.get("type") == "float":
+            return Decimal(kwargs.get("value"))
+        return kwargs.get("value")
 
 
 @register('uuid4')
